@@ -1,0 +1,25 @@
+{
+  "name": "tg-bot-sc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ivkin-Alexey/tg-bot-sc.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Ivkin-Alexey/tg-bot-sc/issues"
+  },
+  "homepage": "https://github.com/Ivkin-Alexey/tg-bot-sc#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "node-telegram-bot-api": "^0.61.0",
+    "nodemon": "^3.0.1"
+  }
+}
