@@ -1,34 +1,64 @@
-const TelegramApi = require('node-telegram-bot-api')
-const {gameOptions, againOptions} = require('./options')
+const TelegramBot = require('node-telegram-bot-api');
+const express = require('express');
+const cors = require('cors');
 
-const token = '5925873875:AAG2u_B5HEToInmYc6hIfPEdAo7-HPYT_DM'
+const token = '5925873875:AAG2u_B5HEToInmYc6hIfPEdAo7-HPYT_DM';
+const webAppUrl = 'https://ephemeral-kringle-2c94b2.netlify.app/';
 
-const bot = new TelegramApi(token, {polling: true})
+const bot = new TelegramBot(token, {polling: true});
+const app = express();
 
-const chats = {}
+app.use(express.json());
+app.use(cors());
 
-const start = async () => {
+bot.on('message', async (msg) => {
+    const chatId = msg.chat.id;
+    const text = msg.text;
 
-    await bot.setMyCommands([
-        {command: '/start', description: 'Начальное приветствие'},
-        {command: '/info', description: 'Получить информацию о пользователе'},
-        {command: '/game', description: 'Игра угадай цифру'},
-    ])
-
-    bot.on('message', async msg => {
-        const text = msg.text;
-        const chatId = msg.chat.id;
-
-        try {
-            if (text === '/start') {
-                await bot.sendSticker(chatId, 'https://tlgrm.ru/_/stickers/ea5/382/ea53826d-c192-376a-b766-e5abc535f1c9/7.webp')
-                return bot.sendMessage(chatId, `Добро пожаловать в телеграм бот автора ютуб канала ULBI TV`);
+    if(text === '/start') {
+        await bot.sendMessage(chatId, 'Вы - незарегестрированный пользователь. Пожалуйста заполните форму', {
+            reply_markup: {
+                keyboard: [
+                    [{text: 'Заполнить форму', web_app: {url: webAppUrl + '/profile/editeProfile'}}]
+                ]
             }
-            return bot.sendMessage(chatId, 'Я тебя не понимаю, попробуй еще раз!)');
-        } catch (e) {
-            return bot.sendMessage(chatId, 'Произошла какая то ошибочка!)');
-        }
-    })
-}
+        })
+    }
 
-start()
+    if(msg?.web_app_data?.data) {
+        try {
+            const data = JSON.parse(msg?.web_app_data?.data)
+            console.log(data)
+            await bot.sendMessage(chatId, 'Спасибо за обратную связь!')
+            await bot.sendMessage(chatId, 'Ваша страна: ' + data?.country);
+            await bot.sendMessage(chatId, 'Ваша улица: ' + data?.street);
+
+            setTimeout(async () => {
+                await bot.sendMessage(chatId, 'Всю информацию вы получите в этом чате');
+            }, 3000)
+        } catch (e) {
+            console.log(e);
+        }
+    }
+});
+
+app.post('/web-data', async (req, res) => {
+    const {queryId, data} = req.body;
+    try {
+        await bot.answerWebAppQuery(queryId, {
+            type: 'article',
+            id: queryId,
+            title: 'Успешная покупка',
+            input_message_content: {
+                message_text: `Следующие данные отправлены: ${data}`
+            }
+        })
+        return res.status(200).json({});
+    } catch (e) {
+        return res.status(500).json({})
+    }
+})
+
+const PORT = 8000;
+
+app.listen(PORT, () => console.log('server started on PORT ' + PORT))
