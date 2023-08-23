@@ -1,19 +1,9 @@
 const TelegramApi = require('node-telegram-bot-api')
-const {gameOptions, againOptions} = require('./options')
 
 const token = '5925873875:AAG2u_B5HEToInmYc6hIfPEdAo7-HPYT_DM'
 
 const bot = new TelegramApi(token, {polling: true})
 
-const chats = {}
-
-const start = async () => {
-
-    await bot.setMyCommands([
-        {command: '/start', description: 'Начальное приветствие'},
-        {command: '/info', description: 'Получить информацию о пользователе'},
-        {command: '/game', description: 'Игра угадай цифру'},
-    ])
 
     bot.on('message', async msg => {
         const text = msg.text;
@@ -29,6 +19,3 @@ const start = async () => {
             return bot.sendMessage(chatId, 'Произошла какая то ошибочка!)');
         }
     })
-}
-
-start()
