@@ -39,7 +39,7 @@ bot.on('message', msg => { // it starts if user send message to bot
     }
 })
 
-app.post('web-data', async (req, res) => {
+app.post('/web-data', async (req, res) => {
     const {queryID, data} = req.body;
     try {
        await bot.answerWebAppQuery(queryID, {
@@ -47,9 +47,10 @@ app.post('web-data', async (req, res) => {
            id: queryID,
            title: 'данные пользователя',
            input_message_content: {
-               message_text: 'Ваши данные отправлены'
+               message_text: `Ваши данные отправлены ${data}`
            }
        })
+        await bot.sendMessage(data)
         return res.status(200).json({})
     } catch (e) {
         await bot.answerWebAppQuery(queryID, {
@@ -63,6 +64,6 @@ app.post('web-data', async (req, res) => {
         return res.status(500).json({})
     }
 })
-
+//jhkhk
 const PORT = 8080;
 app.listen(PORT, () => console.log('server starting on PORT ' + PORT))
