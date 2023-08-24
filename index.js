@@ -19,7 +19,7 @@ bot.on('message', async (msg) => {
         await bot.sendMessage(chatId, 'Вы - незарегестрированный пользователь. Пожалуйста заполните форму', {
             reply_markup: {
                 inline_keyboard: [
-                    [{text: 'Заполнить форму', web_app: {url: webAppUrl}}]
+                    [{text: 'Заполнить форму', web_app: {url: webAppUrl + 'profile/editeProfile'}}]
                 ]
             }
         })
