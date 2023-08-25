@@ -18,7 +18,7 @@ bot.on('message', async (msg) => {
     if(text === '/start') {
         await bot.sendMessage(chatId, 'Вы - незарегестрированный пользователь. Пожалуйста заполните форму', {
             reply_markup: {
-                inline_keyboard: [
+                keyboard: [
                     [{text: 'Заполнить форму', web_app: {url: webAppUrl + 'profile/editeProfile'}}]
                 ]
             }
@@ -28,14 +28,7 @@ bot.on('message', async (msg) => {
     if(msg?.web_app_data?.data) {
         try {
             const data = JSON.parse(msg?.web_app_data?.data)
-            console.log(data)
-            await bot.sendMessage(chatId, 'Спасибо за обратную связь!')
-            await bot.sendMessage(chatId, 'Ваша страна: ' + data?.country);
-            await bot.sendMessage(chatId, 'Ваша улица: ' + data?.street);
-
-            setTimeout(async () => {
-                await bot.sendMessage(chatId, 'Всю информацию вы получите в этом чате');
-            }, 3000)
+            await bot.sendMessage(chatId, 'Спасибо за обратную связь!' + data);
         } catch (e) {
             console.log(e);
         }
