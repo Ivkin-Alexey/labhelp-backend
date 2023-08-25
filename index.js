@@ -36,14 +36,14 @@ bot.on('message', async (msg) => {
 });
 
 app.post('/web-data', async (req, res) => {
-    const {queryId, data} = req.body;
+    const {queryId, formData} = req.body;
     try {
         await bot.answerWebAppQuery(queryId, {
             type: 'article',
             id: queryId,
             title: 'Успешная покупка',
             input_message_content: {
-                message_text: `Следующие данные отправлены: ${data}`
+                message_text: `Следующие данные отправлены: ${formData}`
             }
         })
         return res.status(200).json({});
