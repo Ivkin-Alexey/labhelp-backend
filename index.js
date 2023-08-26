@@ -17,7 +17,7 @@ bot.on('message', async (msg) => {
     const text = msg.text;
 
     if(text === '/start') {
-        await bot.sendMessage(chatId, 'Вы - незарегестрированный пользователь. Пожалуйста заполните форму', {
+        await bot.sendMessage(chatId, 'Вы - лох. Пожалуйста заполните форму', {
             reply_markup: {
                 keyboard: [
                     [{text: 'Заполнить форму', web_app: {url: webAppUrl + 'profile/editeProfile'}}]
