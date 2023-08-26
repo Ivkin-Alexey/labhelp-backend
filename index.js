@@ -7,6 +7,7 @@ const webAppUrl = 'https://ephemeral-kringle-2c94b2.netlify.app/';
 
 const bot = new TelegramBot(token, {polling: true});
 const app = express();
+//sdfsdfs
 
 app.use(express.json());
 app.use(cors());
