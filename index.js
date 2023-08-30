@@ -1,13 +1,16 @@
 const TelegramBot = require('node-telegram-bot-api');
 const express = require('express');
+const googleSpreadsheetAPIServices = require('./google-spreadsheet');
 const cors = require('cors');
 
 const token = '5925873875:AAG2u_B5HEToInmYc6hIfPEdAo7-HPYT_DM';
 const webAppUrl = 'https://ephemeral-kringle-2c94b2.netlify.app/';
 
+const {doc} = googleSpreadsheetAPIServices;
+
+
 const bot = new TelegramBot(token, {polling: true});
 const app = express();
-//sdfsdfs
 
 app.use(express.json());
 app.use(cors());
@@ -47,16 +50,24 @@ app.post('/web-data', async (req, res) => {
                 message_text: `Следующие данные отправлены: ${formData}`
             }
         })
-        return res.status(200).json({});
+        loadDoc().then(() => doc.updateProperties({ title: queryId + Math.random()}));
+
+        return res.status(200).json({queryId});
     } catch (e) {
         return res.status(500).json({})
     }
 })
 
 app.get('/web-data', async (req, res) => {
-    res.send('Hello World!');
+    return res.status(200).json('Привет');
 });
 
 const PORT = 8000;
 
-app.listen(PORT, () => console.log('server started on PORT ' + PORT))
+app.listen(PORT, () => console.log('server started on PORT ' + PORT));
+
+const loadDoc = async () => {
+    await doc.loadInfo();
+    let sheet = doc.sheetsByIndex[0];
+    console.log(sheet.title);
+};
