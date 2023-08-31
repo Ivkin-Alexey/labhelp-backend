@@ -62,7 +62,7 @@ app.get('/web-data', async (req, res) => {
     return res.status(200).json('Привет');
 });
 
-const PORT = 8000;
+const PORT = 443;
 
 app.listen(PORT, () => console.log('server started on PORT ' + PORT));
 
