@@ -14,6 +14,11 @@ const app = express();
 
 app.use(express.json());
 app.use(cors());
+//
+// const httpsServer = https.createServer({
+//     key: fs.readFileSync('/etc/letsencrypt/live/my_api_url/privkey.pem'),
+//     cert: fs.readFileSync('/etc/letsencrypt/live/my_api_url/fullchain.pem'),
+// }, app);
 
 bot.on('message', async (msg) => {
     const chatId = msg.chat.id;
@@ -62,7 +67,7 @@ app.get('/web-data', async (req, res) => {
     return res.status(200).json('Привет');
 });
 
-const PORT = 443;
+const PORT = 8000;
 
 app.listen(PORT, () => console.log('server started on PORT ' + PORT));
 
