@@ -9,18 +9,22 @@ const token = '5925873875:AAG2u_B5HEToInmYc6hIfPEdAo7-HPYT_DM';
 const webAppUrl = 'https://ephemeral-kringle-2c94b2.netlify.app/';
 
 const {doc} = googleSpreadsheetAPIServices;
+const app = express();
+
+const httpsServer = https.createServer({
+    key: fs.readFileSync('ssl/key.pem'),
+    cert: fs.readFileSync('ssl/cert.pem'),
+}, app);
+
+const PORT = 443;
+
+httpsServer.listen(PORT, () => console.log('server started on PORT ' + PORT));
 
 
 const bot = new TelegramBot(token, {polling: true});
-const app = express();
 
 app.use(express.json());
 app.use(cors());
-
-const httpsServer = https.createServer({
-    key: fs.readFileSync('ssl/scmp-bot-server.ru_private_key.pem'),
-    cert: fs.readFileSync('ssl/scmp-bot-server.ru_cert.pem'),
-}, app);
 
 bot.on('message', async (msg) => {
     const chatId = msg.chat.id;
@@ -69,9 +73,7 @@ app.get('/web-data', async (req, res) => {
     return res.status(200).json('Привет');
 });
 
-const PORT = 8443;
 
-httpsServer.listen(PORT, () => console.log('server started on PORT ' + PORT));
 
 const loadDoc = async () => {
     await doc.loadInfo();
