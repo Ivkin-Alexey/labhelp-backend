@@ -12,14 +12,11 @@ const {doc} = googleSpreadsheetAPIServices;
 const app = express();
 
 const httpsServer = https.createServer({
-    key: fs.readFileSync('ssl/key.pem'),
-    cert: fs.readFileSync('ssl/cert.pem'),
+    key: fs.readFileSync('/ssl/key.pem'),
+    cert: fs.readFileSync('/ssl/cert.pem'),
 }, app);
 
 const PORT = 443;
-
-httpsServer.listen(PORT, () => console.log('server started on PORT ' + PORT));
-
 
 const bot = new TelegramBot(token, {polling: true});
 
@@ -61,8 +58,6 @@ app.post('/web-data', async (req, res) => {
                 message_text: `Следующие данные отправлены: ${formData}`
             }
         })
-        loadDoc().then(() => doc.updateProperties({ title: queryId + Math.random()}));
-
         return res.status(200).json({queryId});
     } catch (e) {
         return res.status(500).json({})
@@ -73,10 +68,10 @@ app.get('/web-data', async (req, res) => {
     return res.status(200).json('Привет');
 });
 
+// const loadDoc = async () => {
+//     await doc.loadInfo();
+//     let sheet = doc.sheetsByIndex[0];
+//     console.log(sheet.title);
+// };
 
-
-const loadDoc = async () => {
-    await doc.loadInfo();
-    let sheet = doc.sheetsByIndex[0];
-    console.log(sheet.title);
-};
+httpsServer.listen(PORT, () => console.log('server started on PORT ' + PORT));
