@@ -13,7 +13,7 @@ const app = express();
 
 const httpsServer = https.createServer({
     key: fs.readFileSync('./ssl/key.pem'),
-    cert: fs.readFileSync('./ssl/cert.pem'),
+    cert: fs.readFileSync('./ssl/scmp-bot-server.ru.p12'),
 }, app);
 
 const PORT = 443;
