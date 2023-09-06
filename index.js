@@ -12,8 +12,8 @@ const {doc} = googleSpreadsheetAPIServices;
 const app = express();
 
 const httpsServer = https.createServer({
-    key: fs.readFileSync('./ssl/key.pem'),
-    cert: fs.readFileSync('./ssl/scmp-bot-server.ru.p12'),
+    key: fs.readFileSync('/etc/letsencrypt/live/scmp-bot-server/privkey.pem'),
+    cert: fs.readFileSync('/etc/letsencrypt/live/scmp-bot-server/fullchain.pem'),
 }, app);
 
 const PORT = 443;
