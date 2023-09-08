@@ -11,11 +11,6 @@ const webAppUrl = 'https://ephemeral-kringle-2c94b2.netlify.app/';
 const {doc} = googleSpreadsheetAPIServices;
 const app = express();
 
-const httpsServer = https.createServer({
-    key: fs.readFileSync('./ssl/key.pem'),
-    cert: fs.readFileSync('./ssl/cert.pem'),
-}, app);
-
 const PORT = 443;
 
 const bot = new TelegramBot(token, {polling: true});
@@ -74,4 +69,4 @@ app.get('/web-data', async (req, res) => {
 //     console.log(sheet.title);
 // };
 
-httpsServer.listen(PORT, () => console.log('server started on PORT ' + PORT));
+app.listen(PORT, () => console.log('server started on PORT ' + PORT));
