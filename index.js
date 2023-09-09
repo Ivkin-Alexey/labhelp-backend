@@ -14,7 +14,9 @@ const app = express();
 
 const PORT = 8000;
 
-const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, {polling: true});
+const token = "6630698958:AAFhxmxspKrNGOmW0qTyhG2kdwehFJQVi6E";
+
+const bot = new TelegramBot(token, {polling: true});
 
 app.use(express.json());
 app.use(cors());
