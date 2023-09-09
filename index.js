@@ -5,7 +5,7 @@ const cors = require('cors');
 const fs = require("fs");
 const https = require("https");
 
-const token = '5925873875:AAG2u_B5HEToInmYc6hIfPEdAo7-HPYT_DM';
+const token = process.env.TELEGRAM_TOKEN;
 const webAppUrl = 'https://ephemeral-kringle-2c94b2.netlify.app/';
 
 const {doc} = googleSpreadsheetAPIServices;
