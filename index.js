@@ -11,7 +11,7 @@ const webAppUrl = 'https://ephemeral-kringle-2c94b2.netlify.app/';
 const {doc} = googleSpreadsheetAPIServices;
 const app = express();
 
-const PORT = 8000;
+const PORT = 443;
 
 const bot = new TelegramBot(token, {polling: true});
 
