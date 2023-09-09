@@ -5,7 +5,8 @@ const cors = require('cors');
 const fs = require("fs");
 const https = require("https");
 
-const token = process.env.TELEGRAM_TOKEN;
+require('dotenv').config();
+
 const webAppUrl = 'https://ephemeral-kringle-2c94b2.netlify.app/';
 
 const {doc} = googleSpreadsheetAPIServices;
@@ -13,7 +14,7 @@ const app = express();
 
 const PORT = 443;
 
-const bot = new TelegramBot(token, {polling: true});
+const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, {polling: true});
 
 app.use(express.json());
 app.use(cors());
@@ -23,13 +24,9 @@ bot.on('message', async (msg) => {
     const text = msg.text;
 
     if(text === '/start') {
-        await bot.sendMessage(chatId, 'Вы - лbnvbnох. Пожалуйста заполните форму', {
-            reply_markup: {
-                keyboard: [
-                    [{text: 'Заполнить форму', web_app: {url: webAppUrl + 'profile/editeProfile'}}]
-                ]
-            }
-        })
+        await bot.sendMessage(chatId, 'Привет!')
+    } else {
+        await bot.sendMessage(chatId, 'Вы написали: ' + text)
     }
 
     if(msg?.web_app_data?.data) {
