@@ -1,24 +1,13 @@
 require('dotenv').config();
 const TelegramBot = require('node-telegram-bot-api');
 const express = require('express');
-const googleSpreadsheetAPIServices = require('./google-spreadsheet');
 const cors = require('cors');
 const fs = require("fs");
-// const http = require("http");
-// const https = require("https");
 const webAppUrl = 'https://ephemeral-kringle-2c94b2.netlify.app/';
-
-const {doc} = googleSpreadsheetAPIServices;
-
-// const options = {
-//     key: fs.readFileSync('/key.pem'),
-//     cert: fs.readFileSync('/cert.pem')
-// };
 
 const app = express();
 
 const PORT = 8000;
-// const sPORT = 443;
 
 const token = process.env.TELEGRAM_TOKEN;
 
