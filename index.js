@@ -4,13 +4,21 @@ const express = require('express');
 const googleSpreadsheetAPIServices = require('./google-spreadsheet');
 const cors = require('cors');
 const fs = require("fs");
-const https = require("https");
+// const http = require("http");
+// const https = require("https");
 const webAppUrl = 'https://ephemeral-kringle-2c94b2.netlify.app/';
 
 const {doc} = googleSpreadsheetAPIServices;
+
+// const options = {
+//     key: fs.readFileSync('/key.pem'),
+//     cert: fs.readFileSync('/cert.pem')
+// };
+
 const app = express();
 
 const PORT = 8000;
+// const sPORT = 443;
 
 const token = process.env.TELEGRAM_TOKEN;
 
@@ -22,15 +30,6 @@ app.use(cors());
 bot.on('message', async (msg) => {
     const chatId = msg.chat.id;
     const text = msg.text;
-    await loadDoc();
-    async function loadDoc() {
-        await doc.loadInfo();
-        let sheet = doc.sheetsByIndex[0];
-        await sheet.loadCells('A1:A10');
-        const A1 = sheet.getCell(0,0);
-        A1.value = text;
-        await sheet.saveUpdatedCells();
-    }
 
     if(text === '/start') {
         await bot.sendMessage(chatId, 'Привет!')
@@ -69,4 +68,4 @@ app.get('/web-data', async (req, res) => {
     return res.status(200).json('Привет');
 });
 
-app.listen(PORT, () => console.log('server started on PORT ' + PORT));
+app.listen(PORT, () => console.log('server started on PORT ' + PORT))

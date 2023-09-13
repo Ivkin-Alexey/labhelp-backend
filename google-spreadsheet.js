@@ -13,3 +13,13 @@ const serviceAccountAuth = new JWT.JWT({
 
 const doc = new GoogleSpreadsheet.GoogleSpreadsheet(spreadSheetID, serviceAccountAuth);
 module.exports = {doc};
+
+// await loadDoc();
+// async function loadDoc() {
+//     await doc.loadInfo();
+//     let sheet = doc.sheetsByIndex[0];
+//     await sheet.loadCells('A1:A10');
+//     const A1 = sheet.getCell(0,0);
+//     A1.value = text;
+//     await sheet.saveUpdatedCells();
+// }
