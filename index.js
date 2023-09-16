@@ -82,14 +82,14 @@ bot.on('message', async msg => {
         await bot.sendMessage(chatId, localisations.iDontUnderstand);
     }
 
-    // if (msg?.web_app_data?.data) {
-    //     try {
-    //         const data = JSON.parse(msg?.web_app_data?.data)
-    //         await bot.sendMessage(chatId, 'Спасибо за обратную связь!' + JSON.stringify(data));
-    //     } catch (e) {
-    //         console.log(e);
-    //     }
-    // }
+    if (msg?.web_app_data?.data) {
+        try {
+            const data = JSON.parse(msg?.web_app_data?.data)
+            await bot.sendMessage(chatId, 'Спасибо за обратную связь!' + JSON.stringify(data));
+        } catch (e) {
+            console.log(e);
+        }
+    }
 });
 
 bot.on('callback_query', async ctx => {
@@ -126,9 +126,9 @@ app.post('/web-data', async (req, res) => {
         return res.status(500).json({});
     }
 });
-//
-// app.get('/web-data', async (req, res) => {
-//     return res.status(200).json('Привет');
-// });
+
+app.get('/web-data', async (req, res) => {
+    return res.status(200).json('Привет');
+});
 
 app.listen(PORT, () => console.log('server started on PORT ' + PORT));

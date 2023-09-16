@@ -13,7 +13,7 @@ const researches = [
 ];
 
 const smiles = {
-    researches: "⭐ ",
+    researches: "👨‍ ‍🔬 ",
 }
 
 const keyboards = {
