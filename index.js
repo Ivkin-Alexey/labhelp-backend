@@ -36,13 +36,20 @@ bot.on('message', async msg => {
     }
 
     async function updateUserData(chatId, field, value) {
-        userList[chatId][field] = value;
+        if(userList[chatId]) {
+            userList[chatId][field] = value;
+        } else {
+           userList[chatId] = {};
+           userList[chatId][field] = value;
+        }
     }
 
         try {
             switch (text) {
                 case "/start":
                     await BotAnswers.sendStartMessage(bot, chatId, first_name, last_name);
+                    await updateUserData(chatId, "first_name", first_name);
+                    await updateUserData(chatId, "last_name", last_name);
                     await BotQuestions.askConfirmNewUser(bot, first_name, last_name)
                     break;
                 case "/researches":
