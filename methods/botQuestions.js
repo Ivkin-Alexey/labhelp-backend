@@ -1,4 +1,4 @@
-const {stickers, constants} = require("../assets/db");
+const {stickers, constants} = require("../assets/constants");
 
 const adminChatId = constants.adminsChatId.rybchenkoSvetlana;
 

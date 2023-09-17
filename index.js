@@ -5,7 +5,8 @@ const cors = require('cors');
 // const fs = require("fs");
 // const webAppUrl = 'https://frolicking-kleicha-94863e.netlify.app/';
 // const localisations = require("./localisations.js");
-const {stickers, researches, smiles, researchTopics} = require("./assets/db");
+const {userList} = require("./assets/db");
+const {stickers, researches, smiles, researchTopics} = require("./assets/constants");
 const BotAnswers = require("./methods/botAnswers");
 const BotQuestions = require("./methods/botQuestions");
 
@@ -34,6 +35,10 @@ bot.on('message', async msg => {
         return re.test(input_str);
     }
 
+    async function updateUserData(chatId, field, value) {
+        userList[chatId][field] = value;
+    }
+
         try {
             switch (text) {
                 case "/start":
@@ -51,6 +56,7 @@ bot.on('message', async msg => {
                     break;
                 case studyGroup:
                     await BotQuestions.askPhoneNumber(bot, chatId);
+                    await updateUserData(chatId, "studyGroup", studyGroup);
                     break;
                 case phone:
                     await bot.sendMessage(chatId, "Ваш номер " + phone);
@@ -58,7 +64,7 @@ bot.on('message', async msg => {
                 default:
                     await BotAnswers.sendConfusedMessage(bot, chatId);
             }
-            // await bot.sendMessage(chatId, JSON.stringify(msg))
+            await bot.sendMessage(chatId, JSON.stringify(userList[chatId]))
         } catch (e) {
             console.log(e);
         }

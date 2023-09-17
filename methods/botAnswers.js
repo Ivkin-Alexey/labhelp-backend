@@ -1,4 +1,4 @@
-const {keyboards, stickers, researches} = require("../assets/db");
+const {keyboards, stickers, researches} = require("../assets/constants");
 const localisations = require("../localisations");
 const fs = require("fs");
 
