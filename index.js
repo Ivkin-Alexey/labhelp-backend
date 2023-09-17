@@ -9,10 +9,14 @@ const {userList} = require("./assets/db");
 const {stickers, researches, smiles, researchTopics} = require("./assets/constants");
 const BotAnswers = require("./methods/botAnswers");
 const BotQuestions = require("./methods/botQuestions");
+const {updateUserData} = require("./methods/updateDb");
 
 process.on('uncaughtException', function (err) {
     console.log(err);
 });
+
+
+process.traceDeprecation = true;
 
 const app = express();
 const PORT = 8000;
@@ -27,7 +31,7 @@ bot.on('message', async msg => {
     const {first_name, last_name} = msg.chat;
     const researchTopic = text.replace(smiles.researches, '');
     const researchBtnText = researchTopics.includes(researchTopic) ? text : undefined;
-    const studyGroup = text.includes("группа") ? text : undefined;
+    const studyGroup = text.toLowerCase().includes("группа") ? text : undefined;
     const phone = validatePhoneNumber(text) ? text : undefined;
 
     function validatePhoneNumber(input_str) {
@@ -35,21 +39,10 @@ bot.on('message', async msg => {
         return re.test(input_str);
     }
 
-    async function updateUserData(chatId, field, value) {
-        if(userList[chatId]) {
-            userList[chatId][field] = value;
-        } else {
-           userList[chatId] = {};
-           userList[chatId][field] = value;
-        }
-    }
-
         try {
             switch (text) {
                 case "/start":
                     await BotAnswers.sendStartMessage(bot, chatId, first_name, last_name);
-                    await updateUserData(chatId, "first_name", first_name);
-                    await updateUserData(chatId, "last_name", last_name);
                     await BotQuestions.askConfirmNewUser(bot, first_name, last_name)
                     break;
                 case "/researches":
@@ -57,6 +50,9 @@ bot.on('message', async msg => {
                     break;
                 case "/get_chat_id":
                     await bot.sendMessage(chatId, 'Чат ID: ' + chatId);
+                    break;
+                case "/get_my_data":
+                    await BotAnswers.sendUserData(bot, chatId);
                     break;
                 case researchBtnText:
                     await BotAnswers.sendResearch(bot, chatId, researchTopic);
@@ -71,7 +67,6 @@ bot.on('message', async msg => {
                 default:
                     await BotAnswers.sendConfusedMessage(bot, chatId);
             }
-            await bot.sendMessage(chatId, JSON.stringify(userList[chatId]))
         } catch (e) {
             console.log(e);
         }

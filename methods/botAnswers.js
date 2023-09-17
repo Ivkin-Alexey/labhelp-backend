@@ -2,6 +2,8 @@ const {keyboards, stickers, researches} = require("../assets/constants");
 const localisations = require("../localisations");
 const fs = require("fs");
 
+const {getUserData} = require("./updateDb");
+
 async function sendStartMessage(bot, chatId, first_name, last_name) {
     await bot.sendSticker(chatId, stickers.hello).then();
     await bot.sendMessage(chatId, `Привет ${last_name} ${first_name}! ` + localisations.startMessage, {
@@ -43,4 +45,9 @@ async function sendConfusedMessage(bot, chatId) {
     await bot.sendMessage(chatId, localisations.iDontUnderstand);
 }
 
-module.exports = {sendResearch, sendStartMessage, sendResearches, sendConfusedMessage};
+async function sendUserData(bot, chatId) {
+    const userData = await getUserData(chatId);
+    await bot.sendMessage(chatId, userData);
+}
+
+module.exports = {sendResearch, sendStartMessage, sendResearches, sendConfusedMessage, sendUserData};

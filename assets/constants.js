@@ -38,12 +38,16 @@ const commands = [
     {
         command: "get_chat_id",
         description: "узнать чат id"
+    }, {
+        command: "get_my_data",
+        description: "мои данные"
     },
 ];
 
 // start - старт
 // researches - научные направления
 // get_chat_id - узнать id чата
+// get_my_data - мои данные
 
 const stickers = {
     hello: 'CAACAgIAAxkBAAEKTKtlA3vTRlxYTs35OSSO7Q3KDGFaogACIAADwZxgDGWWbaHi0krRMAQ',
