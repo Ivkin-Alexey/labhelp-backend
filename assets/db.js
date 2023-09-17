@@ -1,3 +1,7 @@
+const constants = {
+    adminsChatId: {alexeyIvkin: 392584400, rybchenkoSvetlana: 857875270},
+}
+
 const researches = [
     {id: 10, name: "Направление \"Обогащение\"", advisor: "Александрова Татьяна Николаевна", degree: "докт. техн. наук"},
     {id: 9, name: "Направление \"Алюминий\"", advisor: "Горланов Евгений Сергеевич", degree: "докт. техн. наук"},
@@ -25,13 +29,21 @@ const researchTopics = researches.map(el => el.name);
 const commands = [
     {
         command: "start",
-        description: "Запуск бота"
+        description: "старт"
     },
     {
         command: "researches",
-        description: "Научные направления"
+        description: "научные направления"
+    },
+    {
+        command: "get_chat_id",
+        description: "узнать чат id"
     },
 ];
+
+// start - старт
+// researches - научные направления
+// get_chat_id - узнать id чата
 
 const stickers = {
     hello: 'CAACAgIAAxkBAAEKTKtlA3vTRlxYTs35OSSO7Q3KDGFaogACIAADwZxgDGWWbaHi0krRMAQ',
@@ -41,4 +53,4 @@ const stickers = {
     ok: 'CAACAgIAAxkBAAEKTlNlBLDJzNKqxAvp52WGuh4FS4TLeAACLAADwZxgDLDdeXbj2CCVMAQ'
 }
 
-module.exports = {keyboards, commands, stickers, researches, researchTopics, smiles};
+module.exports = {keyboards, commands, stickers, researches, researchTopics, smiles, constants};

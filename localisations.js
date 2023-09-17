@@ -1,5 +1,5 @@
 const localisations = {
-    startMessage: 'Привет! Хочешь к нам?',
+    startMessage: 'Хочешь к нам?',
     selectResearches: "Выбери научное направление: 👇",
     researchDescription: "Описание направления",
     iDontUnderstand: "Я не понимаю..."
