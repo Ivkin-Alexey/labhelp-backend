@@ -5,7 +5,7 @@ const fs = require("fs");
 const {getUserData} = require("./updateDb");
 
 async function sendStartMessage(bot, chatId, first_name, last_name) {
-    await bot.sendSticker(chatId, stickers.hello).then();
+    await bot.sendSticker(chatId, stickers.hello);
     await bot.sendMessage(chatId, `Привет ${last_name} ${first_name}! ` + localisations.startMessage, {
         reply_markup: {
             inline_keyboard: [
@@ -47,9 +47,9 @@ async function sendConfusedMessage(bot, chatId) {
 }
 
 async function sendUserData(bot, chatId, userData) {
-    const {first_name, last_name,phone, position, studyGroup, research} = userData;
+    const {first_name, last_name,phone, position, study, research} = userData;
     await bot.sendMessage(chatId,
-        `Мои данные: \n${research}\n${position}, ${studyGroup}\n${last_name} ${first_name}\n${phone}`, {
+        `Мои данные: \n${research}\n${position}, ${study}\n${last_name} ${first_name}\n${phone}`, {
             reply_markup: {
                 inline_keyboard: [
                     [{text: 'Подтвердить', callback_data: "userConfirmData"}],

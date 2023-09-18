@@ -22,14 +22,8 @@ let userLocalData = {
     last_name: "Пягай",
     phone: "+79876543210",
     position: "Магистр",
-    studyGroup: "группа ТХ-10-1",
+    study: "группа ТХ-10-1",
     research: "Направление \"Кремнегель\""
-}
-
-function updateUserLocalData(data) {
-    for(let field in data) {
-        userLocalData[field] = data[field];
-    }
 }
 
 const app = express();
@@ -63,7 +57,6 @@ bot.on('message', async msg => {
                             })
                     break;
                 case "/start":
-                    updateUserLocalData(chatId, {first_name, last_name});
                     await BotAnswers.sendStartMessage(bot, chatId, first_name, last_name);
                     await updateUserData(chatId, {first_name, last_name});
                     break;
@@ -80,14 +73,12 @@ bot.on('message', async msg => {
                     await BotAnswers.sendResearch(bot, chatId, researchTopic);
                     break;
                 case studyGroup:
-                    updateUserLocalData(chatId, {studyGroup});
                     await BotQuestions.askPhoneNumber(bot, chatId);
                     await updateUserData(chatId, {studyGroup});
                     break;
                 case phone:
-                    await BotAnswers.sendUserData(bot, chatId, userLocalData);
-                    updateUserLocalData(chatId, {phone});
                     await updateUserData(chatId, {phone});
+                    await BotAnswers.sendUserData(bot, chatId, userLocalData);
                     break;
                 default:
                     await BotAnswers.sendConfusedMessage(bot, chatId);
@@ -108,8 +99,10 @@ bot.on('message', async msg => {
 
 bot.on('callback_query', async ctx => {
     const chatId = ctx.message.chat.id;
+    const messageData = ctx.data;
+
     try {
-        switch (ctx.data) {
+        switch (messageData) {
             case "Yes":
                 await bot.sendSticker(chatId, stickers.agree);
                 await BotAnswers.sendResearches(bot, chatId);
@@ -123,7 +116,12 @@ bot.on('callback_query', async ctx => {
                 break;
             case "bachelor":
             case "master":
+                await updateUserData(chatId, {position: messageData === "bachelor" ? "бакалавр" : "магистр"});
                 await BotQuestions.askEducationalGroup(bot, chatId);
+                break;
+            case "postgraduate":
+                await updateUserData(chatId, {position: "аспирант"});
+                await BotQuestions.askEducationYear(bot, chatId);
                 break;
             case "adminConfirmUser":
                 await bot.sendMessage(adminChatId, "Данные сохранены на сервере");
@@ -136,6 +134,13 @@ bot.on('callback_query', async ctx => {
                 break;
             case "userWantToEditData":
                 await BotQuestions.askWhichFieldNeedToEdit(bot, chatId, userLocalData);
+                break;
+            case "1EducationYear":
+            case "2EducationYear":
+            case "3EducationYear":
+            case "4EducationYear":
+                await updateUserData(chatId, {study: messageData[0] + " год обучения"});
+                await BotQuestions.askPhoneNumber(bot, chatId);
                 break;
         }
     } catch (error) {

@@ -6,7 +6,18 @@ async function askUserPosition(bot, chatId) {
             inline_keyboard: [
                 [{text: 'Бакалавр', callback_data: "bachelor"}],
                 [{text: 'Магистр', callback_data: "master"}],
-                // [{text: 'Аспирант', callback_data: "postgraduate"}],
+                [{text: 'Аспирант', callback_data: "postgraduate"}],
+            ]
+        },
+    })
+}
+
+async function askEducationYear(bot, chatId) {
+    await bot.sendMessage(chatId, "Выбери свой год обучения: ", {
+        reply_markup: {
+            inline_keyboard: [
+                [{text: '1', callback_data: "1EducationYear"}, {text: '2', callback_data: "2EducationYear"}],
+                [{text: '3', callback_data: "3EducationYear"}, {text: '4', callback_data: "4EducationYear"}],
             ]
         },
     })
@@ -21,9 +32,9 @@ async function askPhoneNumber(bot, chatId) {
 }
 
 async function askConfirmNewUser(bot, adminChatId, userData) {
-    const {first_name, last_name, patronymic, phone, position, studyGroup, research} = userData;
+    const {first_name, last_name, patronymic, phone, position, study, research} = userData;
     await bot.sendMessage(adminChatId,
-        `Новая заявка: \n${research}\n${position}, ${studyGroup}\n${last_name} ${first_name}\n${phone}`, {
+        `Новая заявка: \n${research}\n${position}, ${study}\n${last_name} ${first_name}\n${phone}`, {
         reply_markup: {
             inline_keyboard: [
                 [{text: 'Подтвердить', callback_data: "adminConfirmUser"}],
@@ -45,4 +56,6 @@ async function askWhichFieldNeedToEdit(bot, chatId, userLocalData) {
     });
 }
 
-module.exports = {askUserPosition, askEducationalGroup, askPhoneNumber, askConfirmNewUser,askWhichFieldNeedToEdit};
+
+
+module.exports = {askUserPosition, askEducationalGroup, askPhoneNumber, askConfirmNewUser,askWhichFieldNeedToEdit, askEducationYear};
