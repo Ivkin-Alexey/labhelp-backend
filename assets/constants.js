@@ -1,5 +1,5 @@
 const constants = {
-    adminsChatId: {alexeyIvkin: 392584400, rybchenkoSvetlana: 857875270},
+    adminsChatId: {alexeyIvkin: 392584400, rybchenkoSvetlana: 857875270, rudkoVyacheslav: 1516784245},
 }
 
 const researches = [

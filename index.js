@@ -9,7 +9,7 @@ const {stickers, smiles, researchTopics, constants} = require("./assets/constant
 const BotAnswers = require("./methods/botAnswers");
 const BotQuestions = require("./methods/botQuestions");
 const {updateUserData} = require("./methods/updateDb");
-const adminChatId = constants.adminsChatId.rybchenkoSvetlana;
+const adminChatId = constants.adminsChatId.rudkoVyacheslav;
 
 process.on('uncaughtException', function (err) {
     console.log(err);
