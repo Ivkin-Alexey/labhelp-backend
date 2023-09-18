@@ -1,18 +1,18 @@
-const { writeFile, readFile } = require("fs");
+const { writeFile, readFile, readFileSync } = require("fs");
 const path = require("path");
-const jsonPath = path.join(__dirname, '..', 'assets', 'db.json')
+const jsonPath = path.join(__dirname, '..', 'assets', 'db.json');
 
 const user = {
-    first_name: "неизвестно",
-    last_name: "неизвестно",
-    patronymic: "неизвестно",
-    phone: "неизвестно",
-    position: "неизвестно",
-    studyGroup: "неизвестно",
-    research: "неизвестно"
+    first_name: "",
+    last_name: "",
+    patronymic: "",
+    phone: "",
+    position: "",
+    studyGroup: "",
+    research: ""
 }
 
-async function updateUserData(chatId, field, value) {
+async function updateUserData(chatId, userData) {
 
     await readFile(jsonPath, (error, data) => {
         if (error) {
@@ -22,10 +22,14 @@ async function updateUserData(chatId, field, value) {
         const parsedData = JSON.parse(Buffer.from(data));
 
         if(parsedData[chatId]) {
-            parsedData[chatId][field] = value;
+            for(let field in userData) {
+                parsedData[chatId][field] = userData[field];
+            }
         } else {
             parsedData[chatId] = user;
-            parsedData[chatId][field] = value;
+            for(let field in userData) {
+                parsedData[chatId][field] = userData[field];
+            }
         }
 
        writeFile(jsonPath, JSON.stringify(parsedData, null, 2), (err) => {
@@ -38,14 +42,9 @@ async function updateUserData(chatId, field, value) {
     });
 }
 
-async function getUserData(chatId) {
-    return readFile(jsonPath, (error, data) => {
-        if (error) {
-            console.log(error);
-            return;
-        }
-        return JSON.parse(Buffer.from(data))[chatId];
-    });
+async function getUserData() {
+    const file = await readFileSync(jsonPath);
+    return JSON.parse(Buffer.from(file));
 }
 
 module.exports = {updateUserData, getUserData}

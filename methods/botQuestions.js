@@ -1,7 +1,5 @@
 const {stickers, constants} = require("../assets/constants");
 
-const adminChatId = constants.adminsChatId.rybchenkoSvetlana;
-
 async function askUserPosition(bot, chatId) {
     await bot.sendMessage(chatId, "Выбери категорию обучающегося: ", {
         reply_markup: {
@@ -22,8 +20,10 @@ async function askPhoneNumber(bot, chatId) {
     await bot.sendMessage(chatId, "Напиши свой номер телефона в формате  \"+79876543210\"");
 }
 
-async function askConfirmNewUser(bot, first_name, last_name) {
-    await bot.sendMessage(adminChatId, `Новая заявка: ${last_name} ${first_name}`, {
+async function askConfirmNewUser(bot, adminChatId, userData) {
+    const {first_name, last_name, patronymic, phone, position, studyGroup, research} = userData;
+    await bot.sendMessage(adminChatId,
+        `Новая заявка: \n${research}\n${position}, ${studyGroup}\n${last_name} ${first_name}\n${phone}`, {
         reply_markup: {
             inline_keyboard: [
                 [{text: 'Подтвердить', callback_data: "adminConfirmUser"}],
@@ -33,5 +33,16 @@ async function askConfirmNewUser(bot, first_name, last_name) {
     });
 }
 
+async function askWhichFieldNeedToEdit(bot, chatId, userLocalData) {
+    let keyboard = [];
+    for(let field in userLocalData) {
+        keyboard.push([{text: userLocalData[field], callback_data: "userWantToEdit_" + field}])
+    }
+    await bot.sendMessage(chatId, "Какие данные редактировать?", {
+        reply_markup: {
+            inline_keyboard: keyboard
+        },
+    });
+}
 
-module.exports = {askUserPosition, askEducationalGroup, askPhoneNumber, askConfirmNewUser};
+module.exports = {askUserPosition, askEducationalGroup, askPhoneNumber, askConfirmNewUser,askWhichFieldNeedToEdit};

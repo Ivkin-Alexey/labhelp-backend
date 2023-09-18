@@ -5,18 +5,32 @@ const cors = require('cors');
 // const fs = require("fs");
 // const webAppUrl = 'https://frolicking-kleicha-94863e.netlify.app/';
 // const localisations = require("./localisations.js");
-const {userList} = require("./assets/db");
-const {stickers, researches, smiles, researchTopics} = require("./assets/constants");
+const {stickers, smiles, researchTopics, constants} = require("./assets/constants");
 const BotAnswers = require("./methods/botAnswers");
 const BotQuestions = require("./methods/botQuestions");
 const {updateUserData} = require("./methods/updateDb");
+const adminChatId = constants.adminsChatId.rybchenkoSvetlana;
 
 process.on('uncaughtException', function (err) {
     console.log(err);
 });
 
-
 process.traceDeprecation = true;
+
+let userLocalData = {
+    first_name: "Игорь",
+    last_name: "Пягай",
+    phone: "+79876543210",
+    position: "Магистр",
+    studyGroup: "группа ТХ-10-1",
+    research: "Направление \"Кремнегель\""
+}
+
+function updateUserLocalData(data) {
+    for(let field in data) {
+        userLocalData[field] = data[field];
+    }
+}
 
 const app = express();
 const PORT = 8000;
@@ -35,15 +49,23 @@ bot.on('message', async msg => {
     const phone = validatePhoneNumber(text) ? text : undefined;
 
     function validatePhoneNumber(input_str) {
-        const re = /^(\+{0,})(\d{0,})([(]{1}\d{1,3}[)]{0,}){0,}(\s?\d+|\+\d{2,3}\s{1}\d+|\d+){1}[\s|-]?\d+([\s|-]?\d+){1,2}(\s){0,}$/gm;
+        const re = /^\+?[1-9]\d{10}$/;
         return re.test(input_str);
     }
 
         try {
             switch (text) {
+                case "❌ Закрыть меню":
+                    await bot.sendMessage(chatId, 'Меню закрыто', {
+                                reply_markup: {
+                                    remove_keyboard: true
+                                }
+                            })
+                    break;
                 case "/start":
+                    updateUserLocalData(chatId, {first_name, last_name});
                     await BotAnswers.sendStartMessage(bot, chatId, first_name, last_name);
-                    await BotQuestions.askConfirmNewUser(bot, first_name, last_name)
+                    await updateUserData(chatId, {first_name, last_name});
                     break;
                 case "/researches":
                     await BotAnswers.sendResearches(bot, chatId);
@@ -52,17 +74,20 @@ bot.on('message', async msg => {
                     await bot.sendMessage(chatId, 'Чат ID: ' + chatId);
                     break;
                 case "/get_my_data":
-                    await BotAnswers.sendUserData(bot, chatId);
+                    await BotAnswers.sendUserData(bot, chatId, userLocalData);
                     break;
                 case researchBtnText:
                     await BotAnswers.sendResearch(bot, chatId, researchTopic);
                     break;
                 case studyGroup:
+                    updateUserLocalData(chatId, {studyGroup});
                     await BotQuestions.askPhoneNumber(bot, chatId);
-                    await updateUserData(chatId, "studyGroup", studyGroup);
+                    await updateUserData(chatId, {studyGroup});
                     break;
                 case phone:
-                    await bot.sendMessage(chatId, "Ваш номер " + phone);
+                    await BotAnswers.sendUserData(bot, chatId, userLocalData);
+                    updateUserLocalData(chatId, {phone});
+                    await updateUserData(chatId, {phone});
                     break;
                 default:
                     await BotAnswers.sendConfusedMessage(bot, chatId);
@@ -70,14 +95,6 @@ bot.on('message', async msg => {
         } catch (e) {
             console.log(e);
         }
-
-    // } else if (text === '❌  Закрыть меню') {
-    //     await bot.sendMessage(chatId, 'Меню закрыто', {
-    //         reply_markup: {
-    //             remove_keyboard: true
-    //         }
-    //     })
-    // }
 
     // if (msg?.web_app_data?.data) {
     //     try {
@@ -109,7 +126,16 @@ bot.on('callback_query', async ctx => {
                 await BotQuestions.askEducationalGroup(bot, chatId);
                 break;
             case "adminConfirmUser":
-                await BotQuestions.askEducationalGroup(bot, chatId);
+                await bot.sendMessage(adminChatId, "Данные сохранены на сервере");
+                break;
+            case "userConfirmData":
+                await BotQuestions.askConfirmNewUser(bot, adminChatId, userLocalData);
+                break;
+            case "adminDoesntConfirmUser":
+                await bot.sendMessage(adminChatId, "Заявка отменена")
+                break;
+            case "userWantToEditData":
+                await BotQuestions.askWhichFieldNeedToEdit(bot, chatId, userLocalData);
                 break;
         }
     } catch (error) {

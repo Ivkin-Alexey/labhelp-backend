@@ -18,6 +18,7 @@ const researches = [
 
 const smiles = {
     researches: "👨‍ ‍🔬 ",
+    closeMenu: "❌ "
 }
 
 const keyboards = {

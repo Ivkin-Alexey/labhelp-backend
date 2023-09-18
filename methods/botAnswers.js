@@ -16,19 +16,20 @@ async function sendStartMessage(bot, chatId, first_name, last_name) {
 }
 
 async function sendResearches(bot, chatId) {
+    const keyboard = [...keyboards.researches, ['❌ Закрыть меню']];
     await bot.sendMessage(chatId, localisations.selectResearches, {
         reply_markup: {
-            keyboard: keyboards.researches,
+            keyboard,
         },
         isResearch: true
     })
 }
 
 async function sendResearch(bot, chatId, researchTopic) {
-    const research = researches.find(el=>el.name === researchTopic);
+    const research = researches.find(el => el.name === researchTopic);
     const {id, degree, advisor} = research;
     const imageStream = fs.createReadStream(`./assets/images/${id}.jpg`);
-    await bot.sendPhoto(chatId, imageStream );
+    await bot.sendPhoto(chatId, imageStream);
     await bot.sendMessage(chatId, "Руководитель направления: " + degree + " " + advisor,);
     await bot.sendMessage(chatId, "Описание направления. Описание направления. Описание направления. Описание направления.", {
         reply_markup: {
@@ -45,9 +46,21 @@ async function sendConfusedMessage(bot, chatId) {
     await bot.sendMessage(chatId, localisations.iDontUnderstand);
 }
 
-async function sendUserData(bot, chatId) {
-    const userData = await getUserData(chatId);
-    await bot.sendMessage(chatId, userData);
+async function sendUserData(bot, chatId, userData) {
+    const {first_name, last_name,phone, position, studyGroup, research} = userData;
+    await bot.sendMessage(chatId,
+        `Мои данные: \n${research}\n${position}, ${studyGroup}\n${last_name} ${first_name}\n${phone}`, {
+            reply_markup: {
+                inline_keyboard: [
+                    [{text: 'Подтвердить', callback_data: "userConfirmData"}],
+                    [{text: 'Редактировать', callback_data: "userWantToEditData"}],
+                ]
+            },
+        });
+
+    // let userData = await getUserData(chatId);
+    // console.log(userData);
+    // await bot.sendMessage(chatId, userData).then(e=>e.log);
 }
 
 module.exports = {sendResearch, sendStartMessage, sendResearches, sendConfusedMessage, sendUserData};
