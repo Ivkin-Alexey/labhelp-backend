@@ -57,10 +57,6 @@ async function sendUserData(bot, chatId, userData) {
                 ]
             },
         });
-
-    // let userData = await getUserData(chatId);
-    // console.log(userData);
-    // await bot.sendMessage(chatId, userData).then(e=>e.log);
 }
 
 module.exports = {sendResearch, sendStartMessage, sendResearches, sendConfusedMessage, sendUserData};

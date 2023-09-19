@@ -1,11 +1,12 @@
 const { writeFile, readFile, readFileSync } = require("fs");
 const path = require("path");
+const BotAnswers = require("./botAnswers");
 const jsonPath = path.join(__dirname, '..', 'assets', 'db.json');
 
 const user = {
     first_name: "",
     last_name: "",
-    patronymic: "",
+    // patronymic: "",
     phone: "",
     position: "",
     studyGroup: "",
@@ -42,10 +43,15 @@ async function updateUserData(chatId, userData) {
     });
 }
 
-async function getUserData() {
+async function getUserData(chatId) {
     const file = await readFileSync(jsonPath);
-    return JSON.parse(Buffer.from(file));
+    return JSON.parse(Buffer.from(file))[chatId];
 }
+
+// async function checkIsUserData(chatId) {
+//     await getUserData(chatId).then(res => BotAnswers.sendUserData(bot, chatId, res));
+//     await updateUserData(chatId, {first_name, last_name});
+// }
 
 module.exports = {updateUserData, getUserData}
 

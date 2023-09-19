@@ -8,7 +8,7 @@ const cors = require('cors');
 const {stickers, smiles, researchTopics, constants} = require("./assets/constants");
 const BotAnswers = require("./methods/botAnswers");
 const BotQuestions = require("./methods/botQuestions");
-const {updateUserData} = require("./methods/updateDb");
+const {updateUserData, getUserData} = require("./methods/updateDb");
 const adminChatId = constants.adminsChatId.rudkoVyacheslav;
 
 process.on('uncaughtException', function (err) {
@@ -16,16 +16,6 @@ process.on('uncaughtException', function (err) {
 });
 
 process.traceDeprecation = true;
-
-let userLocalData = {
-    first_name: "Игорь",
-    last_name: "Пягай",
-    phone: "+79876543210",
-    position: "Магистр",
-    study: "группа ТХ-10-1",
-    research: "Направление \"Кремнегель\""
-}
-
 const app = express();
 const PORT = 8000;
 const token = process.env.TELEGRAM_TOKEN;
@@ -46,7 +36,6 @@ bot.on('message', async msg => {
         const re = /^\+?[1-9]\d{10}$/;
         return re.test(input_str);
     }
-
         try {
             switch (text) {
                 case "❌ Закрыть меню":
@@ -57,6 +46,7 @@ bot.on('message', async msg => {
                             })
                     break;
                 case "/start":
+                    // await checkIsUserData(bot, chatId)
                     await BotAnswers.sendStartMessage(bot, chatId, first_name, last_name);
                     await updateUserData(chatId, {first_name, last_name});
                     break;
@@ -64,21 +54,22 @@ bot.on('message', async msg => {
                     await BotAnswers.sendResearches(bot, chatId);
                     break;
                 case "/get_chat_id":
-                    await bot.sendMessage(chatId, 'Чат ID: ' + chatId);
+                    await bot.sendMessage(chatId, 'Чат ID: ' + chatId).then(res => console.log(res));
                     break;
                 case "/get_my_data":
-                    await BotAnswers.sendUserData(bot, chatId, userLocalData);
+                    await getUserData(chatId).then(res => BotAnswers.sendUserData(bot, chatId, res));
                     break;
                 case researchBtnText:
                     await BotAnswers.sendResearch(bot, chatId, researchTopic);
+                    await updateUserData(chatId, {research: researchTopic});
                     break;
                 case studyGroup:
                     await BotQuestions.askPhoneNumber(bot, chatId);
-                    await updateUserData(chatId, {studyGroup});
+                    await updateUserData(chatId, {study: studyGroup});
                     break;
                 case phone:
                     await updateUserData(chatId, {phone});
-                    await BotAnswers.sendUserData(bot, chatId, userLocalData);
+                    await getUserData(chatId).then(userData => BotAnswers.sendUserData(bot, chatId, userData));
                     break;
                 default:
                     await BotAnswers.sendConfusedMessage(bot, chatId);
@@ -127,13 +118,13 @@ bot.on('callback_query', async ctx => {
                 await bot.sendMessage(adminChatId, "Данные сохранены на сервере");
                 break;
             case "userConfirmData":
-                await BotQuestions.askConfirmNewUser(bot, adminChatId, userLocalData);
+                await getUserData(chatId).then(userData => BotQuestions.askConfirmNewUser(bot, adminChatId, userData));
                 break;
             case "adminDoesntConfirmUser":
                 await bot.sendMessage(adminChatId, "Заявка отменена")
                 break;
             case "userWantToEditData":
-                await BotQuestions.askWhichFieldNeedToEdit(bot, chatId, userLocalData);
+                await getUserData(chatId).then(userData => BotQuestions.askWhichFieldNeedToEdit(bot, chatId, userData));
                 break;
             case "1EducationYear":
             case "2EducationYear":
