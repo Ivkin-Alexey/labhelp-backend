@@ -9,7 +9,7 @@ const {stickers, smiles, researchTopics, constants} = require("./assets/constant
 const BotAnswers = require("./methods/botAnswers");
 const BotQuestions = require("./methods/botQuestions");
 const {updateUserData, getUserData} = require("./methods/updateDb");
-const adminChatId = constants.adminsChatId.rudkoVyacheslav;
+const adminChatId = constants.adminsChatId.rybchenkoSvetlana;
 
 process.on('uncaughtException', function (err) {
     console.log(err);
@@ -36,47 +36,49 @@ bot.on('message', async msg => {
         const re = /^\+?[1-9]\d{10}$/;
         return re.test(input_str);
     }
-        try {
-            switch (text) {
-                case "❌ Закрыть меню":
-                    await bot.sendMessage(chatId, 'Меню закрыто', {
-                                reply_markup: {
-                                    remove_keyboard: true
-                                }
-                            })
-                    break;
-                case "/start":
-                    // await checkIsUserData(bot, chatId)
-                    await BotAnswers.sendStartMessage(bot, chatId, first_name, last_name);
-                    await updateUserData(chatId, {first_name, last_name});
-                    break;
-                case "/researches":
-                    await BotAnswers.sendResearches(bot, chatId);
-                    break;
-                case "/get_chat_id":
-                    await bot.sendMessage(chatId, 'Чат ID: ' + chatId).then(res => console.log(res));
-                    break;
-                case "/get_my_data":
-                    await getUserData(chatId).then(res => BotAnswers.sendUserData(bot, chatId, res));
-                    break;
-                case researchBtnText:
-                    await BotAnswers.sendResearch(bot, chatId, researchTopic);
-                    await updateUserData(chatId, {research: researchTopic});
-                    break;
-                case studyGroup:
-                    await BotQuestions.askPhoneNumber(bot, chatId);
-                    await updateUserData(chatId, {study: studyGroup});
-                    break;
-                case phone:
-                    await updateUserData(chatId, {phone});
-                    await getUserData(chatId).then(userData => BotAnswers.sendUserData(bot, chatId, userData));
-                    break;
-                default:
-                    await BotAnswers.sendConfusedMessage(bot, chatId);
-            }
-        } catch (e) {
-            console.log(e);
+
+    try {
+        switch (text) {
+            case "❌ Закрыть меню":
+                await bot.sendMessage(chatId, 'Меню закрыто', {
+                    reply_markup: {
+                        remove_keyboard: true
+                    }
+                })
+                break;
+            case "/start":
+                // await checkIsUserData(bot, chatId)
+                await BotAnswers.sendStartMessage(bot, chatId, first_name, last_name);
+                await updateUserData(chatId, {first_name, last_name});
+                break;
+            case "/researches":
+                await BotAnswers.sendResearches(bot, chatId);
+                break;
+            case "/get_chat_id":
+                await bot.sendMessage(chatId, 'Чат ID: ' + chatId).then(res => console.log(res));
+                break;
+            case "/get_my_data":
+                await getUserData(chatId).then(res => BotAnswers.sendUserData(bot, chatId, res));
+                break;
+            case researchBtnText:
+                await BotAnswers.sendResearch(bot, chatId, researchTopic);
+                await updateUserData(chatId, {research: researchTopic});
+                break;
+            case studyGroup:
+                await BotQuestions.askPhoneNumber(bot, chatId);
+                await updateUserData(chatId, {study: studyGroup});
+                break;
+            case phone:
+                await updateUserData(chatId, {phone})
+                    .then(userData => BotAnswers.sendUserData(bot, chatId, userData))
+                    .catch(err => bot.sendMessage(chatId, err));
+                break;
+            default:
+                await BotAnswers.sendConfusedMessage(bot, chatId);
         }
+    } catch (e) {
+        console.log(e);
+    }
 
     // if (msg?.web_app_data?.data) {
     //     try {

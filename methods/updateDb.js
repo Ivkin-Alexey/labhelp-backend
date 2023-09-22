@@ -1,4 +1,4 @@
-const { writeFile, readFile, readFileSync } = require("fs");
+const {writeFile, readFile, readFileSync} = require("fs");
 const path = require("path");
 const BotAnswers = require("./botAnswers");
 const jsonPath = path.join(__dirname, '..', 'assets', 'db.json');
@@ -15,33 +15,36 @@ const user = {
 
 async function updateUserData(chatId, userData) {
 
-    await readFile(jsonPath, (error, data) => {
-        if (error) {
-            console.log(error);
-            return;
-        }
-        const parsedData = JSON.parse(Buffer.from(data));
+    return new Promise((resolve, reject) => {
 
-        if(parsedData[chatId]) {
-            for(let field in userData) {
-                parsedData[chatId][field] = userData[field];
-            }
-        } else {
-            parsedData[chatId] = user;
-            for(let field in userData) {
-                parsedData[chatId][field] = userData[field];
-            }
-        }
-
-       writeFile(jsonPath, JSON.stringify(parsedData, null, 2), (err) => {
-            if (err) {
-                console.log("Failed to write updated data to file");
+        readFile(jsonPath, (error, data) => {
+            if (error) {
+                reject(`Ошибка чтения данных на сервере: ${error}. Сообщите о ней администратору`);
                 return;
             }
-            console.log("Updated file successfully");
+            let parsedData = JSON.parse(Buffer.from(data));
+
+            if (parsedData[chatId]) {
+                for (let field in userData) {
+                    parsedData[chatId][field] = userData[field];
+                }
+            } else {
+                parsedData[chatId] = user;
+                for (let field in userData) {
+                    parsedData[chatId][field] = userData[field];
+                }
+            }
+
+        writeFile(jsonPath, JSON.stringify(parsedData, null, 2), (error) => {
+            if (error) {
+                console.log(error);
+                reject(`Ошибка записи данных на сервере: ${error}. Сообщите о ней администратору`);
+                return;
+            }
+            resolve(parsedData[chatId]);
         });
-    });
-}
+        })
+})}
 
 async function getUserData(chatId) {
     const file = await readFileSync(jsonPath);
