@@ -1,6 +1,0 @@
-/node_modules
-/ssl
-.idea
-.env
-/assets/db
-package.json
