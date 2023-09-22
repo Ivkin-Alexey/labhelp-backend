@@ -82,7 +82,7 @@ bot.on('message', async msg => {
 
     // if (msg?.web_app_data?.data) {
     //     try {
-    //         const data = JSON.parse(msg?.web_app_data?.data)
+    //         const data = JSON.parse(msg?.web_app_data?.data)git
     //         await bot.sendMessage(chatId, 'Спасибо за обратную связь!' + JSON.stringify(data));
     //     } catch (e) {
     //         console.log(e);

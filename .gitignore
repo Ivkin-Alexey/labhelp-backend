@@ -2,4 +2,5 @@
 /ssl
 .idea
 .env
-/assets/db.js
+/assets/db
+package.json

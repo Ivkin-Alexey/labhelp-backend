@@ -1,7 +1,8 @@
 const {writeFile, readFile, readFileSync} = require("fs");
 const path = require("path");
 const BotAnswers = require("./botAnswers");
-const jsonPath = path.join(__dirname, '..', 'assets', 'db.json');
+const jsonPath = path.join(__dirname, '..', 'assets', 'db', 'db.json');
+const jsonPath2 = path.join(__dirname, '..', 'assets', 'd', 'db.json');
 
 const user = {
     first_name: "",
