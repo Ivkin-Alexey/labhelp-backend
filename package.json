@@ -1,0 +1,33 @@
+{
+  "name": "tg-bot-sc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+  "nodemonConfig": {
+    "ignore": ["assets/db/*.json", "assets/db/*.js"]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ivkin-Alexey/tg-bot-sc.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Ivkin-Alexey/tg-bot-sc/issues"
+  },
+  "homepage": "https://github.com/Ivkin-Alexey/tg-bot-sc#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "google-auth-library": "^8.9.0",
+    "google-spreadsheet": "^4.0.2",
+    "node-fetch": "^2.6.6",
+    "node-telegram-bot-api": "^0.61.0",
+    "nodemon": "^3.0.1",
+    "sequelize": "^6.32.1"
+  }
+}

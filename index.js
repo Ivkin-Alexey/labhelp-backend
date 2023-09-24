@@ -70,8 +70,8 @@ bot.on('message', async msg => {
                 break;
             case phone:
                 await updateUserData(chatId, {phone})
-                    .then(userData => BotAnswers.sendUserData(bot, chatId, userData))
-                    .catch(err => bot.sendMessage(chatId, err));
+                    // .then(userData => BotAnswers.sendUserData(bot, chatId, userData))
+                    // .catch(err => bot.sendMessage(chatId, err));
                 break;
             default:
                 await BotAnswers.sendConfusedMessage(bot, chatId);
