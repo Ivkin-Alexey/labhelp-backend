@@ -2,14 +2,18 @@ require('dotenv').config();
 const TelegramBot = require('node-telegram-bot-api');
 const express = require('express');
 const cors = require('cors');
-// const fs = require("fs");
+const fs = require("fs");
+const https = require('https');
+const http = require('http');
 // const webAppUrl = 'https://frolicking-kleicha-94863e.netlify.app/';
 // const localisations = require("./localisations.js");
 const {stickers, smiles, researchTopics, constants} = require("./assets/constants");
 const BotAnswers = require("./methods/botAnswers");
 const BotQuestions = require("./methods/botQuestions");
 const {updateUserData, getUserData} = require("./methods/updateDb");
+const path = require("path");
 const adminChatId = constants.adminsChatId.rybchenkoSvetlana;
+let users = require('./assets/db/db_users.json');
 
 process.on('uncaughtException', function (err) {
     console.log(err);
@@ -22,6 +26,11 @@ const token = process.env.TELEGRAM_TOKEN;
 const bot = new TelegramBot(token, {polling: true});
 app.use(express.json());
 app.use(cors());
+const httpServer = http.createServer(app);
+const httpsServer = https.createServer({
+    key: fs.readFileSync('/ssl/key.pem'),
+    cert: fs.readFileSync('/ssl/cert.pem'),
+}, app);
 
 bot.on('message', async msg => {
     const chatId = msg.chat.id;
@@ -47,7 +56,7 @@ bot.on('message', async msg => {
                 })
                 break;
             case "/start":
-                // await checkIsUserData(bot, chatId)
+                // await checkIsUserData(bot, chatId);
                 await BotAnswers.sendStartMessage(bot, chatId, first_name, last_name);
                 await updateUserData(chatId, {first_name, last_name});
                 break;
@@ -55,7 +64,7 @@ bot.on('message', async msg => {
                 await BotAnswers.sendResearches(bot, chatId);
                 break;
             case "/get_chat_id":
-                await bot.sendMessage(chatId, 'Чат ID: ' + chatId).then(res => console.log(res));
+                await bot.sendMessage(chatId, 'Чат ID: ' + chatId);
                 break;
             case "/get_my_data":
                 await getUserData(chatId).then(res => BotAnswers.sendUserData(bot, chatId, res));
@@ -162,5 +171,12 @@ app.get('/web-data', async (req, res) => {
     return res.status(200).json('Привет');
 });
 
-app.listen(PORT, () => console.log('server started on PORT ' + PORT));
+
+httpServer.listen(80, () => {
+    console.log('HTTP Server running on port 80');
+});
+
+httpsServer.listen(443, () => {
+    console.log('HTTPS Server running on port 443');
+});
 

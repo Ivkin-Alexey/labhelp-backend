@@ -2,8 +2,10 @@ const {writeFile, readFile, readFileSync} = require("fs");
 const path = require("path");
 const BotAnswers = require("./botAnswers");
 const jsonPath = path.join(__dirname, '..', 'assets', 'db', 'db.json');
-const jsPath = path.join(__dirname, '..', 'assets', 'db', 'db_users.js');
-const users = require(jsPath);
+const newJsonPath = path.join(__dirname, '..', 'assets', 'db', 'db_users.json');
+const users = require(newJsonPath);
+const fs = require("fs");
+const md5 = require('md5');
 
 const user = {
     first_name: "",
@@ -12,7 +14,30 @@ const user = {
     phone: "",
     position: "",
     studyGroup: "",
-    research: ""
+    research: "",
+    type: "user"
+}
+
+let md5Previous = null;
+let fsWait = false;
+fs.watch(newJsonPath, (event, filename) => {
+    if (filename) {
+        if (fsWait) return;
+        fsWait = setTimeout(() => {
+            fsWait = false;
+        }, 100);
+        const md5Current = md5(fs.readFileSync(newJsonPath));
+        if (md5Current === md5Previous) {
+            return;
+        }
+        md5Previous = md5Current;
+
+        console.log(`${filename} file Changed`);
+    }
+});
+
+async function setAdmin(chatId) {
+
 }
 
 // async function updateUserData(chatId, userData) {
@@ -75,7 +100,7 @@ async function updateUserData(chatId, userData) {
 
             console.log(users);
 
-            writeFile(jsPath, Buffer.from(users), null, 2, (error) => {
+            writeFile(newJsonPath, JSON.stringify(users, null, 2), (error) => {
                 if (error) {
                     console.log(error);
                     reject(`Ошибка записи данных на сервере: ${error}. Сообщите о ней администратору`);
@@ -92,10 +117,10 @@ async function getUserData(chatId) {
     return JSON.parse(Buffer.from(file))[chatId];
 }
 
-// async function checkIsUserData(chatId) {
-//     await getUserData(chatId).then(res => BotAnswers.sendUserData(bot, chatId, res));
-//     await updateUserData(chatId, {first_name, last_name});
-// }
+async function checkIsUserData(chatId) {
+    await getUserData(chatId).then(res => BotAnswers.sendUserData(bot, chatId, res));
+    await updateUserData(chatId, {first_name, last_name});
+}
 
 module.exports = {updateUserData, getUserData}
 

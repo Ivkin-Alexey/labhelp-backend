@@ -1,4 +1,5 @@
 const {stickers, constants} = require("../assets/constants");
+const {updateUserData} = require("./updateDb");
 
 async function askUserPosition(bot, chatId) {
     await bot.sendMessage(chatId, "Выбери категорию обучающегося: ", {
@@ -24,7 +25,15 @@ async function askEducationYear(bot, chatId) {
 }
 
 async function askEducationalGroup(bot, chatId) {
-    await bot.sendMessage(chatId, "Напиши название своей учебной группы, начиная со слова \"группа\", например, \"группа ТХ-10-1\"")
+    const prompt = await bot.sendMessage(chatId, "Напиши название своей учебной группы, например, \"ТХ-10-1\"", {
+        reply_markup: {
+            force_reply: true,
+        },
+    });
+    bot.onReplyToMessage(chatId, prompt.message_id, async function (answer) {
+        console.log(answer);
+        await updateUserData(chatId, {study: answer.text});
+            });
 }
 
 async function askPhoneNumber(bot, chatId) {
