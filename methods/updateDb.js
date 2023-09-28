@@ -117,10 +117,10 @@ async function getUserData(chatId) {
     return JSON.parse(Buffer.from(file))[chatId];
 }
 
-async function checkIsUserData(chatId) {
-    await getUserData(chatId).then(res => BotAnswers.sendUserData(bot, chatId, res));
-    await updateUserData(chatId, {first_name, last_name});
-}
+// async function checkIsUserData(chatId) {
+//     await getUserData(chatId).then(res => BotAnswers.sendUserData(bot, chatId, res));
+//     await updateUserData(chatId, {first_name, last_name});
+// }
 
 module.exports = {updateUserData, getUserData}
 

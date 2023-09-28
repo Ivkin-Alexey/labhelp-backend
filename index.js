@@ -28,8 +28,8 @@ app.use(express.json());
 app.use(cors());
 const httpServer = http.createServer(app);
 const httpsServer = https.createServer({
-    key: fs.readFileSync('/ssl/key.pem'),
-    cert: fs.readFileSync('/ssl/cert.pem'),
+    key: fs.readFileSync('ssl/key.pem'),
+    cert: fs.readFileSync('ssl/cert.pem'),
 }, app);
 
 bot.on('message', async msg => {
