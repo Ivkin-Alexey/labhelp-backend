@@ -12,18 +12,22 @@ const BotAnswers = require("./methods/botAnswers");
 const BotQuestions = require("./methods/botQuestions");
 const {updateUserData, getUserData} = require("./methods/updateDb");
 const path = require("path");
-const adminChatId = constants.adminsChatId.rybchenkoSvetlana;
+const adminChatId = constants.adminsChatId.alexeyIvkin;
 let users = require('./assets/db/db_users.json');
+const Process = require("process");
 
 process.on('uncaughtException', function (err) {
     console.log(err);
 });
 
+
+
 process.traceDeprecation = true;
 const app = express();
 const PORT = 8000;
-const token = process.env.TELEGRAM_TOKEN;
+const token = Process.env.TELEGRAM_TOKEN;
 const bot = new TelegramBot(token, {polling: true});
+
 app.use(express.json());
 app.use(cors());
 const httpServer = http.createServer(app);
@@ -172,11 +176,14 @@ app.get('/web-data', async (req, res) => {
 });
 
 
-httpServer.listen(80, () => {
-    console.log('HTTP Server running on port 80');
-});
+// app.listen(PORT, () => {
+//     console.log(`HTTP Server running on port ${PORT}`);
+// });
+
+httpServer.listen(PORT, () => {
+    console.log(`HTTP Server running on port ${PORT}`);
+})
 
 httpsServer.listen(443, () => {
-    console.log('HTTPS Server running on port 443');
-});
-
+    console.log(`HTTP Server running on port ${443}`);
+})
