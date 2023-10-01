@@ -154,7 +154,9 @@ bot.on('callback_query', async ctx => {
 
 app.post('/web-data', async (req, res) => {
     const {queryId, formData} = req.body;
-    console.log(req, res);
+    console.log(req.body);
+
+
     try {
         await bot.answerWebAppQuery(queryId, {
             type: 'article',
