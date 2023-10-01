@@ -13,8 +13,6 @@ const BotQuestions = require("./methods/botQuestions");
 const {updateUserData, getUserData} = require("./methods/updateDb");
 const path = require("path");
 const adminChatId = constants.adminsChatId.alexeyIvkin;
-let users = require('./assets/db/db_users.json');
-const Process = require("process");
 
 process.on('uncaughtException', function (err) {
     console.log(err);
@@ -25,7 +23,7 @@ process.on('uncaughtException', function (err) {
 process.traceDeprecation = true;
 const app = express();
 const PORT = 8000;
-const token = Process.env.TELEGRAM_TOKEN;
+const token = process.env.TELEGRAM_TOKEN;
 const bot = new TelegramBot(token, {polling: true});
 
 app.use(express.json());

@@ -2,8 +2,8 @@ const {writeFile, readFile, readFileSync} = require("fs");
 const path = require("path");
 const BotAnswers = require("./botAnswers");
 const jsonPath = path.join(__dirname, '..', 'assets', 'db', 'db.json');
-const newJsonPath = path.join(__dirname, '..', 'assets', 'db', 'db_users.json');
-const users = require(newJsonPath);
+// const newJsonPath = path.join(__dirname, '..', 'assets', 'db', 'db_users.json');
+const users = require(jsonPath);
 const fs = require("fs");
 const md5 = require('md5');
 
@@ -20,13 +20,13 @@ const user = {
 
 let md5Previous = null;
 let fsWait = false;
-fs.watch(newJsonPath, (event, filename) => {
+fs.watch(jsonPath, (event, filename) => {
     if (filename) {
         if (fsWait) return;
         fsWait = setTimeout(() => {
             fsWait = false;
         }, 100);
-        const md5Current = md5(fs.readFileSync(newJsonPath));
+        const md5Current = md5(fs.readFileSync(jsonPath));
         if (md5Current === md5Previous) {
             return;
         }
@@ -100,7 +100,7 @@ async function updateUserData(chatId, userData) {
 
             console.log(users);
 
-            writeFile(newJsonPath, JSON.stringify(users, null, 2), (error) => {
+            writeFile(jsonPath, JSON.stringify(users, null, 2), (error) => {
                 if (error) {
                     console.log(error);
                     reject(`Ошибка записи данных на сервере: ${error}. Сообщите о ней администратору`);
