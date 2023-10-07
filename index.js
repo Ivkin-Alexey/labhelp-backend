@@ -5,11 +5,13 @@ const cors = require('cors');
 const fs = require("fs");
 const https = require('https');
 const http = require('http');
-const webAppUrl = 'https://frolicking-kleicha-94863e.netlify.app/';
+
 // const localisations = require("./localisations.js");
 const {stickers, smiles, researchTopics, constants} = require("./assets/constants");
 const BotAnswers = require("./methods/botAnswers");
+const BotQuestionsToCEO = require("./methods/botQuestionsToCEO");
 const BotQuestions = require("./methods/botQuestions");
+
 const {updateUserData, getUserData} = require("./methods/updateDb");
 const path = require("path");
 const adminChatId = constants.adminsChatId.alexeyIvkin;
@@ -35,6 +37,7 @@ const httpsServer = https.createServer({
 }, app);
 
 bot.on('message', async msg => {
+    console.log(msg);
     const chatId = msg.chat.id;
     const text = msg.text;
     const {first_name, last_name} = msg.chat;
@@ -104,11 +107,13 @@ bot.on('message', async msg => {
 bot.on('callback_query', async ctx => {
     const chatId = ctx.message.chat.id;
     const messageData = ctx.data;
+    console.log(ctx);
 
     try {
         switch (messageData) {
             case "Yes":
                 await bot.sendSticker(chatId, stickers.agree);
+                await BotQuestions.askUserPosition(bot, chatId);
                 await BotAnswers.sendResearches(bot, chatId);
                 break;
             case "No":
@@ -126,6 +131,10 @@ bot.on('callback_query', async ctx => {
             case "postgraduate":
                 await updateUserData(chatId, {position: "аспирант"});
                 await BotQuestions.askEducationYear(bot, chatId);
+                break;
+            case "userIsAdvisor":
+                await updateUserData(chatId, {position: "аспирант"});
+                await BotQuestionsToCEO.askIsUserAdvisor(bot, chatId);
                 break;
             case "adminConfirmUser":
                 await bot.sendMessage(adminChatId, "Данные сохранены на сервере");

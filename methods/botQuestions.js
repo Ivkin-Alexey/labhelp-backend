@@ -1,13 +1,13 @@
-const {stickers, constants} = require("../assets/constants");
+const {stickers, constants, webAppUrl} = require("../assets/constants");
 const {updateUserData} = require("./updateDb");
 
 async function askUserPosition(bot, chatId) {
     await bot.sendMessage(chatId, "Выбери категорию обучающегося: ", {
         reply_markup: {
             inline_keyboard: [
-                [{text: 'Бакалавр', callback_data: "bachelor"}],
-                [{text: 'Магистр', callback_data: "master"}],
-                [{text: 'Аспирант', callback_data: "postgraduate"}],
+                [{text: 'Бакалавр', callback_data: "bachelor", web_app: {url: webAppUrl}}],
+                [{text: 'Магистр', callback_data: "master", web_app: {url: webAppUrl}}],
+                [{text: 'Аспирант', callback_data: "postgraduate", web_app: {url: webAppUrl}}],
             ]
         },
     })
