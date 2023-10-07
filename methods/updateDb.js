@@ -86,7 +86,6 @@ async function updateUserData(chatId, userData) {
         //     console.log(parsedData);
         //
 
-        console.log(users);
             if (users[chatId]) {
                 for (let field in userData) {
                     users[chatId][field] = userData[field];
@@ -97,8 +96,6 @@ async function updateUserData(chatId, userData) {
                     users[chatId][field] = userData[field];
                 }
             }
-
-            console.log(users);
 
             writeFile(jsonPath, JSON.stringify(users, null, 2), (error) => {
                 if (error) {
