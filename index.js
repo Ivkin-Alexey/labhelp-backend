@@ -5,6 +5,7 @@ const cors = require('cors');
 const fs = require("fs");
 const https = require('https');
 const http = require('http');
+const userList = require('./assets/db/db.json');
 
 // const localisations = require("./localisations.js");
 const {stickers, smiles, researchTopics, constants} = require("./assets/constants");
@@ -185,10 +186,9 @@ app.get('/web-data', async (req, res) => {
     return res.status(200).json('Привет');
 });
 
-
-// app.listen(PORT, () => {
-//     console.log(`HTTP Server running on port ${PORT}`);
-// });
+app.get('/users', async (req, res) => {
+    return res.status(200).json(userList);
+});
 
 httpServer.listen(PORT, () => {
     console.log(`HTTP Server running on port ${PORT}`);
