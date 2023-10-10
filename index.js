@@ -21,8 +21,6 @@ process.on('uncaughtException', function (err) {
     console.log(err);
 });
 
-
-
 process.traceDeprecation = true;
 const app = express();
 const PORT = 8000;
@@ -38,8 +36,7 @@ const httpsServer = https.createServer({
 }, app);
 
 bot.on('message', async msg => {
-    console.log(msg);
-    const chatId = msg.chat.id;
+    const chatID = msg.chat.id;
     const text = msg.text;
     const {first_name, last_name} = msg.chat;
     const researchTopic = text.replace(smiles.researches, '');
@@ -55,41 +52,41 @@ bot.on('message', async msg => {
     try {
         switch (text) {
             case "❌ Закрыть меню":
-                await bot.sendMessage(chatId, 'Меню закрыто', {
+                await bot.sendMessage(chatID, 'Меню закрыто', {
                     reply_markup: {
                         remove_keyboard: true
                     }
                 })
                 break;
             case "/start":
-                // await checkIsUserData(bot, chatId);
-                await BotAnswers.sendStartMessage(bot, chatId, first_name, last_name);
-                await updateUserData(chatId, {first_name, last_name});
+                // await checkIsUserData(bot, chatID);
+                await BotAnswers.sendStartMessage(bot, chatID, first_name, last_name);
+                await updateUserData(chatID, {firstName: first_name, lastName: last_name, chatID});
                 break;
             case "/researches":
-                await BotAnswers.sendResearches(bot, chatId);
+                await BotAnswers.sendResearches(bot, chatID);
                 break;
             case "/get_chat_id":
-                await bot.sendMessage(chatId, 'Чат ID: ' + chatId);
+                await bot.sendMessage(chatID, 'Чат ID: ' + chatID);
                 break;
             case "/get_my_data":
-                await getUserData(chatId).then(res => BotAnswers.sendUserData(bot, chatId, res));
+                await getUserData(chatID).then(res => BotAnswers.sendUserData(bot, chatID, res));
                 break;
             case researchBtnText:
-                await BotAnswers.sendResearch(bot, chatId, researchTopic);
-                await updateUserData(chatId, {research: researchTopic});
+                await BotAnswers.sendResearch(bot, chatID, researchTopic);
+                await updateUserData(chatID, {research: researchTopic});
                 break;
             case studyGroup:
-                await BotQuestions.askPhoneNumber(bot, chatId);
-                await updateUserData(chatId, {study: studyGroup});
+                await BotQuestions.askPhoneNumber(bot, chatID);
+                await updateUserData(chatID, {study: studyGroup});
                 break;
             case phone:
-                await updateUserData(chatId, {phone})
-                    // .then(userData => BotAnswers.sendUserData(bot, chatId, userData))
-                    // .catch(err => bot.sendMessage(chatId, err));
+                await updateUserData(chatID, {phone})
+                    // .then(userData => BotAnswers.sendUserData(bot, chatID, userData))
+                    // .catch(err => bot.sendMessage(chatID, err));
                 break;
             default:
-                await BotAnswers.sendConfusedMessage(bot, chatId);
+                await BotAnswers.sendConfusedMessage(bot, chatID);
         }
     } catch (e) {
         console.log(e);
@@ -98,7 +95,7 @@ bot.on('message', async msg => {
     // if (msg?.web_app_data?.data) {
     //     try {
     //         const data = JSON.parse(msg?.web_app_data?.data)git
-    //         await bot.sendMessage(chatId, 'Спасибо за обратную связь!' + JSON.stringify(data));
+    //         await bot.sendMessage(chatID, 'Спасибо за обратную связь!' + JSON.stringify(data));
     //     } catch (e) {
     //         console.log(e);
     //     }
@@ -106,55 +103,54 @@ bot.on('message', async msg => {
 });
 
 bot.on('callback_query', async ctx => {
-    const chatId = ctx.message.chat.id;
+    const chatID = ctx.message.chat.id;
     const messageData = ctx.data;
-    console.log(ctx);
 
     try {
         switch (messageData) {
             case "Yes":
-                await bot.sendSticker(chatId, stickers.agree);
-                await BotQuestions.askUserPosition(bot, chatId);
-                await BotAnswers.sendResearches(bot, chatId);
+                await bot.sendSticker(chatID, stickers.agree);
+                await BotQuestions.askUserPosition(bot, chatID);
+                await BotAnswers.sendResearches(bot, chatID);
                 break;
             case "No":
-                await bot.sendSticker(chatId, stickers.disagree);
+                await bot.sendSticker(chatID, stickers.disagree);
                 break;
             case "joinUs":
-                await bot.sendSticker(chatId, stickers.ok);
-                await BotQuestions.askUserPosition(bot, chatId);
+                await bot.sendSticker(chatID, stickers.ok);
+                await BotQuestions.askUserPosition(bot, chatID);
                 break;
             case "bachelor":
             case "master":
-                await updateUserData(chatId, {position: messageData === "bachelor" ? "бакалавр" : "магистр"});
-                await BotQuestions.askEducationalGroup(bot, chatId);
+                await updateUserData(chatID, {position: messageData === "bachelor" ? "бакалавр" : "магистр"});
+                await BotQuestions.askEducationalGroup(bot, chatID);
                 break;
             case "postgraduate":
-                await updateUserData(chatId, {position: "аспирант"});
-                await BotQuestions.askEducationYear(bot, chatId);
+                await updateUserData(chatID, {position: "аспирант"});
+                await BotQuestions.askEducationYear(bot, chatID);
                 break;
             case "userIsAdvisor":
-                await updateUserData(chatId, {position: "аспирант"});
-                await BotQuestionsToCEO.askIsUserAdvisor(bot, chatId);
+                await updateUserData(chatID, {position: "аспирант"});
+                await BotQuestionsToCEO.askIsUserAdvisor(bot, chatID);
                 break;
             case "adminConfirmUser":
                 await bot.sendMessage(adminChatId, "Данные сохранены на сервере");
                 break;
             case "userConfirmData":
-                await getUserData(chatId).then(userData => BotQuestions.askConfirmNewUser(bot, adminChatId, userData));
+                await getUserData(chatID).then(userData => BotQuestions.askConfirmNewUser(bot, adminChatId, userData));
                 break;
             case "adminDoesntConfirmUser":
                 await bot.sendMessage(adminChatId, "Заявка отменена")
                 break;
             case "userWantToEditData":
-                await getUserData(chatId).then(userData => BotQuestions.askWhichFieldNeedToEdit(bot, chatId, userData));
+                await getUserData(chatID).then(userData => BotQuestions.askWhichFieldNeedToEdit(bot, chatID, userData));
                 break;
             case "1EducationYear":
             case "2EducationYear":
             case "3EducationYear":
             case "4EducationYear":
-                await updateUserData(chatId, {study: messageData[0] + " год обучения"});
-                await BotQuestions.askPhoneNumber(bot, chatId);
+                await updateUserData(chatID, {study: messageData[0] + " год обучения"});
+                await BotQuestions.askPhoneNumber(bot, chatID);
                 break;
         }
     } catch (error) {

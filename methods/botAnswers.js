@@ -4,9 +4,9 @@ const fs = require("fs");
 
 const {getUserData} = require("./updateDb");
 
-async function sendStartMessage(bot, chatId, first_name, last_name) {
-    await bot.sendSticker(chatId, stickers.hello);
-    await bot.sendMessage(chatId, `Привет ${last_name} ${first_name}! ` + localisations.startMessage, {
+async function sendStartMessage(bot, chatID, first_name, last_name) {
+    await bot.sendSticker(chatID, stickers.hello);
+    await bot.sendMessage(chatID, `Привет ${last_name} ${first_name}! ` + localisations.startMessage, {
         reply_markup: {
             inline_keyboard: [
                 [{text: 'Да', callback_data: "Yes"}, {text: 'Нет', callback_data: "No"}],
@@ -15,9 +15,9 @@ async function sendStartMessage(bot, chatId, first_name, last_name) {
     })
 }
 
-async function sendResearches(bot, chatId) {
+async function sendResearches(bot, chatID) {
     const keyboard = [...keyboards.researches, ['❌ Закрыть меню']];
-    await bot.sendMessage(chatId, localisations.selectResearches, {
+    await bot.sendMessage(chatID, localisations.selectResearches, {
         reply_markup: {
             keyboard,
         },
@@ -25,13 +25,13 @@ async function sendResearches(bot, chatId) {
     })
 }
 
-async function sendResearch(bot, chatId, researchTopic) {
+async function sendResearch(bot, chatID, researchTopic) {
     const research = researches.find(el => el.name === researchTopic);
     const {id, degree, advisor} = research;
     const imageStream = fs.createReadStream(`./assets/images/${id}.jpg`);
-    await bot.sendPhoto(chatId, imageStream);
-    await bot.sendMessage(chatId, "Руководитель направления: " + degree + " " + advisor,);
-    await bot.sendMessage(chatId, "Описание направления. Описание направления. Описание направления. Описание направления.", {
+    await bot.sendPhoto(chatID, imageStream);
+    await bot.sendMessage(chatID, "Руководитель направления: " + degree + " " + advisor,);
+    await bot.sendMessage(chatID, "Описание направления. Описание направления. Описание направления. Описание направления.", {
         reply_markup: {
             inline_keyboard: [
                 [{text: 'Присоединиться', callback_data: "joinUs"}],
@@ -41,14 +41,14 @@ async function sendResearch(bot, chatId, researchTopic) {
     })
 }
 
-async function sendConfusedMessage(bot, chatId) {
-    await bot.sendSticker(chatId, stickers.unknown);
-    await bot.sendMessage(chatId, localisations.iDontUnderstand);
+async function sendConfusedMessage(bot, chatID) {
+    await bot.sendSticker(chatID, stickers.unknown);
+    await bot.sendMessage(chatID, localisations.iDontUnderstand);
 }
 
-async function sendUserData(bot, chatId, userData) {
+async function sendUserData(bot, chatID, userData) {
     const {first_name, last_name,phone, position, study, research} = userData;
-    await bot.sendMessage(chatId,
+    await bot.sendMessage(chatID,
         `Мои данные: \n${research}\n${position}, ${study}\n${last_name} ${first_name}\n${phone}`, {
             reply_markup: {
                 inline_keyboard: [

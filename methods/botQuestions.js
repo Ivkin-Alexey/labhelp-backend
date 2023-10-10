@@ -1,8 +1,8 @@
 const {stickers, constants, webAppUrl} = require("../assets/constants");
 const {updateUserData} = require("./updateDb");
 
-async function askUserPosition(bot, chatId) {
-    await bot.sendMessage(chatId, "Выбери категорию обучающегося: ", {
+async function askUserPosition(bot, chatID) {
+    await bot.sendMessage(chatID, "Выбери категорию обучающегося: ", {
         reply_markup: {
             inline_keyboard: [
                 [{text: 'Бакалавр', callback_data: "bachelor", web_app: {url: webAppUrl}}],
@@ -13,8 +13,8 @@ async function askUserPosition(bot, chatId) {
     })
 }
 
-async function askEducationYear(bot, chatId) {
-    await bot.sendMessage(chatId, "Выбери свой год обучения: ", {
+async function askEducationYear(bot, chatID) {
+    await bot.sendMessage(chatID, "Выбери свой год обучения: ", {
         reply_markup: {
             inline_keyboard: [
                 [{text: '1', callback_data: "1EducationYear"}, {text: '2', callback_data: "2EducationYear"}],
@@ -24,20 +24,19 @@ async function askEducationYear(bot, chatId) {
     })
 }
 
-async function askEducationalGroup(bot, chatId) {
-    const prompt = await bot.sendMessage(chatId, "Напиши название своей учебной группы, например, \"ТХ-10-1\"", {
+async function askEducationalGroup(bot, chatID) {
+    const prompt = await bot.sendMessage(chatID, "Напиши название своей учебной группы, например, \"ТХ-10-1\"", {
         reply_markup: {
             force_reply: true,
         },
     });
-    bot.onReplyToMessage(chatId, prompt.message_id, async function (answer) {
-        console.log(answer);
-        await updateUserData(chatId, {study: answer.text});
+    bot.onReplyToMessage(chatID, prompt.message_id, async function (answer) {
+        await updateUserData(chatID, {study: answer.text});
             });
 }
 
-async function askPhoneNumber(bot, chatId) {
-    await bot.sendMessage(chatId, "Напиши свой номер телефона в формате  \"+79876543210\"");
+async function askPhoneNumber(bot, chatID) {
+    await bot.sendMessage(chatID, "Напиши свой номер телефона в формате  \"+79876543210\"");
 }
 
 async function askConfirmNewUser(bot, adminChatId, userData) {
@@ -53,12 +52,12 @@ async function askConfirmNewUser(bot, adminChatId, userData) {
     });
 }
 
-async function askWhichFieldNeedToEdit(bot, chatId, userLocalData) {
+async function askWhichFieldNeedToEdit(bot, chatID, userLocalData) {
     let keyboard = [];
     for(let field in userLocalData) {
         keyboard.push([{text: userLocalData[field], callback_data: "userWantToEdit_" + field}])
     }
-    await bot.sendMessage(chatId, "Какие данные редактировать?", {
+    await bot.sendMessage(chatID, "Какие данные редактировать?", {
         reply_markup: {
             inline_keyboard: keyboard
         },

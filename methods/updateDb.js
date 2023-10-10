@@ -7,15 +7,17 @@ const users = require(jsonPath);
 const fs = require("fs");
 const md5 = require('md5');
 
-const user = {
-    first_name: "",
-    last_name: "",
-    // patronymic: "",
+const newUser = {
+    chatID: "",
+    firstName: "",
+    lastName: "",
+    patronymic: "",
     phone: "",
     position: "",
-    studyGroup: "",
+    study: "",
     research: "",
-    type: "user"
+    type: "user",
+    otherInfo: ""
 }
 
 let md5Previous = null;
@@ -36,87 +38,60 @@ fs.watch(jsonPath, (event, filename) => {
     }
 });
 
-async function setAdmin(chatId) {
-
-}
-
-// async function updateUserData(chatId, userData) {
-//
-//     return new Promise((resolve, reject) => {
-//
-//         readFile(jsonPath, (error, data) => {
-//             if (error) {
-//                 reject(`Ошибка чтения данных на сервере: ${error}. Сообщите о ней администратору`);
-//                 return;
-//             }
-//             let parsedData = JSON.parse(Buffer.from(data));
-//
-//             if (parsedData[chatId]) {
-//                 for (let field in userData) {
-//                     parsedData[chatId][field] = userData[field];
-//                 }
-//             } else {
-//                 parsedData[chatId] = user;
-//                 for (let field in userData) {
-//                     parsedData[chatId][field] = userData[field];
-//                 }
-//             }
-//
-//         writeFile(jsonPath, JSON.stringify(parsedData, null, 2), (error) => {
-//             if (error) {
-//                 console.log(error);
-//                 reject(`Ошибка записи данных на сервере: ${error}. Сообщите о ней администратору`);
-//                 return;
-//             }
-//             resolve(parsedData[chatId]);
-//         });
-//         })
-// })}
-
-async function updateUserData(chatId, userData) {
+async function updateUserData(chatID, userData) {
 
     return new Promise((resolve, reject) => {
 
-        // readFile(jsPath, 'utf8', (error, data) => {
-        //     if (error) {
-        //         reject(`Ошибка чтения данных на сервере: ${error}. Сообщите о ней администратору`);
-        //         return;
-        //     }
-        //     let parsedData = data;
-        //     console.log(parsedData);
-        //
-
-            if (users[chatId]) {
-                for (let field in userData) {
-                    users[chatId][field] = userData[field];
-                }
-            } else {
-                users[chatId] = user;
-                for (let field in userData) {
-                    users[chatId][field] = userData[field];
-                }
+        readFile(jsonPath, 'utf8', (error, data) => {
+            if (error) {
+                reject(`Ошибка чтения данных на сервере: ${error}. Сообщите о ней администратору`);
+                return;
             }
 
-            writeFile(jsonPath, JSON.stringify(users, null, 2), (error) => {
+            let parsedData = JSON.parse(Buffer.from(data));
+            let isNewUser = true;
+            parsedData = parsedData.map(el => {
+                if(el.chatID === chatID) {
+                    for (let field in userData) {
+                        el[field] = userData[field];
+                    }
+                    isNewUser = false;
+                }
+                return el;
+            })
+
+            if(isNewUser) {
+                for (let field in userData) {
+                    newUser[field] = userData[field];
+                }
+                parsedData.push(newUser);
+            }
+
+            writeFile(jsonPath, JSON.stringify(parsedData, null, 2), (error) => {
                 if (error) {
                     console.log(error);
                     reject(`Ошибка записи данных на сервере: ${error}. Сообщите о ней администратору`);
                     return;
                 }
-                resolve(users[chatId]);
+                resolve(newUser);
             });
         })
-    // })
+    })
 }
 
-async function getUserData(chatId) {
+async function getUserData(chatID) {
     const file = await readFileSync(jsonPath);
-    return JSON.parse(Buffer.from(file))[chatId];
+    return JSON.parse(Buffer.from(file))[chatID];
 }
 
-// async function checkIsUserData(chatId) {
-//     await getUserData(chatId).then(res => BotAnswers.sendUserData(bot, chatId, res));
-//     await updateUserData(chatId, {first_name, last_name});
+// function getArrayOfUsers() {
+//     const userList  = JSON.parse(users);
+//     const arr = [];
+//     for (const user in userList) {
+//
+//         arr.push(user)
+//     }
+//     return
 // }
 
 module.exports = {updateUserData, getUserData}
