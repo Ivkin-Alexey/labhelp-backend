@@ -51,7 +51,7 @@ async function updateUserData(chatID, userData) {
             let parsedData = JSON.parse(Buffer.from(data));
             let isNewUser = true;
             parsedData = parsedData.map(el => {
-                if(el.chatID === chatID) {
+                if (el.chatID === chatID) {
                     for (let field in userData) {
                         el[field] = userData[field];
                     }
@@ -60,7 +60,7 @@ async function updateUserData(chatID, userData) {
                 return el;
             })
 
-            if(isNewUser) {
+            if (isNewUser) {
                 for (let field in userData) {
                     newUser[field] = userData[field];
                 }
@@ -84,15 +84,17 @@ async function getUserData(chatID) {
     return JSON.parse(Buffer.from(file))[chatID];
 }
 
-// function getArrayOfUsers() {
-//     const userList  = JSON.parse(users);
-//     const arr = [];
-//     for (const user in userList) {
-//
-//         arr.push(user)
-//     }
-//     return
-// }
+function getUsersList() {
+    return new Promise((resolve, reject) => {
+        readFile(jsonPath, 'utf8', (error, data) => {
+            if (error) {
+                reject(`Ошибка чтения данных на сервере: ${error}. Сообщите о ней администратору`);
+                return;
+            }
+            resolve(JSON.parse(Buffer.from(data)));
+        })
+    })
+}
 
-module.exports = {updateUserData, getUserData}
+module.exports = {updateUserData, getUserData, getUsersList}
 

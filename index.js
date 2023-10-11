@@ -13,7 +13,7 @@ const BotAnswers = require("./methods/botAnswers");
 const BotQuestionsToCEO = require("./methods/botQuestionsToCEO");
 const BotQuestions = require("./methods/botQuestions");
 
-const {updateUserData, getUserData} = require("./methods/updateDb");
+const {updateUserData, getUserData, getUsersList} = require("./methods/updateDb");
 const path = require("path");
 const adminChatId = constants.adminsChatId.alexeyIvkin;
 
@@ -183,7 +183,7 @@ app.get('/web-data', async (req, res) => {
 });
 
 app.get('/users', async (req, res) => {
-    return res.status(200).json(userList);
+    return await getUsersList().then(userList => res.status(200).json(userList))
 });
 
 httpServer.listen(PORT, () => {
