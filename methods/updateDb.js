@@ -17,7 +17,7 @@ const newUser = {
     study: "",
     research: "",
     type: "user",
-    otherInfo: ""
+    otherInfo: {registrationDate: "", isUserConfirmed: false, isUserDataSent: false}
 }
 
 let md5Previous = null;
@@ -38,8 +38,30 @@ fs.watch(jsonPath, (event, filename) => {
     }
 });
 
-async function updateUserData(chatID, userData) {
+async function updateNewUserFields() {
+    try {
+        readFile(jsonPath, 'utf8', (error, data) => {
+            if (error) {
+                console.log(error);
+                return;
+            }
+            let parsedData = JSON.parse(Buffer.from(data));
+            parsedData = parsedData.map(el => {
+                for (const key in newUser) {
+                    if (!el[key] || el[key] === "") el[key] = newUser[key]
+                }
+                return el
+            })
+            writeFile(jsonPath, JSON.stringify(parsedData, null, 2), (error) => {
+                if (error) console.log(error);
+            });
+        })
+    } catch (e) {
+        console.log(e);
+    }
+}
 
+async function updateUserData(chatID, userData) {
     return new Promise((resolve, reject) => {
 
         readFile(jsonPath, 'utf8', (error, data) => {
@@ -66,6 +88,7 @@ async function updateUserData(chatID, userData) {
                 }
                 parsedData.push(newUser);
             }
+
 
             writeFile(jsonPath, JSON.stringify(parsedData, null, 2), (error) => {
                 if (error) {
@@ -95,6 +118,8 @@ function getUsersList() {
         })
     })
 }
+
+// updateNewUserFields();
 
 module.exports = {updateUserData, getUserData, getUsersList}
 

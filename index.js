@@ -164,14 +164,14 @@ app.post('/updateUserData', async (req, res) => {
     const {queryId, formData, userChatID} = req.body;
     try {
         await updateUserData(+userChatID, formData);
-        await bot.answerWebAppQuery(queryId, {
-            type: 'article',
-            id: queryId,
-            title: 'Успешная покупка',
-            input_message_content: {
-                message_text: "Ваши данные обновлены",
-            }
-        })
+        // await bot.answerWebAppQuery(queryId, {
+        //     type: 'article',
+        //     id: queryId,
+        //     title: 'Успешная покупка',
+        //     input_message_content: {
+        //         message_text: "Ваши данные обновлены",
+        //     }
+        // })
         return res.status(200).json({formData});
     } catch (e) {
         return res.status(500).json({});
