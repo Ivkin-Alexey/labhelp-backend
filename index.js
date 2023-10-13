@@ -5,16 +5,12 @@ const cors = require('cors');
 const fs = require("fs");
 const https = require('https');
 const http = require('http');
-const userList = require('./assets/db/db.json');
-
-// const localisations = require("./localisations.js");
 const {stickers, smiles, researchTopics, constants} = require("./assets/constants");
 const BotAnswers = require("./methods/botAnswers");
 const BotQuestionsToCEO = require("./methods/botQuestionsToCEO");
 const BotQuestions = require("./methods/botQuestions");
 
 const {updateUserData, getUserData, getUsersList} = require("./methods/updateDb");
-const path = require("path");
 const adminChatId = constants.adminsChatId.alexeyIvkin;
 
 process.on('uncaughtException', function (err) {
@@ -36,22 +32,13 @@ const httpsServer = https.createServer({
 }, app);
 
 bot.on('message', async msg => {
-
     const chatID = msg.chat.id;
     const text = msg.text;
     const {first_name, last_name} = msg.chat;
     const researchTopic = text.replace(smiles.researches, '');
     const researchBtnText = researchTopics.includes(researchTopic) ? text : undefined;
-    const studyGroup = text.toLowerCase().includes("группа") ? text : undefined;
-    const phone = validatePhoneNumber(text) ? text : undefined;
-
-    function validatePhoneNumber(input_str) {
-        const re = /^\+?[1-9]\d{10}$/;
-        return re.test(input_str);
-    }
 
     try {
-        console.log(msg);
         switch (text) {
             case "❌ Закрыть меню":
                 await bot.sendMessage(chatID, 'Меню закрыто', {
@@ -61,7 +48,6 @@ bot.on('message', async msg => {
                 })
                 break;
             case "/start":
-                // await checkIsUserData(bot, chatID);
                 await BotAnswers.sendStartMessage(bot, chatID, first_name, last_name);
                 await updateUserData(chatID, {firstName: first_name, lastName: last_name, chatID});
                 break;
@@ -77,15 +63,6 @@ bot.on('message', async msg => {
             case researchBtnText:
                 await BotAnswers.sendResearch(bot, chatID, researchTopic);
                 await updateUserData(chatID, {research: researchTopic});
-                break;
-            case studyGroup:
-                await BotQuestions.askPhoneNumber(bot, chatID);
-                await updateUserData(chatID, {study: studyGroup});
-                break;
-            case phone:
-                await updateUserData(chatID, {phone})
-                    // .then(userData => BotAnswers.sendUserData(bot, chatID, userData))
-                    // .catch(err => bot.sendMessage(chatID, err));
                 break;
             default:
                 await BotAnswers.sendConfusedMessage(bot, chatID);
@@ -122,37 +99,11 @@ bot.on('callback_query', async ctx => {
                 await bot.sendSticker(chatID, stickers.ok);
                 await BotQuestions.askUserPosition(bot, chatID);
                 break;
-            case "bachelor":
-            case "master":
-                await updateUserData(chatID, {position: messageData === "bachelor" ? "бакалавр" : "магистр"});
-                await BotQuestions.askEducationalGroup(bot, chatID);
-                break;
-            case "postgraduate":
-                await updateUserData(chatID, {position: "аспирант"});
-                await BotQuestions.askEducationYear(bot, chatID);
-                break;
-            case "userIsAdvisor":
-                await updateUserData(chatID, {position: "аспирант"});
-                await BotQuestionsToCEO.askIsUserAdvisor(bot, chatID);
-                break;
             case "adminConfirmUser":
                 await bot.sendMessage(adminChatId, "Данные сохранены на сервере");
                 break;
-            case "userConfirmData":
-                await getUserData(chatID).then(userData => BotQuestions.askConfirmNewUser(bot, adminChatId, userData));
-                break;
             case "adminDoesntConfirmUser":
                 await bot.sendMessage(adminChatId, "Заявка отменена")
-                break;
-            case "userWantToEditData":
-                await getUserData(chatID).then(userData => BotQuestions.askWhichFieldNeedToEdit(bot, chatID, userData));
-                break;
-            case "1EducationYear":
-            case "2EducationYear":
-            case "3EducationYear":
-            case "4EducationYear":
-                await updateUserData(chatID, {study: messageData[0] + " год обучения"});
-                await BotQuestions.askPhoneNumber(bot, chatID);
                 break;
         }
     } catch (error) {
