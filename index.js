@@ -36,6 +36,7 @@ const httpsServer = https.createServer({
 }, app);
 
 bot.on('message', async msg => {
+    console.log(msg);
     const chatID = msg.chat.id;
     const text = msg.text;
     const {first_name, last_name} = msg.chat;
@@ -167,7 +168,7 @@ app.post('/updateUserData', async (req, res) => {
             id: queryId,
             title: 'Успешная покупка',
             input_message_content: {
-                message_text: "Данные обновлены",
+                message_text: "Ваши данные обновлены",
             }
         })
         return res.status(200).json({formData});
