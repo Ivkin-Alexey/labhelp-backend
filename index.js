@@ -36,7 +36,7 @@ const httpsServer = https.createServer({
 }, app);
 
 bot.on('message', async msg => {
-    console.log(msg);
+
     const chatID = msg.chat.id;
     const text = msg.text;
     const {first_name, last_name} = msg.chat;
@@ -51,6 +51,7 @@ bot.on('message', async msg => {
     }
 
     try {
+        console.log(msg);
         switch (text) {
             case "❌ Закрыть меню":
                 await bot.sendMessage(chatID, 'Меню закрыто', {
