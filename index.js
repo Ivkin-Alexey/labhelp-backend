@@ -158,26 +158,25 @@ bot.on('callback_query', async ctx => {
     }
 });
 
-app.post('/web-data', async (req, res) => {
-    const {queryId, formData} = req.body;
-    // console.log(req, res, formData);
+app.post('/updateUserData', async (req, res) => {
+    const {queryId, formData, userChatID} = req.body;
     try {
-        // await updateUserData(chatID, formData);
+        await updateUserData(userChatID, formData);
         await bot.answerWebAppQuery(queryId, {
             type: 'article',
             id: queryId,
             title: 'Успешная покупка',
             input_message_content: {
-                message_text: `Следующие данные отправлены: ${JSON.stringify(req, res, formData)}`,
+                message_text: "Данные обновлены",
             }
         })
-        return res.status(200).json({queryId});
+        return res.status(200).json({formData});
     } catch (e) {
         return res.status(500).json({});
     }
 });
 
-app.get('/web-data', async (req, res) => {
+app.get('/hello', async (req, res) => {
     return res.status(200).json('Привет');
 });
 
