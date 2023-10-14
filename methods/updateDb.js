@@ -61,6 +61,10 @@ async function updateNewUserFields() {
     }
 }
 
+async function confirmUser(chatID) {
+    updateUserData(chatID, {otherInfo: {registrationDate: "", isUserConfirmed: true, isUserDataSent: false}})
+}
+
 async function updateUserData(chatID, userData) {
     return new Promise((resolve, reject) => {
 
@@ -77,6 +81,7 @@ async function updateUserData(chatID, userData) {
                     for (let field in userData) {
                         el[field] = userData[field];
                     }
+                    // el.otherInfo.isUserDataSent = checkIsAllFieldsComplete(el);
                     isNewUser = false;
                 }
                 return el;
@@ -88,7 +93,6 @@ async function updateUserData(chatID, userData) {
                 }
                 parsedData.push(newUser);
             }
-
 
             writeFile(jsonPath, JSON.stringify(parsedData, null, 2), (error) => {
                 if (error) {

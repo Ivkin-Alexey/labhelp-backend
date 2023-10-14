@@ -1,4 +1,4 @@
-const {keyboards, stickers, researches} = require("../assets/constants");
+const {keyboards, stickers, researches, webAppUrl} = require("../assets/constants");
 const localisations = require("../localisations");
 const fs = require("fs");
 
@@ -9,7 +9,10 @@ async function sendStartMessage(bot, chatID, first_name, last_name) {
     await bot.sendMessage(chatID, `Привет ${last_name} ${first_name}! ` + localisations.startMessage, {
         reply_markup: {
             inline_keyboard: [
-                [{text: 'Да', callback_data: "Yes"}, {text: 'Нет', callback_data: "No"}],
+                [
+                    {text: 'Да', callback_data: JSON.stringify({userAnswer: "Yes"})},
+                    {text: 'Нет', callback_data: JSON.stringify({userAnswer: "No"})}
+                ],
             ]
         }
     })
@@ -26,6 +29,7 @@ async function sendResearches(bot, chatID) {
 }
 
 async function sendResearch(bot, chatID, researchTopic) {
+    const editProfileUrl = webAppUrl + `/${chatID}/editProfile`;
     const research = researches.find(el => el.name === researchTopic);
     const {id, degree, advisor} = research;
     const imageStream = fs.createReadStream(`./assets/images/${id}.jpg`);
@@ -34,10 +38,10 @@ async function sendResearch(bot, chatID, researchTopic) {
     await bot.sendMessage(chatID, "Описание направления. Описание направления. Описание направления. Описание направления.", {
         reply_markup: {
             inline_keyboard: [
-                [{text: 'Присоединиться', callback_data: "joinUs"}],
+                [{text: 'Присоединиться', web_app: {url: editProfileUrl}}],
             ]
         },
-        disable_notification: true
+        disable_notification: true,
     })
 }
 
@@ -52,8 +56,8 @@ async function sendUserData(bot, chatID, userData) {
         `Мои данные: \n${research}\n${position}, ${study}\n${last_name} ${first_name}\n${phone}`, {
             reply_markup: {
                 inline_keyboard: [
-                    [{text: 'Подтвердить', callback_data: "userConfirmData"}],
-                    [{text: 'Редактировать', callback_data: "userWantToEditData"}],
+                    [{text: 'Подтвердить', callback_data: JSON.stringify({userAnswer: "userConfirmData"})}],
+                    [{text: 'Редактировать', callback_data: JSON.stringify({userAnswer: "userWantToEditData"})}],
                 ]
             },
         });

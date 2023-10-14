@@ -9,6 +9,8 @@ const {stickers, smiles, researchTopics, constants} = require("./assets/constant
 const BotAnswers = require("./methods/botAnswers");
 const BotQuestionsToCEO = require("./methods/botQuestionsToCEO");
 const BotQuestions = require("./methods/botQuestions");
+const {checkTextIsResearch} = require("./methods/validation");
+const {processCallbackQuery} = require("./methods/callbackQueriesProcessing");
 
 const {updateUserData, getUserData, getUsersList} = require("./methods/updateDb");
 const adminChatId = constants.adminsChatId.alexeyIvkin;
@@ -18,9 +20,11 @@ process.on('uncaughtException', function (err) {
 });
 
 process.traceDeprecation = true;
+process.env.NTBA_FIX_350 = true;
 const app = express();
 const PORT = 8000;
 const token = process.env.TELEGRAM_TOKEN;
+
 const bot = new TelegramBot(token, {polling: true});
 
 app.use(express.json());
@@ -33,10 +37,10 @@ const httpsServer = https.createServer({
 
 bot.on('message', async msg => {
     const chatID = msg.chat.id;
-    const text = msg.text;
+    let text = msg.text;
     const {first_name, last_name} = msg.chat;
-    const researchTopic = text.replace(smiles.researches, '');
-    const researchBtnText = researchTopics.includes(researchTopic) ? text : undefined;
+    const isResearch = checkTextIsResearch(text);
+    if(isResearch) text = isResearch;
 
     try {
         switch (text) {
@@ -60,9 +64,9 @@ bot.on('message', async msg => {
             case "/get_my_data":
                 await getUserData(chatID).then(res => BotAnswers.sendUserData(bot, chatID, res));
                 break;
-            case researchBtnText:
-                await BotAnswers.sendResearch(bot, chatID, researchTopic);
-                await updateUserData(chatID, {research: researchTopic});
+            case isResearch:
+                await BotAnswers.sendResearch(bot, chatID, isResearch);
+                await updateUserData(chatID, {research: isResearch});
                 break;
             default:
                 await BotAnswers.sendConfusedMessage(bot, chatID);
@@ -83,27 +87,10 @@ bot.on('message', async msg => {
 
 bot.on('callback_query', async ctx => {
     const chatID = ctx.message.chat.id;
-    const messageData = ctx.data;
-
+    let messageData = JSON.parse(ctx.data);
+    console.log(messageData);
     try {
-        switch (messageData) {
-            case "Yes":
-                await bot.sendSticker(chatID, stickers.agree);
-                await BotAnswers.sendResearches(bot, chatID);
-                break;
-            case "No":
-                await bot.sendSticker(chatID, stickers.disagree);
-                break;
-            case "joinUs":
-                await bot.sendSticker(chatID, stickers.ok);
-                break;
-            case "adminConfirmUser":
-                await bot.sendMessage(adminChatId, "Данные сохранены на сервере");
-                break;
-            case "adminDoesntConfirmUser":
-                await bot.sendMessage(adminChatId, "Заявка отменена")
-                break;
-        }
+        await processCallbackQuery(bot, chatID, messageData);
     } catch (error) {
         console.log(error);
     }
