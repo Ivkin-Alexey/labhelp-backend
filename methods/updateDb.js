@@ -18,7 +18,7 @@ const newUser = {
     research: "",
     type: "user",
     otherInfo: {registrationDate: "", isUserConfirmed: false, isUserDataSent: false}
-}
+};
 
 let md5Previous = null;
 let fsWait = false;
@@ -81,7 +81,8 @@ async function updateUserData(chatID, userData) {
                     for (let field in userData) {
                         el[field] = userData[field];
                     }
-                    // el.otherInfo.isUserDataSent = checkIsAllFieldsComplete(el);
+                    el.otherInfo.isUserDataSent = checkIsAllFieldsComplete(el);
+                    if(el.otherInfo.isUserDataSent) el.otherInfo.registrationDate = createRegistrationDate();
                     isNewUser = false;
                 }
                 return el;
@@ -91,6 +92,8 @@ async function updateUserData(chatID, userData) {
                 for (let field in userData) {
                     newUser[field] = userData[field];
                 }
+                newUser.otherInfo.isUserDataSent = checkIsAllFieldsComplete(newUser);
+                if(newUser.otherInfo.isUserDataSent) newUser.otherInfo.registrationDate = createRegistrationDate();
                 parsedData.push(newUser);
             }
 
@@ -122,6 +125,23 @@ function getUsersList() {
         })
     })
 }
+
+function checkIsAllFieldsComplete(el) {
+    return !Object.values(el).some(el => el === "");
+}
+
+function createRegistrationDate() {
+    const date = new Date();
+    let day, month, year;
+    day = date.getDate();
+    if(+day<10) day= "0" + day;
+    month = +date.getMonth()+1;
+    if(+month<10) month= "0" + month;
+    year = date.getFullYear();
+    return day + "." + month + "." + year;
+}
+
+createRegistrationDate()
 
 // updateNewUserFields();
 
