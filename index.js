@@ -89,7 +89,6 @@ bot.on('callback_query', async ctx => {
         switch (messageData) {
             case "Yes":
                 await bot.sendSticker(chatID, stickers.agree);
-                await BotQuestions.askUserPosition(bot, chatID);
                 await BotAnswers.sendResearches(bot, chatID);
                 break;
             case "No":
@@ -97,7 +96,6 @@ bot.on('callback_query', async ctx => {
                 break;
             case "joinUs":
                 await bot.sendSticker(chatID, stickers.ok);
-                await BotQuestions.askUserPosition(bot, chatID);
                 break;
             case "adminConfirmUser":
                 await bot.sendMessage(adminChatId, "Данные сохранены на сервере");
