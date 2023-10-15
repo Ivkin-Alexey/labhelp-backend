@@ -126,6 +126,30 @@ function getUsersList() {
     })
 }
 
+async function deleteUser(chatID) {
+    return new Promise((resolve, reject) => {
+
+        readFile(jsonPath, 'utf8', (error, data) => {
+            if (error) {
+                reject(`Ошибка чтения данных на сервере: ${error}. Сообщите о ней администратору`);
+                return;
+            }
+
+            let parsedData = JSON.parse(Buffer.from(data));
+            parsedData = parsedData.filter(el => el.chatID !== chatID);
+
+            writeFile(jsonPath, JSON.stringify(parsedData, null, 2), (error) => {
+                if (error) {
+                    console.log(error);
+                    reject(`Ошибка записи данных на сервере: ${error}. Сообщите о ней администратору`);
+                    return;
+                }
+                resolve(`Пользователь с chatID ${chatID} был удалён`);
+            });
+        })
+    })
+}
+
 function checkIsAllFieldsComplete(el) {
     return !Object.values(el).some(el => el === "");
 }
@@ -141,9 +165,9 @@ function createRegistrationDate() {
     return day + "." + month + "." + year;
 }
 
-createRegistrationDate()
+createRegistrationDate();
 
 // updateNewUserFields();
 
-module.exports = {updateUserData, getUserData, getUsersList}
+module.exports = {updateUserData, getUserData, getUsersList, deleteUser}
 

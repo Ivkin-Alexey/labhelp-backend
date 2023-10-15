@@ -5,14 +5,12 @@ const cors = require('cors');
 const fs = require("fs");
 const https = require('https');
 const http = require('http');
-const {stickers, smiles, researchTopics, constants} = require("./assets/constants");
+const {constants} = require("./assets/constants");
 const BotAnswers = require("./methods/botAnswers");
-const BotQuestionsToCEO = require("./methods/botQuestionsToCEO");
-const BotQuestions = require("./methods/botQuestions");
 const {checkTextIsResearch} = require("./methods/validation");
 const {processCallbackQuery} = require("./methods/callbackQueriesProcessing");
 
-const {updateUserData, getUserData, getUsersList} = require("./methods/updateDb");
+const {updateUserData, getUserData, getUsersList, deleteUser} = require("./methods/updateDb");
 const adminChatId = constants.adminsChatId.alexeyIvkin;
 
 process.on('uncaughtException', function (err) {
@@ -109,6 +107,16 @@ app.post('/updateUserData', async (req, res) => {
         //     }
         // })
         return res.status(200).json({formData});
+    } catch (e) {
+        return res.status(500).json({});
+    }
+});
+
+app.post('/deleteUser', async (req, res) => {
+    const {chatID} = req.body;
+    try {
+        await deleteUser(+chatID);
+        return res.status(200).json("Пользователь " + chatID + " был удалён");
     } catch (e) {
         return res.status(500).json({});
     }
