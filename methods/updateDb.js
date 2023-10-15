@@ -61,6 +61,24 @@ async function updateNewUserFields() {
     }
 }
 
+async function deleteUsersWithEmptyChatID() {
+    try {
+        readFile(jsonPath, 'utf8', (error, data) => {
+            if (error) {
+                console.log(error);
+                return;
+            }
+            let parsedData = JSON.parse(Buffer.from(data));
+            parsedData = parsedData.filter(el => el.chatID !== "")
+            writeFile(jsonPath, JSON.stringify(parsedData, null, 2), (error) => {
+                if (error) console.log(error);
+            });
+        })
+    } catch (e) {
+        console.log(e);
+    }
+}
+
 async function confirmUser(chatID) {
     updateUserData(chatID, {otherInfo: {registrationDate: "", isUserConfirmed: true, isUserDataSent: false}})
 }
@@ -168,6 +186,7 @@ function createRegistrationDate() {
 createRegistrationDate();
 
 // updateNewUserFields();
+// deleteUsersWithEmptyChatID();
 
 module.exports = {updateUserData, getUserData, getUsersList, deleteUser}
 
