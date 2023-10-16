@@ -85,6 +85,11 @@ async function confirmUser(chatID) {
 
 async function updateUserData(chatID, userData) {
     return new Promise((resolve, reject) => {
+        console.log(chatID);
+        if(typeof chatID === "undefined" || typeof userData === "undefined") {
+            reject(`Ошибка. Отсутствуют необходимые данные`);
+            return;
+        }
 
         readFile(jsonPath, 'utf8', (error, data) => {
             if (error) {
@@ -95,7 +100,7 @@ async function updateUserData(chatID, userData) {
             let parsedData = JSON.parse(Buffer.from(data));
             let isNewUser = true;
             parsedData = parsedData.map(el => {
-                if (el.chatID === chatID) {
+                if (el.chatID === +chatID) {
                     for (let field in userData) {
                         el[field] = userData[field];
                     }
