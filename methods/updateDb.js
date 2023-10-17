@@ -83,9 +83,17 @@ async function confirmUser(chatID) {
     updateUserData(chatID, {otherInfo: {registrationDate: "", isUserConfirmed: true, isUserDataSent: false}})
 }
 
+async function addRandomUser(type = "user") {
+    let user = newUser;
+    user.chatID = Math.floor(100000000 + Math.random() * 900000000);
+    user.firstName = "Rayn";
+    user.lastName = "Gosling";
+    user.type = type;
+    await updateUserData(user.chatID, user);
+}
+
 async function updateUserData(chatID, userData) {
     return new Promise((resolve, reject) => {
-        console.log(chatID);
         if(typeof chatID === "undefined" || typeof userData === "undefined") {
             reject(`Ошибка. Отсутствуют необходимые данные`);
             return;
@@ -96,7 +104,6 @@ async function updateUserData(chatID, userData) {
                 reject(`Ошибка чтения данных на сервере: ${error}. Сообщите о ней администратору`);
                 return;
             }
-
             let parsedData = JSON.parse(Buffer.from(data));
             let isNewUser = true;
             parsedData = parsedData.map(el => {
@@ -193,5 +200,5 @@ createRegistrationDate();
 // updateNewUserFields();
 // deleteUsersWithEmptyChatID();
 
-module.exports = {updateUserData, getUserData, getUsersList, deleteUser}
+module.exports = {updateUserData, getUserData, getUsersList, deleteUser, addRandomUser}
 

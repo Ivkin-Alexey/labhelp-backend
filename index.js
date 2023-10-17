@@ -10,7 +10,7 @@ const BotAnswers = require("./methods/botAnswers");
 const {checkTextIsResearch} = require("./methods/validation");
 const {processCallbackQuery} = require("./methods/callbackQueriesProcessing");
 
-const {updateUserData, getUserData, getUsersList, deleteUser} = require("./methods/updateDb");
+const {updateUserData, getUserData, getUsersList, deleteUser, addRandomUser} = require("./methods/updateDb");
 const adminChatId = constants.adminsChatId.alexeyIvkin;
 
 process.on('uncaughtException', function (err) {
@@ -52,6 +52,15 @@ bot.on('message', async msg => {
             case "/start":
                 await BotAnswers.sendStartMessage(bot, chatID, first_name, last_name);
                 await updateUserData(chatID, {firstName: first_name, lastName: last_name, chatID});
+                break;
+            case "/addRandomUser":
+                await addRandomUser();
+                break;
+            case "/addRandomAdmin":
+                await addRandomUser("admin");
+                break;
+            case "/addRandomSuperAdmin":
+                await addRandomUser("superAdmin");
                 break;
             case "/researches":
                 await BotAnswers.sendResearches(bot, chatID);
