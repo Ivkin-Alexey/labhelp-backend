@@ -125,10 +125,9 @@ app.post('/updateUserData', async (req, res) => {
 app.post('/deleteUser', async (req, res) => {
     const {chatID} = req.body;
     try {
-        await deleteUser(+chatID);
-        return res.status(200).json("Пользователь " + chatID + " был удалён");
+        return await deleteUser(+chatID).then(userList => res.status(200).json(userList));
     } catch (e) {
-        return res.status(500).json({});
+        return res.status(500).json(e);
     }
 });
 
