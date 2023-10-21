@@ -6,19 +6,7 @@ const jsonPath = path.join(__dirname, '..', 'assets', 'db', 'db.json');
 const users = require(jsonPath);
 const fs = require("fs");
 const md5 = require('md5');
-
-const newUser = {
-    chatID: "",
-    firstName: "",
-    lastName: "",
-    patronymic: "",
-    phone: "",
-    position: "",
-    study: "",
-    research: "",
-    type: "user",
-    otherInfo: {registrationDate: "", isUserConfirmed: false, isUserDataSent: false}
-};
+const {newPerson, unRequiredPersonData} = require("../assets/constants");
 
 let md5Previous = null;
 let fsWait = false;
@@ -47,8 +35,8 @@ async function updateNewUserFields() {
             }
             let parsedData = JSON.parse(Buffer.from(data));
             parsedData = parsedData.map(el => {
-                for (const key in newUser) {
-                    if (!el[key] || el[key] === "") el[key] = newUser[key]
+                for (const key in newPerson) {
+                    if (!el[key] || el[key] === "") el[key] = newPerson[key]
                 }
                 return el
             })
@@ -84,7 +72,7 @@ async function confirmUser(chatID) {
 }
 
 async function addRandomUser(type = "user") {
-    let user = newUser;
+    let user = newPerson;
     user.chatID = Math.floor(100000000 + Math.random() * 900000000);
     user.firstName = "Rayn";
     user.lastName = "Gosling";
@@ -111,7 +99,7 @@ async function updateUserData(chatID, userData) {
             let parsedData = JSON.parse(Buffer.from(data));
             let isNewUser = true;
             parsedData = parsedData.map(el => {
-                if (el.chatID === +chatID) {
+                if (el.chatID === chatID) {
                     for (let field in userData) {
                         el[field] = userData[field];
                     }
@@ -124,11 +112,11 @@ async function updateUserData(chatID, userData) {
 
             if (isNewUser) {
                 for (let field in userData) {
-                    newUser[field] = userData[field];
+                    newPerson[field] = userData[field];
                 }
-                newUser.otherInfo.isUserDataSent = checkIsAllFieldsComplete(newUser);
-                if(newUser.otherInfo.isUserDataSent) newUser.otherInfo.registrationDate = createRegistrationDate();
-                parsedData.push(newUser);
+                newPerson.otherInfo.isUserDataSent = checkIsAllFieldsComplete(newPerson);
+                if(newPerson.otherInfo.isUserDataSent) newPerson.otherInfo.registrationDate = createRegistrationDate();
+                parsedData.push(newPerson);
             }
 
             writeFile(jsonPath, JSON.stringify(parsedData, null, 2), (error) => {
@@ -185,6 +173,9 @@ async function deleteUser(chatID) {
 }
 
 function checkIsAllFieldsComplete(el) {
+    unRequiredPersonData.forEach(field => {
+        delete el[field];
+    })
     return !Object.values(el).some(el => el === "");
 }
 

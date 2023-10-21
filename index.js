@@ -106,7 +106,7 @@ bot.on('callback_query', async ctx => {
 app.post('/updatePersonData', async (req, res) => {
     const {queryId, formData, chatID} = req.body;
     try {
-        return await updateUserData(chatID, formData)
+        return await updateUserData(+chatID, formData)
             .then(userList => res.status(200).json(userList));
         // await bot.answerWebAppQuery(queryId, {
         //     type: 'article',
