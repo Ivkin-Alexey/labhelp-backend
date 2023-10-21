@@ -80,7 +80,7 @@ async function deleteUsersWithEmptyChatID() {
 }
 
 async function confirmUser(chatID) {
-    updateUserData(chatID, {otherInfo: {registrationDate: "", isUserConfirmed: true, isUserDataSent: false}})
+    await updateUserData(chatID, {otherInfo: {registrationDate: "", isUserConfirmed: true, isUserDataSent: false}})
 }
 
 async function addRandomUser(type = "user") {
@@ -94,8 +94,12 @@ async function addRandomUser(type = "user") {
 
 async function updateUserData(chatID, userData) {
     return new Promise((resolve, reject) => {
-        if(typeof chatID === "undefined" || typeof userData === "undefined") {
-            reject(`Ошибка. Отсутствуют необходимые данные`);
+        if(typeof chatID === "undefined") {
+            reject(`Ошибка сервера. Полученное значение chatID: ${chatID}`);
+            return;
+        }
+        if(typeof userData === "undefined") {
+            reject(`Ошибка сервера. Полученное значение userData: ${userData}`);
             return;
         }
 
@@ -133,7 +137,7 @@ async function updateUserData(chatID, userData) {
                     reject(`Ошибка записи данных на сервере: ${error}. Сообщите о ней администратору`);
                     return;
                 }
-                resolve(newUser);
+                resolve(parsedData);
             });
         })
     })
@@ -174,7 +178,7 @@ async function deleteUser(chatID) {
                     reject(`Ошибка записи данных на сервере: ${error}. Сообщите о ней администратору`);
                     return;
                 }
-                resolve(`Пользователь с chatID ${chatID} был удалён`);
+                resolve(parsedData);
             });
         })
     })

@@ -10,7 +10,7 @@ const BotAnswers = require("./methods/botAnswers");
 const {checkTextIsResearch} = require("./methods/validation");
 const {processCallbackQuery} = require("./methods/callbackQueriesProcessing");
 
-const {updateUserData, getUserData, getUsersList, deleteUser, addRandomUser} = require("./methods/updateDb");
+const {updateUserData, getUserData, getUsersList: getUserList, deleteUser, addRandomUser} = require("./methods/updateDb");
 const adminChatId = constants.adminsChatId.alexeyIvkin;
 
 process.on('uncaughtException', function (err) {
@@ -38,7 +38,7 @@ bot.on('message', async msg => {
     let text = msg.text;
     const {first_name, last_name} = msg.chat;
     const isResearch = checkTextIsResearch(text);
-    if(isResearch) text = isResearch;
+    if (isResearch) text = isResearch;
 
     try {
         switch (text) {
@@ -103,11 +103,11 @@ bot.on('callback_query', async ctx => {
     }
 });
 
-app.post('/updateUserData', async (req, res) => {
+app.post('/updatePersonData', async (req, res) => {
     const {queryId, formData, chatID} = req.body;
     try {
-
-        await updateUserData(chatID, formData);
+        return await updateUserData(chatID, formData)
+            .then(userList => res.status(200).json(userList));
         // await bot.answerWebAppQuery(queryId, {
         //     type: 'article',
         //     id: queryId,
@@ -116,16 +116,15 @@ app.post('/updateUserData', async (req, res) => {
         //         message_text: "Ваши данные обновлены",
         //     }
         // })
-        return res.status(200).json({formData});
     } catch (e) {
-        return res.status(500).json({});
+        return res.status(500).json(e);
     }
 });
 
-app.post('/deleteUser', async (req, res) => {
+app.post('/deletePerson', async (req, res) => {
     const {chatID} = req.body;
     try {
-        return await deleteUser(+chatID).then(userList => res.status(200).json(userList));
+        return await deleteUser(+chatID).then(personList => res.status(200).json(personList));
     } catch (e) {
         return res.status(500).json(e);
     }
@@ -135,8 +134,12 @@ app.get('/hello', async (req, res) => {
     return res.status(200).json('Привет');
 });
 
-app.get('/users', async (req, res) => {
-    return await getUsersList().then(userList => res.status(200).json(userList))
+app.get('/persons', async (req, res) => {
+    try {
+        return await getUserList().then(personList => res.status(200).json(personList))
+    } catch (e) {
+        return res.status(500).json({});
+    }
 });
 
 httpServer.listen(PORT, () => {
