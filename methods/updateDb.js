@@ -38,6 +38,9 @@ async function updateNewUserFields() {
                 for (const key in newPerson) {
                     if (!el[key] || el[key] === "") el[key] = newPerson[key]
                 }
+                for (const key in el) {
+                    if (!Object.hasOwn(newPerson, key)) delete el[key]
+                }
                 return el
             })
             writeFile(jsonPath, JSON.stringify(parsedData, null, 2), (error) => {
@@ -82,6 +85,7 @@ async function addRandomUser(type = "user") {
 
 async function updateUserData(chatID, userData) {
     return new Promise((resolve, reject) => {
+        console.log(chatID);
         if(typeof chatID === "undefined") {
             reject(`Ошибка сервера. Полученное значение chatID: ${chatID}`);
             return;
@@ -97,6 +101,7 @@ async function updateUserData(chatID, userData) {
                 return;
             }
             let parsedData = JSON.parse(Buffer.from(data));
+            console.log(parsedData);
             let isNewUser = true;
             parsedData = parsedData.map(el => {
                 if (el.chatID === chatID) {
@@ -105,6 +110,7 @@ async function updateUserData(chatID, userData) {
                     }
                     el.otherInfo.isUserDataSent = checkIsAllFieldsComplete(el);
                     if(el.otherInfo.isUserDataSent) el.otherInfo.registrationDate = createRegistrationDate();
+                    else el.otherInfo.registrationDate = "";
                     isNewUser = false;
                 }
                 return el;
@@ -162,7 +168,6 @@ async function deleteUser(chatID) {
 
             writeFile(jsonPath, JSON.stringify(parsedData, null, 2), (error) => {
                 if (error) {
-                    console.log(error);
                     reject(`Ошибка записи данных на сервере: ${error}. Сообщите о ней администратору`);
                     return;
                 }
@@ -172,11 +177,26 @@ async function deleteUser(chatID) {
     })
 }
 
-function checkIsAllFieldsComplete(el) {
-    unRequiredPersonData.forEach(field => {
-        delete el[field];
-    })
-    return !Object.values(el).some(el => el === "");
+function checkIsAllFieldsComplete(object) {
+    let clone = Object.assign({}, object);
+    let isComplete = false;
+    if (unRequiredPersonData.length > 0) {
+        unRequiredPersonData.forEach(field => {
+            if(typeof field === "string") {
+                delete clone[field];
+            } else {
+                const str = field.reduce((acc, cur) => acc + clone[cur].toString(), "");
+                if(str === "") return isComplete;
+                else {
+                    field.forEach(item => {
+                        delete clone[item];
+                    })
+                }
+            }
+        })
+    }
+    isComplete = !Object.values(clone).some(el => el === "");
+    return isComplete;
 }
 
 function createRegistrationDate() {

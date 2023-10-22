@@ -12,13 +12,15 @@ const newPerson = {
     patronymic: "",
     phone: "",
     position: "",
-    study: "",
+    postGraduateEducationYear: "",
+    studentsEducationYear: "",
     research: "",
     type: "user",
     otherInfo: {registrationDate: "", isUserConfirmed: false, isUserDataSent: false}
 };
 
-const unRequiredPersonData = ["patronymic"];
+const unRequiredPersonData = ["patronymic", ["studentsEducationYear", "postGraduateEducationYear"]];
+
 
 const researches = [
     {id: 10, name: "Обогащение", advisor: "Александрова Татьяна Николаевна", degree: "докт. техн. наук"},

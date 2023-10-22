@@ -30,6 +30,7 @@ async function askEducationalGroup(bot, chatID) {
             force_reply: true,
         },
     });
+
     bot.onReplyToMessage(chatID, prompt.message_id, async function (answer) {
         await updateUserData(chatID, {study: answer.text});
             });
