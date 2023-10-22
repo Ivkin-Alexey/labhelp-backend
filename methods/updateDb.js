@@ -184,7 +184,10 @@ function checkIsAllFieldsComplete(object) {
             if(typeof field === "string") {
                 delete clone[field];
             } else {
-                const str = field.reduce((acc, cur) => acc + clone[cur].toString(), "");
+                const str = field.reduce((acc, cur) => {
+                    console.log(clone[cur])
+                    return acc + clone[cur].toString()
+                }, "");
                 if(str === "") return isComplete;
                 else {
                     field.forEach(item => {
