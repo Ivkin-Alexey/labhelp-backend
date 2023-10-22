@@ -5,13 +5,13 @@ const cors = require('cors');
 const fs = require("fs");
 const https = require('https');
 const http = require('http');
-const {constants} = require("./assets/constants");
+const {adminsChatID} = require("./assets/constants");
 const BotAnswers = require("./methods/botAnswers");
 const {checkTextIsResearch} = require("./methods/validation");
 const {processCallbackQuery} = require("./methods/callbackQueriesProcessing");
 
-const {updateUserData, getUserData, getUsersList: getUserList, deleteUser, addRandomUser} = require("./methods/updateDb");
-const adminChatId = constants.adminsChatId.alexeyIvkin;
+const {updateUserData, getUserData, getUsersList: getUserList, deleteUser, addRandomUser, deleteUsersWithEmptyChatID} = require("./methods/updateDb");
+const adminChatID = adminsChatID.adminsChatID[0];
 
 process.on('uncaughtException', function (err) {
     console.log(err);
@@ -61,6 +61,9 @@ bot.on('message', async msg => {
                 break;
             case "/addRandomSuperAdmin":
                 await addRandomUser("superAdmin");
+                break;
+            case "/deleteUsersWithEmptyChatID":
+                await deleteUsersWithEmptyChatID(chatID).then(res => console.log(res));
                 break;
             case "/researches":
                 await BotAnswers.sendResearches(bot, chatID);

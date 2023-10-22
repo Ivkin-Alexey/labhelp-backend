@@ -6,7 +6,7 @@ const jsonPath = path.join(__dirname, '..', 'assets', 'db', 'db.json');
 const users = require(jsonPath);
 const fs = require("fs");
 const md5 = require('md5');
-const {newPerson, unRequiredPersonData} = require("../assets/constants");
+const {newPerson, unRequiredPersonData, adminsChatID} = require("../assets/constants");
 
 let md5Previous = null;
 let fsWait = false;
@@ -30,7 +30,6 @@ async function updateNewUserFields() {
     try {
         readFile(jsonPath, 'utf8', (error, data) => {
             if (error) {
-                console.log(error);
                 return;
             }
             let parsedData = JSON.parse(Buffer.from(data));
@@ -52,22 +51,25 @@ async function updateNewUserFields() {
     }
 }
 
-async function deleteUsersWithEmptyChatID() {
-    try {
-        readFile(jsonPath, 'utf8', (error, data) => {
-            if (error) {
-                console.log(error);
-                return;
-            }
-            let parsedData = JSON.parse(Buffer.from(data));
-            parsedData = parsedData.filter(el => el.chatID !== "")
-            writeFile(jsonPath, JSON.stringify(parsedData, null, 2), (error) => {
-                if (error) console.log(error);
-            });
-        })
-    } catch (e) {
-        console.log(e);
-    }
+async function deleteUsersWithEmptyChatID(chatID) {
+    return new Promise((resolve, reject) => {
+        try {
+            if(!adminsChatID.adminsChatID.includes(+chatID)) reject("Ошибка сервера. Вы не администратор")
+            readFile(jsonPath, 'utf8', (error, data) => {
+                if (error) {
+                    reject(error);
+                    return;
+                }
+                let parsedData = JSON.parse(Buffer.from(data));
+                parsedData = parsedData.filter(el => el.chatID !== "")
+                writeFile(jsonPath, JSON.stringify(parsedData, null, 2), (error) => {
+                    if (error) reject(error);
+                });
+            })
+        } catch (e) {
+            reject(e);
+        }
+    })
 }
 
 async function confirmUser(chatID) {
@@ -85,7 +87,6 @@ async function addRandomUser(type = "user") {
 
 async function updateUserData(chatID, userData) {
     return new Promise((resolve, reject) => {
-        console.log(chatID);
         if(typeof chatID === "undefined") {
             reject(`Ошибка сервера. Полученное значение chatID: ${chatID}`);
             return;
@@ -101,7 +102,6 @@ async function updateUserData(chatID, userData) {
                 return;
             }
             let parsedData = JSON.parse(Buffer.from(data));
-            console.log(parsedData);
             let isNewUser = true;
             parsedData = parsedData.map(el => {
                 if (el.chatID === chatID) {
@@ -127,7 +127,6 @@ async function updateUserData(chatID, userData) {
 
             writeFile(jsonPath, JSON.stringify(parsedData, null, 2), (error) => {
                 if (error) {
-                    console.log(error);
                     reject(`Ошибка записи данных на сервере: ${error}. Сообщите о ней администратору`);
                     return;
                 }
@@ -213,7 +212,6 @@ function createRegistrationDate() {
 createRegistrationDate();
 
 // updateNewUserFields();
-// deleteUsersWithEmptyChatID();
 
-module.exports = {updateUserData, getUserData, getUsersList, deleteUser, addRandomUser}
+module.exports = {updateUserData, getUserData, getUsersList, deleteUser, addRandomUser, deleteUsersWithEmptyChatID}
 

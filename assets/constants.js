@@ -1,7 +1,7 @@
 const webAppUrl = 'https://ephemeral-kringle-2c94b2.netlify.app/';
 
 const adminsChatID = {
-    adminsChatId: {alexeyIvkin: 392584400, rybchenkoSvetlana: 857875270, rudkoVyacheslav: 1516784245},
+    adminsChatID: [392584400, 857875270, 1516784245],
     CEOChatID: 392584400,
 }
 
@@ -78,4 +78,4 @@ const stickers = {
     ok: 'CAACAgIAAxkBAAEKTlNlBLDJzNKqxAvp52WGuh4FS4TLeAACLAADwZxgDLDdeXbj2CCVMAQ'
 }
 
-module.exports = {webAppUrl, keyboards, commands, stickers, researches, researchTopics, smiles, constants: adminsChatID, unRequiredPersonData, newPerson};
+module.exports = {webAppUrl, keyboards, commands, stickers, researches, researchTopics, smiles, adminsChatID, unRequiredPersonData, newPerson};

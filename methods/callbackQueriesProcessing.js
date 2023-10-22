@@ -1,7 +1,7 @@
-const {stickers, constants} = require("../assets/constants");
+const {stickers, adminsChatID} = require("../assets/constants");
 const BotAnswers = require("./botAnswers");
 const {updateUserData} = require("./updateDb");
-const adminChatId = constants.adminsChatId.alexeyIvkin;
+const adminChatID = adminsChatID.adminsChatID[0];
 
 async function processCallbackQuery(bot, chatID, messageData) {
     let answer = undefined;
@@ -21,10 +21,10 @@ async function processCallbackQuery(bot, chatID, messageData) {
             await updateUserData(chatID, messageData);
             break;
         case "adminConfirmUser":
-            await bot.sendMessage(adminChatId, "Данные сохранены на сервере");
+            await bot.sendMessage(adminChatID, "Данные сохранены на сервере");
             break;
         case "adminDoesntConfirmUser":
-            await bot.sendMessage(adminChatId, "Заявка отменена")
+            await bot.sendMessage(adminChatID, "Заявка отменена")
             break;
     }
 }
