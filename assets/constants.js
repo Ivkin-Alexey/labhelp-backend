@@ -12,15 +12,24 @@ const newPerson = {
     patronymic: "",
     phone: "",
     position: "",
-    postGraduateEducationYear: "",
-    studentsEducationYear: "",
+    study: {postGraduateEducationYear: "", studentsEducationYear: ""},
     research: "",
     type: "user",
     otherInfo: {registrationDate: "", isUserConfirmed: false, isUserDataSent: false}
 };
 
-const unRequiredPersonData = ["patronymic", ["studentsEducationYear", "postGraduateEducationYear"]];
-
+const newPersonCheckingRules = {
+    chatID: "required",
+    firstName: "required",
+    lastName: "required",
+    patronymic: "unRequired",
+    phone: "required",
+    position: "required",
+    study: "any",
+    research: "required",
+    type: "required",
+    otherInfo: "unRequired"
+};
 
 const researches = [
     {id: 10, name: "Обогащение", advisor: "Александрова Татьяна Николаевна", degree: "докт. техн. наук"},
@@ -78,4 +87,4 @@ const stickers = {
     ok: 'CAACAgIAAxkBAAEKTlNlBLDJzNKqxAvp52WGuh4FS4TLeAACLAADwZxgDLDdeXbj2CCVMAQ'
 }
 
-module.exports = {webAppUrl, keyboards, commands, stickers, researches, researchTopics, smiles, adminsChatID, unRequiredPersonData, newPerson};
+module.exports = {webAppUrl, keyboards, commands, stickers, researches, researchTopics, smiles, adminsChatID, newPerson, newPersonCheckingRules};

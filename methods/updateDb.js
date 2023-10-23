@@ -1,12 +1,9 @@
 const {writeFile, readFile, readFileSync} = require("fs");
 const path = require("path");
-const BotAnswers = require("./botAnswers");
 const jsonPath = path.join(__dirname, '..', 'assets', 'db', 'db.json');
-// const newJsonPath = path.join(__dirname, '..', 'assets', 'db', 'db_users.json');
-const users = require(jsonPath);
 const fs = require("fs");
 const md5 = require('md5');
-const {newPerson, unRequiredPersonData, adminsChatID} = require("../assets/constants");
+const {newPerson, newPersonCheckingRules, adminsChatID} = require("../assets/constants");
 
 let md5Previous = null;
 let fsWait = false;
@@ -177,27 +174,22 @@ async function deleteUser(chatID) {
 }
 
 function checkIsAllFieldsComplete(object) {
-    let clone = Object.assign({}, object);
-    let isComplete = false;
-    if (unRequiredPersonData.length > 0) {
-        unRequiredPersonData.forEach(field => {
-            if(typeof field === "string") {
-                delete clone[field];
-            } else {
-                const str = field.reduce((acc, cur) => {
-                    console.log(clone[cur])
-                    return acc + clone[cur].toString()
-                }, "");
-                if(str === "") return isComplete;
-                else {
-                    field.forEach(item => {
-                        delete clone[item];
-                    })
-                }
-            }
-        })
+    let isComplete = true;
+    for (const key in object) {
+        if(!isComplete) break;
+        const rule = newPersonCheckingRules[key];
+        switch (rule) {
+            case "required":
+                if(object[key] === "") isComplete = false;
+                break;
+            case "unRequired":
+                break;
+            case "any":
+                const str = Object.values(object[key]).join("");
+                if(str === "") isComplete = false;
+                break;
+        }
     }
-    isComplete = !Object.values(clone).some(el => el === "");
     return isComplete;
 }
 
@@ -211,8 +203,6 @@ function createRegistrationDate() {
     year = date.getFullYear();
     return day + "." + month + "." + year;
 }
-
-createRegistrationDate();
 
 // updateNewUserFields();
 

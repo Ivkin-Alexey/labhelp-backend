@@ -29,8 +29,6 @@ async function sendResearches(bot, chatID) {
 }
 
 async function sendResearch(bot, chatID, researchTopic) {
-    const editProfileUrl = webAppUrl + `${chatID}/editProfile`;
-    console.log(editProfileUrl);
     const research = researches.find(el => el.name === researchTopic);
     const {id, degree, advisor} = research;
     const imageStream = fs.createReadStream(`./assets/images/${id}.jpg`);
