@@ -12,7 +12,8 @@ const newPerson = {
     patronymic: "",
     phone: "",
     position: "",
-    study: {postGraduateEducationYear: "", studentsEducationYear: ""},
+    postGraduateEducationYear: "",
+    studentsEducationYear: "",
     research: "",
     type: "user",
     otherInfo: {registrationDate: "", isUserConfirmed: false, isUserDataSent: false}
@@ -25,7 +26,8 @@ const newPersonCheckingRules = {
     patronymic: "unRequired",
     phone: "required",
     position: "required",
-    study: "any",
+    postGraduateEducationYear: ["studentsEducationYear", "postGraduateEducationYear"],
+    studentsEducationYear: ["studentsEducationYear", "postGraduateEducationYear"],
     research: "required",
     type: "required",
     otherInfo: "unRequired"

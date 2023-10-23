@@ -102,8 +102,10 @@ async function updateUserData(chatID, userData) {
             let isNewUser = true;
             parsedData = parsedData.map(el => {
                 if (el.chatID === chatID) {
-                    for (let field in userData) {
-                        el[field] = userData[field];
+                    for (let field in el) {
+                        if(userData[field] !== undefined) {
+                            el[field] = userData[field];
+                        }
                     }
                     el.otherInfo.isUserDataSent = checkIsAllFieldsComplete(el);
                     if(el.otherInfo.isUserDataSent) el.otherInfo.registrationDate = createRegistrationDate();
@@ -178,16 +180,14 @@ function checkIsAllFieldsComplete(object) {
     for (const key in object) {
         if(!isComplete) break;
         const rule = newPersonCheckingRules[key];
-        switch (rule) {
-            case "required":
-                if(object[key] === "") isComplete = false;
-                break;
-            case "unRequired":
-                break;
-            case "any":
-                const str = Object.values(object[key]).join("");
-                if(str === "") isComplete = false;
-                break;
+        if(rule === "required") {
+            if (object[key] === "") isComplete = false;
+        } else if (Array.isArray(rule)) {
+            let str = "";
+            rule.forEach(el => {
+                str += object[el];
+            })
+            if(str === "") isComplete = false;
         }
     }
     return isComplete;
