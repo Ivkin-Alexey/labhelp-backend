@@ -16,7 +16,8 @@ const newPerson = {
     studentsEducationYear: "",
     research: "",
     type: "user",
-    otherInfo: {registrationDate: "", isUserConfirmed: false, isUserDataSent: false}
+    isUserConfirmed: false,
+    otherInfo: {registrationDate: "", isUserDataSent: false}
 };
 
 const newPersonCheckingRules = {
@@ -30,6 +31,7 @@ const newPersonCheckingRules = {
     studentsEducationYear: ["studentsEducationYear", "postGraduateEducationYear"],
     research: "required",
     type: "required",
+    isUserConfirmed: "required",
     otherInfo: "unRequired"
 };
 
