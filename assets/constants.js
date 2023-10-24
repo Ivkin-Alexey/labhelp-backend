@@ -49,6 +49,54 @@ const researches = [
     {id: 0, name: "Кинетика процессов", advisor: "Шариков Феликс Юрьевич", degree: "докт. техн. наук"},
 ];
 
+const researchesSelectOptions = [
+    {
+        value: 'withoutResearch',
+        label: 'Без направления',
+    },
+    {
+        value: 'concentration',
+        label: 'Обогащение',
+    },
+    {
+        value: 'aluminum',
+        label: 'Алюминий',
+    },
+    {
+        value: 'alloys',
+        label: 'Сплавы',
+    },
+    {
+        value: 'rareMetals',
+        label: 'Редкие металлы',
+    },
+    {
+        value: 'agglomeration',
+        label: 'Агломерация',
+    },
+    {
+        value: 'silicaGel',
+        label: 'Кремнегель',
+    },
+    {
+        value: 'carbon',
+        label: 'Углерод',
+    },
+    {
+        value: 'fertilizers',
+        label: 'Удобрения',
+    },
+    {
+        value: 'saponite',
+        label: 'Сапонит',
+    },
+    {
+        value: 'kineticsOfProcesses',
+        label: 'Кинетика процессов',
+    },
+
+];
+
 const smiles = {
     researches: "👨‍ ‍🔬 ",
     closeMenu: "❌ "
@@ -91,4 +139,4 @@ const stickers = {
     ok: 'CAACAgIAAxkBAAEKTlNlBLDJzNKqxAvp52WGuh4FS4TLeAACLAADwZxgDLDdeXbj2CCVMAQ'
 }
 
-module.exports = {webAppUrl, keyboards, commands, stickers, researches, researchTopics, smiles, adminsChatID, newPerson, newPersonCheckingRules};
+module.exports = {webAppUrl, keyboards, commands, stickers, researches, researchTopics, smiles, adminsChatID, newPerson, newPersonCheckingRules, researchesSelectOptions};

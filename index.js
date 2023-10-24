@@ -5,7 +5,7 @@ const cors = require('cors');
 const fs = require("fs");
 const https = require('https');
 const http = require('http');
-const {adminsChatID} = require("./assets/constants");
+const {adminsChatID, researchesSelectOptions} = require("./assets/constants");
 const BotAnswers = require("./methods/botAnswers");
 const {checkTextIsResearch} = require("./methods/validation");
 const {processCallbackQuery} = require("./methods/callbackQueriesProcessing");
@@ -140,6 +140,14 @@ app.get('/hello', async (req, res) => {
 app.get('/persons', async (req, res) => {
     try {
         return await getUserList().then(personList => res.status(200).json(personList))
+    } catch (e) {
+        return res.status(500).json({});
+    }
+});
+
+app.get('/researches', async (req, res) => {
+    try {
+        return res.status(200).json(researchesSelectOptions);
     } catch (e) {
         return res.status(500).json({});
     }
