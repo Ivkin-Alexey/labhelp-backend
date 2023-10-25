@@ -1,4 +1,6 @@
 const {stickers, adminsChatID} = require("../assets/constants");
+const localisations = require("../assets/localisations");
+const {invitationToRegistration} = localisations.botAnswers;
 const BotAnswers = require("./botAnswers");
 const {updateUserData} = require("./updateDb");
 const adminChatID = adminsChatID.adminsChatID[0];
@@ -18,7 +20,9 @@ async function processCallbackQuery(bot, chatID, messageData) {
             break;
         case "research":
             await bot.sendSticker(chatID, stickers.ok);
-            await updateUserData(chatID, messageData);
+            await updateUserData(chatID, messageData).then(() => {
+                BotAnswers.sendWebAppButtonWithMessage(bot, chatID, invitationToRegistration)
+            });
             break;
         case "adminConfirmUser":
             await bot.sendMessage(adminChatID, "Данные сохранены на сервере");

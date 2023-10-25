@@ -1,5 +1,5 @@
-const {keyboards, stickers, researches, webAppUrl} = require("../assets/constants");
-const localisations = require("../localisations");
+let {keyboards, stickers, researches, editProfileUrl} = require("../assets/constants");
+const localisations = require("../assets/localisations");
 const fs = require("fs");
 
 const {getUserData} = require("./updateDb");
@@ -18,6 +18,18 @@ async function sendStartMessage(bot, chatID, first_name, last_name) {
     })
 }
 
+async function sendWebAppButtonWithMessage(bot, chatID, message) {
+    await bot.sendMessage(chatID, message, {
+        reply_markup: {
+            inline_keyboard: [
+                [
+                    {text: 'Заполнить', web_app: {url: editProfileUrl}},
+                ],
+            ]
+        }
+    })
+}
+
 async function sendResearches(bot, chatID) {
     const keyboard = [...keyboards.researches, ['❌ Закрыть меню']];
     await bot.sendMessage(chatID, localisations.selectResearches, {
@@ -29,6 +41,7 @@ async function sendResearches(bot, chatID) {
 }
 
 async function sendResearch(bot, chatID, researchTopic) {
+    editProfileUrl = editProfileUrl.replace(":chatID", chatID);
     const research = researches.find(el => el.name === researchTopic);
     const {id, degree, advisor} = research;
     const imageStream = fs.createReadStream(`./assets/images/${id}.jpg`);
@@ -37,12 +50,13 @@ async function sendResearch(bot, chatID, researchTopic) {
     await bot.sendMessage(chatID, "Описание направления. Описание направления. Описание направления. Описание направления.", {
         reply_markup: {
             inline_keyboard: [
-                [{text: 'Присоединиться', web_app: {url: editProfileUrl}}],
+                [{text: 'Присоединиться', callback_data: JSON.stringify({research: researchTopic})}],
             ]
         },
         disable_notification: true,
     })
 }
+
 
 async function sendConfusedMessage(bot, chatID) {
     await bot.sendSticker(chatID, stickers.unknown);
@@ -50,7 +64,7 @@ async function sendConfusedMessage(bot, chatID) {
 }
 
 async function sendUserData(bot, chatID, userData) {
-    const {first_name, last_name,phone, position, study, research} = userData;
+    const {first_name, last_name, phone, position, study, research} = userData;
     await bot.sendMessage(chatID,
         `Мои данные: \n${research}\n${position}, ${study}\n${last_name} ${first_name}\n${phone}`, {
             reply_markup: {
@@ -62,4 +76,4 @@ async function sendUserData(bot, chatID, userData) {
         });
 }
 
-module.exports = {sendResearch, sendStartMessage, sendResearches, sendConfusedMessage, sendUserData};
+module.exports = {sendResearch, sendStartMessage, sendResearches, sendConfusedMessage, sendUserData, sendWebAppButtonWithMessage};

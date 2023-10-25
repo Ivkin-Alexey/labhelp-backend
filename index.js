@@ -6,6 +6,8 @@ const fs = require("fs");
 const https = require('https');
 const http = require('http');
 const {adminsChatID, researchesSelectOptions} = require("./assets/constants");
+const localisations = require("./assets/localisations");
+const {confirmApplication, denyApplication} = localisations.superAdministratorActions;
 const BotAnswers = require("./methods/botAnswers");
 const {checkTextIsResearch} = require("./methods/validation");
 const {processCallbackQuery} = require("./methods/callbackQueriesProcessing");
@@ -98,7 +100,6 @@ bot.on('message', async msg => {
 bot.on('callback_query', async ctx => {
     const chatID = ctx.message.chat.id;
     let messageData = JSON.parse(ctx.data);
-    console.log(messageData);
     try {
         await processCallbackQuery(bot, chatID, messageData);
     } catch (error) {
@@ -110,7 +111,9 @@ app.post('/updatePersonData', async (req, res) => {
     const {queryId, formData, chatID} = req.body;
     try {
         return await updateUserData(+chatID, formData)
-            .then(userList => res.status(200).json(userList));
+            .then(userList => res.status(200).json(userList)).then(async () => {
+                if (formData?.isUserConfirmed) await bot.sendMessage(chatID, confirmApplication);
+            });
         // await bot.answerWebAppQuery(queryId, {
         //     type: 'article',
         //     id: queryId,
@@ -127,7 +130,9 @@ app.post('/updatePersonData', async (req, res) => {
 app.post('/deletePerson', async (req, res) => {
     const {chatID} = req.body;
     try {
-        return await deleteUser(+chatID).then(personList => res.status(200).json(personList));
+        return await deleteUser(+chatID)
+            .then(personList => res.status(200).json(personList))
+            .then(async () => await bot.sendMessage(chatID, denyApplication));
     } catch (e) {
         return res.status(500).json(e);
     }
