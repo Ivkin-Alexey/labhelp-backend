@@ -17,7 +17,12 @@ const newPerson = {
     research: "",
     type: "user",
     isUserConfirmed: false,
-    otherInfo: {registrationDate: "", isUserDataSent: false}
+    otherInfo: {registrationDate: "", isUserDataSent: false},
+    requirements: [
+        {name: "План работ", done: false},
+        {name: 'Соглашение о конфиденциальности', done: false},
+        {name: 'Техника безопасности', done: false}
+    ]
 };
 
 const newPersonCheckingRules = {
@@ -32,7 +37,8 @@ const newPersonCheckingRules = {
     research: "required",
     type: "required",
     isUserConfirmed: "required",
-    otherInfo: "unRequired"
+    otherInfo: "unRequired",
+    requirements: "unRequired"
 };
 
 const researches = [
