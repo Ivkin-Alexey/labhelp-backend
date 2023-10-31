@@ -20,9 +20,8 @@ async function processCallbackQuery(bot, chatID, messageData) {
             break;
         case "research":
             await bot.sendSticker(chatID, stickers.ok);
-            await updateUserData(chatID, messageData).then(() => {
-                BotAnswers.sendWebAppButtonWithMessage(bot, chatID, invitationToRegistration)
-            });
+            await updateUserData(chatID, messageData);
+            await BotAnswers.sendWebAppButtonWithMessage(bot, chatID, invitationToRegistration);
             break;
         case "adminConfirmUser":
             await bot.sendMessage(adminChatID, "Данные сохранены на сервере");

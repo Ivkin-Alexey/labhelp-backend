@@ -73,9 +73,9 @@ bot.on('message', async msg => {
             case "/get_chat_id":
                 await bot.sendMessage(chatID, 'Чат ID: ' + chatID);
                 break;
-            case "/get_my_data":
-                await getUserData(chatID).then(res => BotAnswers.sendUserData(bot, chatID, res));
-                break;
+            // case "/get_my_data":
+            //     await getUserData(chatID).then(res => BotAnswers.sendUserData(bot, chatID, res));
+            //     break;
             case isResearch:
                 await BotAnswers.sendResearch(bot, chatID, isResearch);
                 await updateUserData(chatID, {research: isResearch});
