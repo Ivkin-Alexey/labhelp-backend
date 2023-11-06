@@ -4,6 +4,7 @@ const jsonPath = path.join(__dirname, '..', 'assets', 'db', 'db.json');
 const fs = require("fs");
 const md5 = require('md5');
 const {newPerson, newPersonCheckingRules, adminsChatID} = require("../assets/constants");
+const {createDate} = require("../methods/helpers");
 
 let md5Previous = null;
 let fsWait = false;
@@ -108,7 +109,7 @@ async function updateUserData(chatID, userData) {
                         }
                     }
                     el.otherInfo.isUserDataSent = checkIsAllFieldsComplete(el);
-                    if(el.otherInfo.isUserDataSent) el.otherInfo.registrationDate = createRegistrationDate();
+                    if(el.otherInfo.isUserDataSent) el.otherInfo.registrationDate = createDate();
                     else el.otherInfo.registrationDate = "";
                     isNewUser = false;
                 }
@@ -120,7 +121,7 @@ async function updateUserData(chatID, userData) {
                     newPerson[field] = userData[field];
                 }
                 newPerson.otherInfo.isUserDataSent = checkIsAllFieldsComplete(newPerson);
-                if(newPerson.otherInfo.isUserDataSent) newPerson.otherInfo.registrationDate = createRegistrationDate();
+                if(newPerson.otherInfo.isUserDataSent) newPerson.otherInfo.registrationDate = createDate();
                 parsedData.push(newPerson);
             }
 
@@ -191,17 +192,6 @@ function checkIsAllFieldsComplete(object) {
         }
     }
     return isComplete;
-}
-
-function createRegistrationDate() {
-    const date = new Date();
-    let day, month, year;
-    day = date.getDate();
-    if(+day<10) day= "0" + day;
-    month = +date.getMonth()+1;
-    if(+month<10) month= "0" + month;
-    year = date.getFullYear();
-    return day + "." + month + "." + year;
 }
 
 // updateNewUserFields();

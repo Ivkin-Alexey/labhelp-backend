@@ -11,6 +11,7 @@ const {confirmApplication, denyApplication} = localisations.superAdministratorAc
 const BotAnswers = require("./methods/botAnswers");
 const {checkTextIsResearch} = require("./methods/validation");
 const {processCallbackQuery} = require("./methods/callbackQueriesProcessing");
+const {startWorkWithEquipment} = require("./methods/google-spreadsheet");
 
 const {updateUserData, getUserData, getUsersList: getUserList, deleteUser, addRandomUser, deleteUsersWithEmptyChatID} = require("./methods/updateDb");
 const adminChatID = adminsChatID.adminsChatID[0];
@@ -72,6 +73,9 @@ bot.on('message', async msg => {
                 break;
             case "/get_chat_id":
                 await bot.sendMessage(chatID, 'Чат ID: ' + chatID);
+                break;
+            case "/startEquipment":
+                await startWorkWithEquipment(chatID);
                 break;
             // case "/get_my_data":
             //     await getUserData(chatID).then(res => BotAnswers.sendUserData(bot, chatID, res));
