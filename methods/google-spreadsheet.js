@@ -23,15 +23,11 @@ function StartData(chatID, equipmentID) {
     this.ChatID = chatID
 }
 
-loadDoc();
-async function loadDoc() {
+async function startWorkWithEquipment(chatID = 392584400, equipmentID = 1) {
     await doc.loadInfo();
-}
-
-function startWorkWithEquipment(chatID = 392584400, equipmentID = 1) {
     let sheet = doc.sheetsByIndex[0];
     const data = new StartData(chatID, equipmentID);
-    (async () => await sheet.addRow(data))();
+    await sheet.addRow(data);
 }
 
 
