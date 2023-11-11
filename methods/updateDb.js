@@ -77,8 +77,9 @@ async function confirmUser(chatID) {
 async function addRandomUser(type = "user") {
     let user = newPerson;
     user.chatID = Math.floor(100000000 + Math.random() * 900000000);
-    user.firstName = "Rayn";
-    user.lastName = "Gosling";
+    user.firstName = "Джон";
+    user.lastName = "Сноу";
+    user.phone = "+79533694548";
     user.type = type;
     await updateUserData(user.chatID, user);
 }
@@ -196,5 +197,5 @@ function checkIsAllFieldsComplete(object) {
 
 // updateNewUserFields();
 
-module.exports = {updateUserData, getUserData, getUsersList, deleteUser, addRandomUser, deleteUsersWithEmptyChatID}
+module.exports = {updateUserData, getUserData, getUsersList, deleteUser, addRandomUser, deleteUsersWithEmptyChatID, updateEnvVariable}
 
