@@ -55,53 +55,13 @@ const researches = [
     {id: 0, name: "Кинетика процессов", advisor: "Шариков Феликс Юрьевич", degree: "докт. техн. наук"},
 ];
 
-const researchesSelectOptions = [
-    {
-        value: 'withoutResearch',
-        label: 'Без направления',
-    },
-    {
-        value: 'concentration',
-        label: 'Обогащение',
-    },
-    {
-        value: 'aluminum',
-        label: 'Алюминий',
-    },
-    {
-        value: 'alloys',
-        label: 'Сплавы',
-    },
-    {
-        value: 'rareMetals',
-        label: 'Редкие металлы',
-    },
-    {
-        value: 'agglomeration',
-        label: 'Агломерация',
-    },
-    {
-        value: 'silicaGel',
-        label: 'Кремнегель',
-    },
-    {
-        value: 'carbon',
-        label: 'Углерод',
-    },
-    {
-        value: 'fertilizers',
-        label: 'Удобрения',
-    },
-    {
-        value: 'saponite',
-        label: 'Сапонит',
-    },
-    {
-        value: 'kineticsOfProcesses',
-        label: 'Кинетика процессов',
-    },
+const defaultResearchSelectOption = {
+    value: 'Без направления',
+    label: 'Без направления',
+};
 
-];
+const researchesSelectOptions = researches.map(el => ({value: el.name, label: el.name}));
+researchesSelectOptions.push(defaultResearchSelectOption);
 
 const smiles = {
     researches: "👨‍ ‍🔬 ",
