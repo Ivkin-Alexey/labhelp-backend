@@ -5,6 +5,11 @@ const adminsChatID = {
     adminsChatID: [392584400, 857875270, 1516784245],
 }
 
+const defaultResearchSelectOption = {
+    value: 'Без направления',
+    label: 'Без направления',
+};
+
 const newPerson = {
     chatID: "",
     firstName: "",
@@ -14,7 +19,7 @@ const newPerson = {
     position: "",
     postGraduateEducationYear: "",
     studentsEducationYear: "",
-    research: "",
+    research: defaultResearchSelectOption.value,
     type: "user",
     isUserConfirmed: false,
     otherInfo: {registrationDate: "", isUserDataSent: false},
@@ -54,11 +59,6 @@ const researches = [
     {id: 1, name: "Сапонит", advisor: "Зубкова Ольга Сергеевна", degree: "канд. техн. наук"},
     {id: 0, name: "Кинетика процессов", advisor: "Шариков Феликс Юрьевич", degree: "докт. техн. наук"},
 ];
-
-const defaultResearchSelectOption = {
-    value: 'Без направления',
-    label: 'Без направления',
-};
 
 const researchesSelectOptions = researches.map(el => ({value: el.name, label: el.name}));
 researchesSelectOptions.push(defaultResearchSelectOption);
