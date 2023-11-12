@@ -5,16 +5,17 @@ const cors = require('cors');
 const fs = require("fs");
 const https = require('https');
 const http = require('http');
-const {adminsChatID, researchesSelectOptions} = require("./assets/constants");
+const {researchesSelectOptions} = require("./assets/constants");
 const localisations = require("./assets/localisations");
 const {confirmApplication, denyApplication} = localisations.superAdministratorActions;
 const BotAnswers = require("./methods/botAnswers");
 const {checkTextIsResearch} = require("./methods/validation");
 const {processCallbackQuery} = require("./methods/callbackQueriesProcessing");
 const {startWorkWithEquipment} = require("./methods/google-spreadsheet");
-
-const {updateUserData, getUserData, getUsersList: getUserList, deleteUser, addRandomUser, deleteUsersWithEmptyChatID} = require("./methods/updateDb");
-const adminChatID = adminsChatID.adminsChatID[0];
+const {checkIsUserSuperAdmin} = require("./methods/helpers");
+const {updateUserData, getUserList, deleteUser, addRandomUser, deleteUsersWithEmptyChatID,
+    createEquipmentDbFromGSheet, getEquipmentList
+} = require("./methods/updateDb");
 
 process.on('uncaughtException', function (err) {
     console.log(err);
@@ -76,6 +77,14 @@ bot.on('message', async msg => {
                 break;
             case "/startEquipment":
                 await startWorkWithEquipment(chatID);
+                break;
+            case "/reloadEquipmentDB":
+                const result = checkIsUserSuperAdmin(chatID);
+                if(result.resolved) {
+                    await createEquipmentDbFromGSheet().then(r => console.log(r));
+                } else {
+                    await bot.sendMessage(chatID, result.errorMsg);
+                }
                 break;
             // case "/get_my_data":
             //     await getUserData(chatID).then(res => BotAnswers.sendUserData(bot, chatID, res));
@@ -146,11 +155,19 @@ app.get('/hello', async (req, res) => {
     return res.status(200).json('Привет');
 });
 
+app.get('/equipmentList', async (req, res) => {
+    try {
+        return await getEquipmentList().then(equipmentList => res.status(200).json(equipmentList))
+    } catch (e) {
+        return res.status(500).json(e);
+    }
+});
+
 app.get('/persons', async (req, res) => {
     try {
         return await getUserList().then(personList => res.status(200).json(personList))
     } catch (e) {
-        return res.status(500).json({});
+        return res.status(500).json(e);
     }
 });
 
@@ -158,7 +175,7 @@ app.get('/researches', async (req, res) => {
     try {
         return res.status(200).json(researchesSelectOptions);
     } catch (e) {
-        return res.status(500).json({});
+        return res.status(500).json(e);
     }
 });
 

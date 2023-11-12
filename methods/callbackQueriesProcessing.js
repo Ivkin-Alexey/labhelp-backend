@@ -1,9 +1,9 @@
-const {stickers, adminsChatID} = require("../assets/constants");
+const {stickers, superAdminsChatID} = require("../assets/constants");
 const localisations = require("../assets/localisations");
 const {invitationToRegistration} = localisations.botAnswers;
 const BotAnswers = require("./botAnswers");
 const {updateUserData} = require("./updateDb");
-const adminChatID = adminsChatID.adminsChatID[0];
+const adminChatID = superAdminsChatID;
 
 async function processCallbackQuery(bot, chatID, messageData) {
     let answer = undefined;

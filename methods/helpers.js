@@ -1,3 +1,5 @@
+const {adminsChatID} = require("../assets/constants");
+
 function createDate() {
     const date = new Date();
     let day, month, year;
@@ -19,4 +21,13 @@ function createTime() {
     return hours + ":" + minutes;
 }
 
-module.exports = {createDate, createTime}
+function checkIsUserSuperAdmin(chatID) {
+    const result = {resolved: true, errorMsg: ""};
+    if(!adminsChatID.includes(chatID)) {
+        result.resolved = false;
+        result.errorMsg = "Данную команду могут использовать только суперадминистраторы"
+    }
+    return result;
+}
+
+module.exports = {createDate, createTime, checkIsUserSuperAdmin}

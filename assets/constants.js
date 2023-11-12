@@ -1,9 +1,7 @@
 const webAppUrl = 'https://ephemeral-kringle-2c94b2.netlify.app';
 const editProfileUrl = webAppUrl + '/:chatID/editProfile';
 
-const adminsChatID = {
-    adminsChatID: [392584400, 857875270, 1516784245],
-}
+const superAdminsChatID = [392584400, 1516784245];
 
 const defaultResearchSelectOption = {
     value: 'Без направления',
@@ -45,6 +43,16 @@ const newPersonCheckingRules = {
     otherInfo: "unRequired",
     requirements: "unRequired"
 };
+
+function EquipmentItem() {
+    this.id = "";
+    this.category = "";
+    this.name = "";
+    this.brand = "";
+    this.model = "";
+    this.imgUrl = "";
+    this.filesUrl = "";
+}
 
 const researches = [
     {id: 10, name: "Обогащение", advisor: "Александрова Татьяна Николаевна", degree: "докт. техн. наук"},
@@ -113,9 +121,10 @@ module.exports = {
     researches,
     researchTopics,
     smiles,
-    adminsChatID,
+    adminsChatID: superAdminsChatID,
     newPerson,
     newPersonCheckingRules,
     researchesSelectOptions,
-    editProfileUrl
+    editProfileUrl,
+    EquipmentItem
 };

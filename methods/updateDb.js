@@ -1,10 +1,12 @@
-const {writeFile, readFile, readFileSync} = require("fs");
+const {writeFile, readFile, readFileSync, writeFileSync} = require("fs");
 const path = require("path");
 const jsonPath = path.join(__dirname, '..', 'assets', 'db', 'db.json');
+const equipmentJsonPath = path.join(__dirname, '..', 'assets', 'db', 'equipment.json');
 const fs = require("fs");
 const md5 = require('md5');
 const {newPerson, newPersonCheckingRules, adminsChatID} = require("../assets/constants");
 const {createDate} = require("../methods/helpers");
+const {fetchEquipmentListFromGSheet} = require("./google-spreadsheet");
 
 let md5Previous = null;
 let fsWait = false;
@@ -52,7 +54,7 @@ async function updateNewUserFields() {
 async function deleteUsersWithEmptyChatID(chatID) {
     return new Promise((resolve, reject) => {
         try {
-            if(!adminsChatID.adminsChatID.includes(+chatID)) reject("Ошибка сервера. Вы не администратор")
+            if (!adminsChatID.adminsChatID.includes(+chatID)) reject("Ошибка сервера. Вы не администратор")
             readFile(jsonPath, 'utf8', (error, data) => {
                 if (error) {
                     reject(error);
@@ -86,11 +88,11 @@ async function addRandomUser(type = "user") {
 
 async function updateUserData(chatID, userData) {
     return new Promise((resolve, reject) => {
-        if(typeof chatID === "undefined") {
+        if (typeof chatID === "undefined") {
             reject(`Ошибка сервера. Полученное значение chatID: ${chatID}`);
             return;
         }
-        if(typeof userData === "undefined") {
+        if (typeof userData === "undefined") {
             reject(`Ошибка сервера. Полученное значение userData: ${userData}`);
             return;
         }
@@ -105,12 +107,12 @@ async function updateUserData(chatID, userData) {
             parsedData = parsedData.map(el => {
                 if (el.chatID === chatID) {
                     for (let field in el) {
-                        if(userData[field] !== undefined) {
+                        if (userData[field] !== undefined) {
                             el[field] = userData[field];
                         }
                     }
                     el.otherInfo.isUserDataSent = checkIsAllFieldsComplete(el);
-                    if(el.otherInfo.isUserDataSent) el.otherInfo.registrationDate = createDate();
+                    if (el.otherInfo.isUserDataSent) el.otherInfo.registrationDate = createDate();
                     else el.otherInfo.registrationDate = "";
                     isNewUser = false;
                 }
@@ -122,7 +124,7 @@ async function updateUserData(chatID, userData) {
                     newPerson[field] = userData[field];
                 }
                 newPerson.otherInfo.isUserDataSent = checkIsAllFieldsComplete(newPerson);
-                if(newPerson.otherInfo.isUserDataSent) newPerson.otherInfo.registrationDate = createDate();
+                if (newPerson.otherInfo.isUserDataSent) newPerson.otherInfo.registrationDate = createDate();
                 parsedData.push(newPerson);
             }
 
@@ -137,7 +139,6 @@ async function updateUserData(chatID, userData) {
     })
 }
 
-
 async function getUserData(chatID) {
     const file = await readFileSync(jsonPath);
     return JSON.parse(Buffer.from(file))[chatID];
@@ -146,6 +147,18 @@ async function getUserData(chatID) {
 function getUsersList() {
     return new Promise((resolve, reject) => {
         readFile(jsonPath, 'utf8', (error, data) => {
+            if (error) {
+                reject(`Ошибка чтения данных на сервере: ${error}. Сообщите о ней администратору`);
+                return;
+            }
+            resolve(JSON.parse(Buffer.from(data)));
+        })
+    })
+}
+
+function getEquipmentList() {
+    return new Promise((resolve, reject) => {
+        readFile(equipmentJsonPath, 'utf8', (error, data) => {
             if (error) {
                 reject(`Ошибка чтения данных на сервере: ${error}. Сообщите о ней администратору`);
                 return;
@@ -181,22 +194,53 @@ async function deleteUser(chatID) {
 function checkIsAllFieldsComplete(object) {
     let isComplete = true;
     for (const key in object) {
-        if(!isComplete) break;
+        if (!isComplete) break;
         const rule = newPersonCheckingRules[key];
-        if(rule === "required") {
+        if (rule === "required") {
             if (object[key] === "") isComplete = false;
         } else if (Array.isArray(rule)) {
             let str = "";
             rule.forEach(el => {
                 str += object[el];
             })
-            if(str === "") isComplete = false;
+            if (str === "") isComplete = false;
         }
     }
     return isComplete;
 }
 
+async function createEquipmentDbFromGSheet() {
+    return new Promise((resolve, reject) => {
+        fetchEquipmentListFromGSheet().then(list => {
+            const listWithCategories = {};
+            list.forEach(el => {
+                if(listWithCategories[el.category]) listWithCategories[el.category].push(el);
+                else {
+                    listWithCategories[el.category] = [];
+                    listWithCategories[el.category].push(el);
+                }
+            })
+            writeFileSync(equipmentJsonPath, JSON.stringify(listWithCategories, null, 2), error => {
+                if (error) {
+                    reject(`Ошибка записи данных на сервере: ${error}. Сообщите о ней администратору`);
+                    return;
+                }
+                resolve('База данных оборудования обновлена');
+            })
+        })
+    })
+}
+
 // updateNewUserFields();
 
-module.exports = {updateUserData, getUserData, getUsersList, deleteUser, addRandomUser, deleteUsersWithEmptyChatID}
+module.exports = {
+    updateUserData,
+    getUserData,
+    getUsersList,
+    deleteUser,
+    addRandomUser,
+    deleteUsersWithEmptyChatID,
+    createEquipmentDbFromGSheet,
+    getEquipmentList
+}
 
