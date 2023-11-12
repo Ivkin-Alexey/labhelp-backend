@@ -144,7 +144,7 @@ async function getUserData(chatID) {
     return JSON.parse(Buffer.from(file))[chatID];
 }
 
-function getUsersList() {
+async function getUserList() {
     return new Promise((resolve, reject) => {
         readFile(jsonPath, 'utf8', (error, data) => {
             if (error) {
@@ -156,7 +156,7 @@ function getUsersList() {
     })
 }
 
-function getEquipmentList() {
+async function getEquipmentList() {
     return new Promise((resolve, reject) => {
         readFile(equipmentJsonPath, 'utf8', (error, data) => {
             if (error) {
@@ -236,7 +236,7 @@ async function createEquipmentDbFromGSheet() {
 module.exports = {
     updateUserData,
     getUserData,
-    getUsersList,
+    getUserList,
     deleteUser,
     addRandomUser,
     deleteUsersWithEmptyChatID,
