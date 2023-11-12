@@ -1,4 +1,4 @@
-const {stickers, constants, webAppUrl} = require("../assets/constants");
+const {stickers, constants, webAppUrl, adminsChatID} = require("../assets/constants");
 const {updateUserData} = require("./updateDb");
 
 async function askUserPosition(bot, chatID) {

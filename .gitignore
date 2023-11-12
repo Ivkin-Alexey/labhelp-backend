@@ -1,5 +1,6 @@
 /node_modules
-/ssl
 .idea
 .env
 /assets/db
+/ssl
+.gitignore

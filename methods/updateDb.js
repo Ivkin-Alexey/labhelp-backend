@@ -137,6 +137,7 @@ async function updateUserData(chatID, userData) {
     })
 }
 
+
 async function getUserData(chatID) {
     const file = await readFileSync(jsonPath);
     return JSON.parse(Buffer.from(file))[chatID];
@@ -197,5 +198,5 @@ function checkIsAllFieldsComplete(object) {
 
 // updateNewUserFields();
 
-module.exports = {updateUserData, getUserData, getUsersList, deleteUser, addRandomUser, deleteUsersWithEmptyChatID, updateEnvVariable}
+module.exports = {updateUserData, getUserData, getUsersList, deleteUser, addRandomUser, deleteUsersWithEmptyChatID}
 
