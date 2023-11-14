@@ -9,6 +9,9 @@ const localisations = {
     superAdministratorActions: {
         confirmApplication: "Ваша заявка подтверждена. Приходите для встречи с руководителем направления в ауд. 3215 в 11:00 по вторникам и четвергам",
         denyApplication: "Ваша заявка удалена, т.к. содержит некорректные данные"
+    },
+    postRequests: {
+        startEquipment: {success: "Начата работа на оборудовании"}
     }
 };
 

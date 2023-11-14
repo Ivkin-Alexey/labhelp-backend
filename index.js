@@ -151,6 +151,17 @@ app.post('/deletePerson', async (req, res) => {
     }
 });
 
+app.post('/equipmentStart', async (req, res) => {
+    const {chatID, accountData, equipment} = req.body;
+    try {
+        return await startWorkWithEquipment(+chatID, accountData, equipment)
+            .then(res => res.status(200).json())
+            // .then(async () => await bot.sendMessage(chatID, denyApplication));
+    } catch (e) {
+        return res.status(500).json(e);
+    }
+});
+
 app.get('/hello', async (req, res) => {
     return res.status(200).json('Привет');
 });

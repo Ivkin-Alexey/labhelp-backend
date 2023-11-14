@@ -6,8 +6,11 @@ const equipmentListTableID = "1DzK7-8XCBOmPmmtTpVOR_kEYh1oVfyQD4sUODwKmQK0";
 const equipmentListSheetID = "1818094136";
 const imgColumn = "E";
 const imgUrl = `https://docs.google.com/spreadsheets/d/${equipmentListTableID}/edit#gid=${equipmentListSheetID}&range=`;
-const {createDate, createTime} = require("./helpers");
+const {createDate, createTime, createFullName} = require("./helpers");
 const {EquipmentItem} = require("../assets/constants");
+const localisations = require("../assets/localisations");
+
+const successMsg = localisations.postRequests.startEquipment.success;
 
 const serviceAccountAuth = new JWT.JWT({
     email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
@@ -20,19 +23,30 @@ const serviceAccountAuth = new JWT.JWT({
 const equipmentOperations = new GoogleSpreadsheet.GoogleSpreadsheet(equipmentOperationsTableID, serviceAccountAuth);
 const equipmentList = new GoogleSpreadsheet.GoogleSpreadsheet(equipmentListTableID, serviceAccountAuth);
 
-function StartData(chatID, equipmentID) {
-    this.Оборудование = equipmentID,
-    this.Дата = createDate(),
-    this.Начало = createTime(),
-    this.ФИО = "Ивкин Алексей Сергеевич",
-    this.ChatID = chatID
+function StartData(chatID, accountData, equipment) {
+    this.id = equipment.id,
+    this.date = createDate(),
+    this.startTime = createTime(),
+    this.fullName = createFullName(accountData),
+    this.chatID = chatID,
+    this.position = accountData.position,
+    this.name = equipment.name + " " + equipment.model
 }
 
-async function startWorkWithEquipment(chatID = 392584400, equipmentID = 1) {
-    await equipmentOperations.loadInfo();
-    let sheet = equipmentOperations.sheetsByIndex[0];
-    const data = new StartData(chatID, equipmentID);
-    await sheet.addRow(data);
+async function startWorkWithEquipment(chatID = 392584400, accountData, equipment) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            await equipmentOperations.loadInfo();
+            let sheet = equipmentOperations.sheetsByIndex[0];
+            const data = new StartData(chatID, accountData, equipment);
+            await sheet.addRow(data);
+            resolve(successMsg);
+        } catch (e) {
+            reject(e);
+        }
+
+    })
+
 }
 
 async function fetchEquipmentListFromGSheet() {

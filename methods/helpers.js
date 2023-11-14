@@ -21,6 +21,11 @@ function createTime() {
     return hours + ":" + minutes;
 }
 
+function createFullName(userData) {
+    const {firstName, lastName, patronymic} = userData;
+    return lastName + " " + firstName + " " + patronymic;
+}
+
 function checkIsUserSuperAdmin(chatID) {
     const result = {resolved: true, errorMsg: ""};
     if(!adminsChatID.includes(chatID)) {
@@ -30,4 +35,4 @@ function checkIsUserSuperAdmin(chatID) {
     return result;
 }
 
-module.exports = {createDate, createTime, checkIsUserSuperAdmin}
+module.exports = {createDate, createTime, checkIsUserSuperAdmin, createFullName}
