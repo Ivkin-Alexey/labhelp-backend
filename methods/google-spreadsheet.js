@@ -24,7 +24,7 @@ const equipmentOperations = new GoogleSpreadsheet.GoogleSpreadsheet(equipmentOpe
 const equipmentList = new GoogleSpreadsheet.GoogleSpreadsheet(equipmentListTableID, serviceAccountAuth);
 
 function StartData(chatID, accountData, equipment) {
-    this.id = equipment.id,
+    this.equipmentID = equipment.id,
     this.date = createDate(),
     this.startTime = createTime(),
     this.fullName = createFullName(accountData),

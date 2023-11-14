@@ -2,6 +2,7 @@ const webAppUrl = 'https://ephemeral-kringle-2c94b2.netlify.app';
 const editProfileUrl = webAppUrl + '/:chatID/editProfile';
 
 const superAdminsChatID = [392584400, 1516784245];
+const timeZoneRelativeToUTC = 3;
 
 const defaultResearchSelectOption = {
     value: 'Без направления',
@@ -126,5 +127,6 @@ module.exports = {
     newPersonCheckingRules,
     researchesSelectOptions,
     editProfileUrl,
+    timeZoneRelativeToUTC,
     EquipmentItem
 };
