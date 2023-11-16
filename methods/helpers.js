@@ -15,6 +15,7 @@ function createTime() {
     const date = new Date();
     let hours, minutes;
     hours = date.getUTCHours() + timeZoneRelativeToUTC;
+    if(hours >= 24) hours = hours - 24;
     if(+hours<10) hours= "0" + hours;
     minutes = date.getUTCMinutes();
     if(+minutes<10) minutes = "0" + minutes;
