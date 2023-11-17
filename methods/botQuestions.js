@@ -1,4 +1,4 @@
-const {stickers, constants, webAppUrl, adminsChatID} = require("../assets/constants");
+const {webAppUrl} = require("../assets/constants/constants");
 const {updateUserData} = require("./updateDb");
 
 async function askUserPosition(bot, chatID) {
@@ -41,7 +41,7 @@ async function askPhoneNumber(bot, chatID) {
 }
 
 async function askConfirmNewUser(bot, adminChatId, userData) {
-    const {first_name, last_name, patronymic, phone, position, study, research} = userData;
+    const {first_name, last_name, phone, position, study, research} = userData;
     await bot.sendMessage(adminChatId,
         `Новая заявка: \n${research}\n${position}, ${study}\n${last_name} ${first_name}\n${phone}`, {
         reply_markup: {

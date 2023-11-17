@@ -5,14 +5,15 @@ const cors = require('cors');
 const fs = require("fs");
 const https = require('https');
 const http = require('http');
-const {researchesSelectOptions} = require("./assets/constants");
+const {researchesSelectOptions} = require("./assets/constants/constants");
 const localisations = require("./assets/localisations");
 const {confirmApplication, denyApplication} = localisations.superAdministratorActions;
 const BotAnswers = require("./methods/botAnswers");
 const {checkTextIsResearch} = require("./methods/validation");
 const {processCallbackQuery} = require("./methods/callbackQueriesProcessing");
-const {startWorkWithEquipment} = require("./methods/google-spreadsheet");
+const {getCellImageUrl} = require("./methods/google-spreadsheet");
 const {checkIsUserSuperAdmin} = require("./methods/helpers");
+const {startWorkWithEquipment, endWorkWithEquipment} = require("./methods/equipments");
 const {updateUserData, getUserList, deleteUser, addRandomUser, deleteUsersWithEmptyChatID,
     createEquipmentDbFromGSheet, getEquipmentList
 } = require("./methods/updateDb");
@@ -74,9 +75,6 @@ bot.on('message', async msg => {
                 break;
             case "/get_chat_id":
                 await bot.sendMessage(chatID, 'Чат ID: ' + chatID);
-                break;
-            case "/startEquipment":
-                await startWorkWithEquipment(chatID);
                 break;
             case "/reloadEquipmentDB":
                 const result = checkIsUserSuperAdmin(chatID);
@@ -155,8 +153,9 @@ app.post('/equipmentStart', async (req, res) => {
     const {chatID, accountData, equipment} = req.body;
     try {
         return await startWorkWithEquipment(+chatID, accountData, equipment)
-            .then(res => res.status(200).json())
-            // .then(async () => await bot.sendMessage(chatID, denyApplication));
+            .then(message => {
+                res.status(200).json(message)
+            })
     } catch (e) {
         return res.status(500).json(e);
     }

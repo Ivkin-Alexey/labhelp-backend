@@ -1,4 +1,4 @@
-const {adminsChatID, timeZoneRelativeToUTC} = require("../assets/constants");
+const {superAdminsChatID, timeZoneRelativeToUTC} = require("../assets/constants/constants");
 
 function createDate() {
     const date = new Date();
@@ -29,7 +29,7 @@ function createFullName(userData) {
 
 function checkIsUserSuperAdmin(chatID) {
     const result = {resolved: true, errorMsg: ""};
-    if(!adminsChatID.includes(chatID)) {
+    if(!superAdminsChatID.includes(chatID)) {
         result.resolved = false;
         result.errorMsg = "Данную команду могут использовать только суперадминистраторы"
     }

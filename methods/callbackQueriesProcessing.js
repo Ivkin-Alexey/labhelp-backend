@@ -1,9 +1,8 @@
-const {stickers, superAdminsChatID} = require("../assets/constants");
+const {stickers, superAdminsChatID} = require("../assets/constants/constants");
 const localisations = require("../assets/localisations");
 const {invitationToRegistration} = localisations.botAnswers;
 const BotAnswers = require("./botAnswers");
 const {updateUserData} = require("./updateDb");
-const adminChatID = superAdminsChatID;
 
 async function processCallbackQuery(bot, chatID, messageData) {
     let answer = undefined;
@@ -24,10 +23,10 @@ async function processCallbackQuery(bot, chatID, messageData) {
             await BotAnswers.sendWebAppButtonWithMessage(bot, chatID, invitationToRegistration);
             break;
         case "adminConfirmUser":
-            await bot.sendMessage(adminChatID, "Данные сохранены на сервере");
+            await bot.sendMessage(superAdminsChatID[0], "Данные сохранены на сервере");
             break;
         case "adminDoesntConfirmUser":
-            await bot.sendMessage(adminChatID, "Заявка отменена")
+            await bot.sendMessage(superAdminsChatID[0], "Заявка отменена")
             break;
     }
 }

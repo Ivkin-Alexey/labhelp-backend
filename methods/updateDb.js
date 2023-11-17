@@ -4,8 +4,8 @@ const jsonPath = path.join(__dirname, '..', 'assets', 'db', 'db.json');
 const equipmentJsonPath = path.join(__dirname, '..', 'assets', 'db', 'equipment.json');
 const fs = require("fs");
 const md5 = require('md5');
-const {newPerson, newPersonCheckingRules, adminsChatID} = require("../assets/constants");
-const {createDate} = require("../methods/helpers");
+const {newPerson, newPersonCheckingRules, superAdminsChatID} = require("../assets/constants/users");
+const {createDate} = require("./helpers");
 const {fetchEquipmentListFromGSheet} = require("./google-spreadsheet");
 
 let md5Previous = null;
@@ -54,7 +54,7 @@ async function updateNewUserFields() {
 async function deleteUsersWithEmptyChatID(chatID) {
     return new Promise((resolve, reject) => {
         try {
-            if (!adminsChatID.adminsChatID.includes(+chatID)) reject("Ошибка сервера. Вы не администратор")
+            if (!superAdminsChatID.includes(+chatID)) reject("Ошибка сервера. Вы не администратор")
             readFile(jsonPath, 'utf8', (error, data) => {
                 if (error) {
                     reject(error);
@@ -231,7 +231,7 @@ async function createEquipmentDbFromGSheet() {
     })
 }
 
-// updateNewUserFields();
+updateNewUserFields();
 
 module.exports = {
     updateUserData,
@@ -241,6 +241,7 @@ module.exports = {
     addRandomUser,
     deleteUsersWithEmptyChatID,
     createEquipmentDbFromGSheet,
-    getEquipmentList
+    getEquipmentList,
+    updateEquipmentUsingStatus
 }
 

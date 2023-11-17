@@ -1,4 +1,4 @@
-let {keyboards, stickers, researches, editProfileUrl} = require("../assets/constants");
+let {keyboards, stickers, researches, editProfileUrl} = require("../assets/constants/constants");
 const localisations = require("../assets/localisations");
 const fs = require("fs");
 
