@@ -261,7 +261,7 @@ async function createEquipmentDbFromGSheet() {
     })
 }
 
-updateNewUserFields();
+// updateNewUserFields();
 
 module.exports = {
     updateUserData,
