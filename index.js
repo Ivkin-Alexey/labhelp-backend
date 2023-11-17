@@ -157,12 +157,30 @@ app.post('/equipmentStart', async (req, res) => {
                 res.status(200).json(message)
             })
     } catch (e) {
+        console.log(e);
+        return res.status(500).json(e);
+    }
+});
+
+app.post('/equipmentEnd', async (req, res) => {
+    const {chatID, accountData, equipment} = req.body;
+    try {
+        return await endWorkWithEquipment(+chatID, accountData, equipment)
+            .then(message => {
+                res.status(200).json(message)
+            })
+    } catch (e) {
+        console.log(e);
         return res.status(500).json(e);
     }
 });
 
 app.get('/hello', async (req, res) => {
     return res.status(200).json('Привет');
+});
+
+app.get('/getCellImageUrl', async (req, res) => {
+    return await getCellImageUrl().then((url) => res.status(200).json(url));
 });
 
 app.get('/equipmentList', async (req, res) => {

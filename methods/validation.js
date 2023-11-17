@@ -1,4 +1,4 @@
-const {smiles, researchTopics} = require("../assets/constants");
+const {smiles, researchTopics} = require("../assets/constants/constants");
 
 function validatePhoneNumber(input_str) {
     const re = /^\+?[1-9]\d{10}$/;
