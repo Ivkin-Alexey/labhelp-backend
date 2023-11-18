@@ -1,8 +1,7 @@
-let {keyboards, stickers, researches, editProfileUrl} = require("../assets/constants/constants");
-const localisations = require("../assets/localisations");
 const fs = require("fs");
 
-const {getUserData} = require("./updateDb");
+let {keyboards, stickers, researches, editProfileUrl} = require("../assets/constants/constants");
+let localisations = require("../assets/constants/localisations");
 
 async function sendStartMessage(bot, chatID, first_name, last_name) {
     await bot.sendSticker(chatID, stickers.hello);
@@ -57,7 +56,6 @@ async function sendResearch(bot, chatID, researchTopic) {
         disable_notification: true,
     })
 }
-
 
 async function sendConfusedMessage(bot, chatID) {
     await bot.sendSticker(chatID, stickers.unknown);

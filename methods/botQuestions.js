@@ -1,5 +1,5 @@
 const {webAppUrl} = require("../assets/constants/constants");
-const {updateUserData} = require("./updateDb");
+const {updateUserData} = require("./users");
 
 async function askUserPosition(bot, chatID) {
     await bot.sendMessage(chatID, "Выбери категорию обучающегося: ", {
@@ -65,6 +65,4 @@ async function askWhichFieldNeedToEdit(bot, chatID, userLocalData) {
     });
 }
 
-
-
-module.exports = {askUserPosition, askEducationalGroup, askPhoneNumber, askConfirmNewUser,askWhichFieldNeedToEdit, askEducationYear};
+module.exports = {askUserPosition, askEducationalGroup, askPhoneNumber, askConfirmNewUser, askWhichFieldNeedToEdit, askEducationYear};

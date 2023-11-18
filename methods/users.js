@@ -1,4 +1,4 @@
-const {writeFile, readFile, readFileSync, writeFileSync} = require("fs");
+const {writeFile, readFile, readFileSync} = require("fs");
 const path = require("path");
 const jsonPath = path.join(__dirname, '..', 'assets', 'db', 'db.json');
 const equipmentJsonPath = path.join(__dirname, '..', 'assets', 'db', 'equipment.json');
@@ -6,7 +6,7 @@ const fs = require("fs");
 const md5 = require('md5');
 const {newPerson, newPersonCheckingRules, superAdminsChatID} = require("../assets/constants/users");
 const {createDate} = require("./helpers");
-const {fetchEquipmentListFromGSheet} = require("./google-spreadsheet");
+const {fetchEquipmentListFromGSheet} = require("./equipments");
 
 let md5Previous = null;
 let fsWait = false;
@@ -139,36 +139,6 @@ async function updateUserData(chatID, userData) {
     })
 }
 
-async function updateEquipmentUsingStatus(equipmentCategory, equipmentID, chatID) {
-    return new Promise((resolve, reject) => {
-        readFile(equipmentJsonPath, 'utf8', (error, data) => {
-
-            if (error) {
-                reject(`Ошибка чтения данных на сервере: ${error}. Сообщите о ней администратору`);
-                return;
-            }
-
-            let parsedData = JSON.parse(Buffer.from(data));
-            let index = parsedData[equipmentCategory].findIndex(el => el.id === equipmentID);
-            let equipment = parsedData[equipmentCategory][index];
-            let {isUsing} = equipment;
-            if(isUsing.includes(chatID)) isUsing = isUsing.filter(el => {
-                console.log(el, chatID);
-                return el !== chatID
-            });
-            else isUsing.push(chatID);
-            parsedData[equipmentCategory][index].isUsing = isUsing;
-            writeFile(equipmentJsonPath, JSON.stringify(parsedData, null, 2), (error) => {
-                if (error) {
-                    reject(`Ошибка записи данных на сервере: ${error}. Сообщите о ней администратору`);
-                    return;
-                }
-                resolve(parsedData);
-            });
-        })
-    })
-}
-
 async function getUserData(chatID) {
     const file = await readFileSync(jsonPath);
     return JSON.parse(Buffer.from(file))[chatID];
@@ -177,18 +147,6 @@ async function getUserData(chatID) {
 async function getUserList() {
     return new Promise((resolve, reject) => {
         readFile(jsonPath, 'utf8', (error, data) => {
-            if (error) {
-                reject(`Ошибка чтения данных на сервере: ${error}. Сообщите о ней администратору`);
-                return;
-            }
-            resolve(JSON.parse(Buffer.from(data)));
-        })
-    })
-}
-
-async function getEquipmentList() {
-    return new Promise((resolve, reject) => {
-        readFile(equipmentJsonPath, 'utf8', (error, data) => {
             if (error) {
                 reject(`Ошибка чтения данных на сервере: ${error}. Сообщите о ней администратору`);
                 return;
@@ -239,26 +197,13 @@ function checkIsAllFieldsComplete(object) {
     return isComplete;
 }
 
-async function createEquipmentDbFromGSheet() {
-    return new Promise((resolve, reject) => {
-        fetchEquipmentListFromGSheet().then(list => {
-            const listWithCategories = {};
-            list.forEach(el => {
-                if(listWithCategories[el.category]) listWithCategories[el.category].push(el);
-                else {
-                    listWithCategories[el.category] = [];
-                    listWithCategories[el.category].push(el);
-                }
-            })
-            writeFileSync(equipmentJsonPath, JSON.stringify(listWithCategories, null, 2), error => {
-                if (error) {
-                    reject(`Ошибка записи данных на сервере: ${error}. Сообщите о ней администратору`);
-                    return;
-                }
-                resolve('База данных оборудования обновлена');
-            })
-        })
-    })
+function checkIsUserSuperAdmin(chatID) {
+    const result = {resolved: true, errorMsg: ""};
+    if(!superAdminsChatID.includes(chatID)) {
+        result.resolved = false;
+        result.errorMsg = "Данную команду могут использовать только суперадминистраторы"
+    }
+    return result;
 }
 
 // updateNewUserFields();
@@ -270,8 +215,6 @@ module.exports = {
     deleteUser,
     addRandomUser,
     deleteUsersWithEmptyChatID,
-    createEquipmentDbFromGSheet,
-    getEquipmentList,
-    updateEquipmentUsingStatus
+    checkIsUserSuperAdmin,
 }
 

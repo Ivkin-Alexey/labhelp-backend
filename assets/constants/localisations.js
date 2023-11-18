@@ -15,7 +15,4 @@ const localisations = {
     }
 };
 
-
-
-
 module.exports = localisations;

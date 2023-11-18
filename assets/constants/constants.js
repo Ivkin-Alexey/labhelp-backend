@@ -1,6 +1,5 @@
-const {imgUrl, EquipmentItem, imgColumn, equipmentListSheetID, equipmentOperationsTableID, equipmentListTableID} = require("./equipments");
-const {newPersonCheckingRules, newPerson, superAdminsChatID} = require("../constants/users");
-const {researches, researchTopics, researchesSelectOptions} = require("./researches");
+const {researches} = require("./researches");
+const {localisations} = require("./localisations");
 
 const timeZoneRelativeToUTC = 3;
 const webAppUrl = 'https://ephemeral-kringle-2c94b2.netlify.app';
@@ -51,18 +50,8 @@ module.exports = {
     commands,
     stickers,
     researches,
-    researchTopics,
     smiles,
-    newPerson,
-    newPersonCheckingRules,
-    researchesSelectOptions,
     editProfileUrl,
     timeZoneRelativeToUTC,
-    EquipmentItem,
-    equipmentOperationsTableID,
-    equipmentListTableID,
-    equipmentListSheetID,
-    imgColumn,
-    imgUrl,
-    superAdminsChatID
+    localisations
 };

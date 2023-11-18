@@ -1,9 +1,4 @@
-const {smiles, researchTopics} = require("../assets/constants/constants");
-
-function validatePhoneNumber(input_str) {
-    const re = /^\+?[1-9]\d{10}$/;
-    return re.test(input_str);
-}
+const {researchTopics} = require("../assets/constants/researches");
 
 function checkTextIsResearch(text) {
     let research = null;
@@ -13,4 +8,4 @@ function checkTextIsResearch(text) {
     return research;
 }
 
-module.exports = {validatePhoneNumber, checkTextIsResearch};
+module.exports = {checkTextIsResearch};

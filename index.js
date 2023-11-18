@@ -5,18 +5,18 @@ const cors = require('cors');
 const fs = require("fs");
 const https = require('https');
 const http = require('http');
+
 const {researchesSelectOptions} = require("./assets/constants/constants");
-const localisations = require("./assets/localisations");
-const {confirmApplication, denyApplication} = localisations.superAdministratorActions;
-const BotAnswers = require("./methods/botAnswers");
+const {getCellImageUrl} = require("./assets/constants/gSpreadSheets");
+const {checkIsUserSuperAdmin, updateUserData, getUserList, addRandomUser,
+    deleteUsersWithEmptyChatID} = require("./methods/users");
+const {getEquipmentList, createEquipmentDbFromGSheet} = require("./methods/equipments");
+const {sendResearches, sendStartMessage, sendResearch, sendConfusedMessage} = require("./methods/botAnswers");
+const {processAppPost} = require("./methods/appPostsProcessing");
 const {checkTextIsResearch} = require("./methods/validation");
+
+const path = require("path");
 const {processCallbackQuery} = require("./methods/callbackQueriesProcessing");
-const {getCellImageUrl} = require("./methods/google-spreadsheet");
-const {checkIsUserSuperAdmin} = require("./methods/helpers");
-const {startWorkWithEquipment, endWorkWithEquipment} = require("./methods/equipments");
-const {updateUserData, getUserList, deleteUser, addRandomUser, deleteUsersWithEmptyChatID,
-    createEquipmentDbFromGSheet, getEquipmentList
-} = require("./methods/updateDb");
 
 process.on('uncaughtException', function (err) {
     console.log(err);
@@ -55,7 +55,7 @@ bot.on('message', async msg => {
                 })
                 break;
             case "/start":
-                await BotAnswers.sendStartMessage(bot, chatID, first_name, last_name);
+                await sendStartMessage(bot, chatID, first_name, last_name);
                 await updateUserData(chatID, {firstName: first_name, lastName: last_name, chatID});
                 break;
             case "/addRandomUser":
@@ -71,28 +71,29 @@ bot.on('message', async msg => {
                 await deleteUsersWithEmptyChatID(chatID).then(res => console.log(res));
                 break;
             case "/researches":
-                await BotAnswers.sendResearches(bot, chatID);
+                await sendResearches(bot, chatID);
                 break;
             case "/get_chat_id":
                 await bot.sendMessage(chatID, 'Чат ID: ' + chatID);
                 break;
             case "/reloadEquipmentDB":
                 const result = checkIsUserSuperAdmin(chatID);
-                if(result.resolved) {
+                if (result.resolved) {
                     await createEquipmentDbFromGSheet().then(r => console.log(r));
                 } else {
                     await bot.sendMessage(chatID, result.errorMsg);
                 }
                 break;
             // case "/get_my_data":
-            //     await getUserData(chatID).then(res => BotAnswers.sendUserData(bot, chatID, res));
+            //     await getUserData(chatID).then(res => sendUserData(bot, chatID, res));
             //     break;
             case isResearch:
-                await BotAnswers.sendResearch(bot, chatID, isResearch);
+
+                await sendResearch(bot, chatID, isResearch);
                 await updateUserData(chatID, {research: isResearch});
                 break;
             default:
-                await BotAnswers.sendConfusedMessage(bot, chatID);
+                await sendConfusedMessage(bot, chatID);
         }
     } catch (e) {
         console.log(e);
@@ -118,62 +119,17 @@ bot.on('callback_query', async ctx => {
     }
 });
 
-app.post('/updatePersonData', async (req, res) => {
-    const {queryId, formData, chatID} = req.body;
-    try {
-        return await updateUserData(+chatID, formData)
-            .then(userList => res.status(200).json(userList)).then(async () => {
-                if (formData?.isUserConfirmed) await bot.sendMessage(chatID, confirmApplication);
-            });
-        // await bot.answerWebAppQuery(queryId, {
-        //     type: 'article',
-        //     id: queryId,
-        //     title: 'Успешная покупка',
-        //     input_message_content: {
-        //         message_text: "Ваши данные обновлены",
-        //     }
-        // })
-    } catch (e) {
-        return res.status(500).json(e);
-    }
-});
 
-app.post('/deletePerson', async (req, res) => {
-    const {chatID} = req.body;
+app.post(path, async (req, res) => {
+    const {body} = req;
     try {
-        return await deleteUser(+chatID)
-            .then(personList => res.status(200).json(personList))
-            .then(async () => await bot.sendMessage(chatID, denyApplication));
+        return await processAppPost(bot, path, body).then(data => res.status(200).json(data));
     } catch (e) {
         return res.status(500).json(e);
     }
-});
+})
 
-app.post('/equipmentStart', async (req, res) => {
-    const {chatID, accountData, equipment} = req.body;
-    try {
-        return await startWorkWithEquipment(+chatID, accountData, equipment)
-            .then(message => {
-                res.status(200).json(message)
-            })
-    } catch (e) {
-        console.log(e);
-        return res.status(500).json(e);
-    }
-});
 
-app.post('/equipmentEnd', async (req, res) => {
-    const {chatID, accountData, equipment} = req.body;
-    try {
-        return await endWorkWithEquipment(+chatID, accountData, equipment)
-            .then(message => {
-                res.status(200).json(message)
-            })
-    } catch (e) {
-        console.log(e);
-        return res.status(500).json(e);
-    }
-});
 
 app.get('/hello', async (req, res) => {
     return res.status(200).json('Привет');

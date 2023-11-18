@@ -1,4 +1,5 @@
-const {createDate, createTime, createFullName} = require("../../methods/helpers");
+const {createDate, createTime} = require("../../methods/helpers");
+const {createFullName} = require("../../methods/helpers");
 
 function EquipmentItem() {
     this.id = "";
