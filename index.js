@@ -120,16 +120,14 @@ bot.on('callback_query', async ctx => {
 });
 
 
-app.post(path, async (req, res) => {
+app.post(paths, async (req, res) => {
     const {body} = req;
     try {
-        return await processAppPost(bot, path, body).then(data => res.status(200).json(data));
+        return await processAppPost(bot, paths, body).then(data => res.status(200).json(data));
     } catch (e) {
         return res.status(500).json(e);
     }
 })
-
-
 
 app.get('/hello', async (req, res) => {
     return res.status(200).json('Привет');

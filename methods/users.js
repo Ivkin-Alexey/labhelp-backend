@@ -1,12 +1,10 @@
 const {writeFile, readFile, readFileSync} = require("fs");
 const path = require("path");
 const jsonPath = path.join(__dirname, '..', 'assets', 'db', 'db.json');
-const equipmentJsonPath = path.join(__dirname, '..', 'assets', 'db', 'equipment.json');
 const fs = require("fs");
 const md5 = require('md5');
 const {newPerson, newPersonCheckingRules, superAdminsChatID} = require("../assets/constants/users");
 const {createDate} = require("./helpers");
-const {fetchEquipmentListFromGSheet} = require("./equipments");
 
 let md5Previous = null;
 let fsWait = false;

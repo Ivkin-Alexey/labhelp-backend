@@ -2,6 +2,8 @@ const {EquipmentItem} = require("../assets/constants/equipments");
 const {equipmentOperations, equipmentList, imgUrl, imgColumn, equipmentListSheetID} = require("../assets/constants/gSpreadSheets");
 const {StartData} = require("../assets/constants/equipments");
 const {readFile, writeFile, writeFileSync} = require("fs");
+const path = require("path");
+const equipmentJsonPath = path.join(__dirname, '..', 'assets', 'db', 'equipment.json');
 
 async function startWorkWithEquipment(chatID = 392584400, accountData, equipment) {
     const {category, id} = equipment;

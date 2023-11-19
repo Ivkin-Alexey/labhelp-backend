@@ -24,6 +24,6 @@ function StartData(chatID, accountData, equipment) {
 
 module.exports = {
     EquipmentItem,
-    StartData
+    StartData,
 }
 
