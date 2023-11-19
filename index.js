@@ -6,7 +6,7 @@ const fs = require("fs");
 const https = require('https');
 const http = require('http');
 
-const {researchesSelectOptions} = require("./assets/constants/constants");
+const {researchesSelectOptions} = require("./assets/constants/researches");
 const {getCellImageUrl} = require("./assets/constants/gSpreadSheets");
 const {checkIsUserSuperAdmin, updateUserData, getUserList, addRandomUser,
     deleteUsersWithEmptyChatID
