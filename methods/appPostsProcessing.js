@@ -3,38 +3,55 @@ const {startWorkWithEquipment, endWorkWithEquipment} = require("./equipments");
 const localisations = require("../assets/constants/localisations");
 const {confirmApplication, denyApplication} = localisations.superAdministratorActions;
 
-async function processAppPost(bot, path, body) {
-
-    const {chatID, accountData, equipment, queryId, formData} = body;
-
-    return new Promise((resolve, reject) => {
-        switch (path) {
-            case "/updatePersonData":
-                resolve(updateUserData(+chatID, formData)
-                    .then(userList => {
-                        if (formData?.isUserConfirmed) bot.sendMessage(chatID, confirmApplication);
-                        return userList;
-                    }))
-                break;
-            case "/deletePerson":
-                resolve(deleteUser(+chatID)
-                    .then(personList => {
-                        bot.sendMessage(chatID, denyApplication)
-                        return personList
-                    }));
-                break;
-            case "/equipmentStart":
-                resolve(startWorkWithEquipment(+chatID, accountData, equipment)
-                    .then(message => message))
-                break;
-            case "/equipmentEnd":
-                resolve(endWorkWithEquipment(+chatID, accountData, equipment)
-                        .then(message => message))
-                break;
-            default:
-                reject("Ошибка")
-        }
-    })
+async function updateUserDataPost(req, res, bot) {
+    const {body} = req;
+    const {chatID, formData} = body;
+    try {
+        return await updateUserData(+chatID, formData)
+            .then(userList => {
+                if (formData?.isUserConfirmed) bot.sendMessage(chatID, confirmApplication);
+                return userList;
+            })
+            .then(data => res.status(200).json(data));
+    } catch (e) {
+        return res.status(500).json(e);
+    }
 }
 
-module.exports = {processAppPost}
+async function deletePersonPost(req, res, bot) {
+    const {chatID} = req.body;
+    try {
+        return await deleteUser(+chatID)
+            .then(personList => {
+                bot.sendMessage(chatID, denyApplication)
+                return personList
+            })
+            .then(data => res.status(200).json(data));
+    } catch (e) {
+        return res.status(500).json(e);
+    }
+}
+
+async function equipmentStartPost(req, res, bot) {
+    const {body} = req;
+    const {chatID, accountData, equipment} = body;
+    try {
+        return await startWorkWithEquipment(+chatID, accountData, equipment)
+            .then(data => res.status(200).json(data));
+    } catch (e) {
+        return res.status(500).json(e);
+    }
+}
+
+async function equipmentEndPost(req, res) {
+    const {body} = req;
+    const {chatID, accountData, equipment} = body;
+    try {
+        return await endWorkWithEquipment(+chatID, accountData, equipment)
+            .then(data => res.status(200).json(data));
+    } catch (e) {
+        return res.status(500).json(e);
+    }
+}
+
+module.exports = {updateUserDataPost, deletePersonPost, equipmentEndPost, equipmentStartPost}

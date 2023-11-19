@@ -27,16 +27,15 @@ async function endWorkWithEquipment(chatID = 392584400, accountData, equipment) 
     return new Promise(async (resolve, reject) => {
         try {
             const equipment = await updateEquipmentUsingStatus(category, id, chatID);
-            await equipmentOperations.loadInfo();
-            let sheet = equipmentOperations.sheetsByIndex[0];
-            let rows = await sheet.getRows();
-            console.log(rows);
+            // await equipmentOperations.loadInfo();
+            // let sheet = equipmentOperations.sheetsByIndex[0];
+            // let rows = await sheet.getRows();
             // rows.forEach((el, i) => {
             //     const equipmentID = rows[i].get("id");
             //     if(equipmentID === id) rows[i].set("endTime", createTime());
             // })
-            await sheet.saveUpdatedCells();
-            resolve(rows);
+            // await sheet.saveUpdatedCells();
+            resolve(equipment);
         } catch (e) {
             reject(e);
         }
@@ -148,8 +147,6 @@ async function getEquipmentList() {
 module.exports = {
     startWorkWithEquipment,
     endWorkWithEquipment,
-    fetchEquipmentListFromGSheet,
     getEquipmentList,
     createEquipmentDbFromGSheet,
-    getCellImageUrl
 }

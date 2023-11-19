@@ -9,10 +9,11 @@ const http = require('http');
 const {researchesSelectOptions} = require("./assets/constants/constants");
 const {getCellImageUrl} = require("./assets/constants/gSpreadSheets");
 const {checkIsUserSuperAdmin, updateUserData, getUserList, addRandomUser,
-    deleteUsersWithEmptyChatID} = require("./methods/users");
+    deleteUsersWithEmptyChatID
+} = require("./methods/users");
 const {getEquipmentList, createEquipmentDbFromGSheet} = require("./methods/equipments");
 const {sendResearches, sendStartMessage, sendResearch, sendConfusedMessage} = require("./methods/botAnswers");
-const {processAppPost} = require("./methods/appPostsProcessing");
+const {processAppPost, updateUserDataPost, deletePersonPost, equipmentStartPost, equipmentEndPost} = require("./methods/appPostsProcessing");
 const {checkTextIsResearch} = require("./methods/validation");
 
 const path = require("path");
@@ -120,15 +121,6 @@ bot.on('callback_query', async ctx => {
 });
 
 
-app.post(paths, async (req, res) => {
-    const {body} = req;
-    try {
-        return await processAppPost(bot, paths, body).then(data => res.status(200).json(data));
-    } catch (e) {
-        return res.status(500).json(e);
-    }
-})
-
 app.get('/hello', async (req, res) => {
     return res.status(200).json('Привет');
 });
@@ -168,3 +160,8 @@ httpServer.listen(PORT, () => {
 httpsServer.listen(443, () => {
     console.log(`HTTP Server running on port ${443}`);
 })
+
+app.post("/updatePersonData", async (req, res) => await updateUserDataPost(req, res, bot));
+app.post("/deletePerson", async (req, res) => await deletePersonPost(req, res, bot));
+app.post("/equipmentStart", async (req, res) => await equipmentStartPost(req, res, bot))
+app.post("/equipmentEnd", async (req, res) => await equipmentEndPost(req, res, bot));
