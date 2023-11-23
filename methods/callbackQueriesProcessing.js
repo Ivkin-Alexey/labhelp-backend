@@ -13,6 +13,7 @@ async function processCallbackQuery(bot, chatID, messageData) {
     switch (answer) {
         case "Yes":
             await bot.sendSticker(chatID, stickers.agree);
+            await updateUserData(chatID, {firstName: messageData.first_name, lastName: messageData.last_name, chatID});
             await sendResearches(bot, chatID);
             break;
         case "No":

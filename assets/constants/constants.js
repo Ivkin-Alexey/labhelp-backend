@@ -1,6 +1,9 @@
 const {researches} = require("./researches");
 const {localisations} = require("./localisations");
 
+const PORT = 8000;
+const HTTPS_PORT = 443;
+
 const timeZoneRelativeToUTC = 3;
 const webAppUrl = 'https://ephemeral-kringle-2c94b2.netlify.app';
 const editProfileUrl = webAppUrl + '/:chatID/editProfile';
@@ -45,6 +48,8 @@ const stickers = {
 }
 
 module.exports = {
+    PORT,
+    HTTPS_PORT,
     webAppUrl,
     keyboards,
     commands,

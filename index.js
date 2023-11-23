@@ -6,6 +6,7 @@ const fs = require("fs");
 const https = require('https');
 const http = require('http');
 
+const {HTTPS_PORT, PORT} = require("./assets/constants/constants");
 const {researchesSelectOptions} = require("./assets/constants/researches");
 const {getCellImageUrl} = require("./assets/constants/gSpreadSheets");
 const {checkIsUserSuperAdmin, updateUserData, getUserList, addRandomUser,
@@ -26,7 +27,6 @@ process.on('uncaughtException', function (err) {
 process.traceDeprecation = true;
 process.env.NTBA_FIX_350 = true;
 const app = express();
-const PORT = 8000;
 const token = process.env.TELEGRAM_TOKEN;
 
 const bot = new TelegramBot(token, {polling: true});
@@ -57,7 +57,6 @@ bot.on('message', async msg => {
                 break;
             case "/start":
                 await sendStartMessage(bot, chatID, first_name, last_name);
-                await updateUserData(chatID, {firstName: first_name, lastName: last_name, chatID});
                 break;
             case "/addRandomUser":
                 await addRandomUser();
@@ -111,10 +110,12 @@ bot.on('message', async msg => {
 });
 
 bot.on('callback_query', async ctx => {
-    const chatID = ctx.message.chat.id;
+    const {id, first_name, last_name} = ctx.message.chat;
     let messageData = JSON.parse(ctx.data);
+    messageData.first_name = first_name;
+    messageData.last_name = last_name;
     try {
-        await processCallbackQuery(bot, chatID, messageData);
+        await processCallbackQuery(bot, id, messageData);
     } catch (error) {
         console.log(error);
     }
@@ -157,8 +158,8 @@ httpServer.listen(PORT, () => {
     console.log(`HTTP Server running on port ${PORT}`);
 })
 
-httpsServer.listen(443, () => {
-    console.log(`HTTP Server running on port ${443}`);
+httpsServer.listen(HTTPS_PORT, () => {
+    console.log(`HTTPS Server running on port ${HTTPS_PORT}`);
 })
 
 app.post("/updatePersonData", async (req, res) => await updateUserDataPost(req, res, bot));
