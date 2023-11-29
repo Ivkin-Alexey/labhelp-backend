@@ -1,4 +1,5 @@
 const {defaultResearchSelectOption} = require("./researches")
+const {createFullName} = require("../../methods/helpers");
 
 const superAdminsChatID = [392584400, 1516784245];
 
@@ -39,4 +40,14 @@ const newPersonCheckingRules = {
     requirements: "unRequired"
 };
 
-module.exports = {newPerson, newPersonCheckingRules, superAdminsChatID}
+function ConfirmedUserData(chatID, accountData) {
+    this.chatID = chatID;
+    this.position = accountData.position;
+    this.fullName = createFullName(accountData);
+    this.position = accountData.position;
+    this.registrationDate = accountData.otherInfo.registrationDate;
+    this.research = accountData.research;
+    this.course = accountData.postGraduateEducationYear + accountData.studentsEducationYear;
+}
+
+module.exports = {newPerson, newPersonCheckingRules, superAdminsChatID, ConfirmedUserData}

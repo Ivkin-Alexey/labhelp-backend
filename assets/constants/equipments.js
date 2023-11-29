@@ -13,13 +13,13 @@ function EquipmentItem() {
 }
 
 function StartData(chatID, accountData, equipment) {
-    this.equipmentID = equipment.id,
-        this.date = createDate(),
-        this.startTime = createTime(),
-        this.fullName = createFullName(accountData),
-        this.chatID = chatID,
-        this.position = accountData.position,
-        this.name = equipment.name + " " + equipment.model
+    this.equipmentID = equipment.id;
+    this.date = createDate();
+    this.startTime = createTime();
+    this.fullName = createFullName(accountData);
+    this.chatID = chatID;
+    this.position = accountData.position;
+    this.name = equipment.name + " " + equipment.model;
 }
 
 module.exports = {

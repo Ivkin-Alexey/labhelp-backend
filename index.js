@@ -7,12 +7,13 @@ const https = require('https');
 const http = require('http');
 
 const {HTTPS_PORT, PORT} = require("./assets/constants/constants");
+const {equipment} = require("./assets/constants/localisations");
 const {researchesSelectOptions} = require("./assets/constants/researches");
-const {getCellImageUrl} = require("./assets/constants/gSpreadSheets");
+// const {getCellImageUrl} = require("./assets/constants/gSpreadSheets");
 const {checkIsUserSuperAdmin, updateUserData, getUserList, addRandomUser,
     deleteUsersWithEmptyChatID
 } = require("./methods/users");
-const {getEquipmentList, createEquipmentDbFromGSheet} = require("./methods/equipments");
+const {getEquipmentList, createEquipmentDbFromGSheet, reloadEquipmentDB} = require("./methods/equipments");
 const {sendResearches, sendStartMessage, sendResearch, sendConfusedMessage} = require("./methods/botAnswers");
 const {processAppPost, updateUserDataPost, deletePersonPost, equipmentStartPost, equipmentEndPost} = require("./methods/appPostsProcessing");
 const {checkTextIsResearch} = require("./methods/validation");
@@ -68,7 +69,7 @@ bot.on('message', async msg => {
                 await addRandomUser("superAdmin");
                 break;
             case "/deleteUsersWithEmptyChatID":
-                await deleteUsersWithEmptyChatID(chatID).then(res => console.log(res));
+                await deleteUsersWithEmptyChatID(chatID);
                 break;
             case "/researches":
                 await sendResearches(bot, chatID);
@@ -77,18 +78,12 @@ bot.on('message', async msg => {
                 await bot.sendMessage(chatID, 'Чат ID: ' + chatID);
                 break;
             case "/reloadEquipmentDB":
-                const result = checkIsUserSuperAdmin(chatID);
-                if (result.resolved) {
-                    await createEquipmentDbFromGSheet().then(r => console.log(r));
-                } else {
-                    await bot.sendMessage(chatID, result.errorMsg);
-                }
+                await reloadEquipmentDB(bot, chatID);
                 break;
             // case "/get_my_data":
             //     await getUserData(chatID).then(res => sendUserData(bot, chatID, res));
             //     break;
             case isResearch:
-
                 await sendResearch(bot, chatID, isResearch);
                 await updateUserData(chatID, {research: isResearch});
                 break;
@@ -126,9 +121,9 @@ app.get('/hello', async (req, res) => {
     return res.status(200).json('Привет');
 });
 
-app.get('/getCellImageUrl', async (req, res) => {
-    return await getCellImageUrl().then((url) => res.status(200).json(url));
-});
+// app.get('/getCellImageUrl', async (req, res) => {
+//     return await getCellImageUrl().then((url) => res.status(200).json(url));
+// });
 
 app.get('/equipmentList', async (req, res) => {
     try {

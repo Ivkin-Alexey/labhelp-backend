@@ -1,8 +1,10 @@
 const {EquipmentItem} = require("../assets/constants/equipments");
+const {equipment} = require("../assets/constants/localisations")
 const {equipmentOperations, equipmentList, imgUrl, imgColumn, equipmentListSheetID} = require("../assets/constants/gSpreadSheets");
 const {StartData} = require("../assets/constants/equipments");
 const {readFile, writeFile, writeFileSync} = require("fs");
 const path = require("path");
+const {checkIsUserSuperAdmin} = require("./users");
 const equipmentJsonPath = path.join(__dirname, '..', 'assets', 'db', 'equipment.json');
 
 async function startWorkWithEquipment(chatID = 392584400, accountData, equipment) {
@@ -11,6 +13,7 @@ async function startWorkWithEquipment(chatID = 392584400, accountData, equipment
         try {
             const updatedEquipmentList = await updateEquipmentUsingStatus(category, id, chatID);
             await equipmentOperations.loadInfo();
+            const cells = await equipmentOperations.loadCells().then(res => console.log(res))
             let sheet = equipmentOperations.sheetsByIndex[0];
             const data = new StartData(chatID, accountData, equipment);
             await sheet.addRow(data);
@@ -55,24 +58,36 @@ async function getCellImageUrl() {
     }
 }
 
+async function reloadEquipmentDB(bot, chatID) {
+    const result = checkIsUserSuperAdmin(chatID);
+    if (result.resolved) {
+        await bot.sendMessage(chatID, equipment.dbIsReloading);
+        await createEquipmentDbFromGSheet()
+            .then(r => bot.sendMessage(chatID, r))
+            .catch(err => bot.sendMessage(chatID, err));
+    } else {
+        await bot.sendMessage(chatID, result.errorMsg);
+    }
+}
+
 async function createEquipmentDbFromGSheet() {
     return new Promise((resolve, reject) => {
-        fetchEquipmentListFromGSheet().then(list => {
+        fetchEquipmentListFromGSheet().then(async list => {
             const listWithCategories = {};
             list.forEach(el => {
-                if(listWithCategories[el.category]) listWithCategories[el.category].push(el);
+                if (listWithCategories[el.category]) listWithCategories[el.category].push(el);
                 else {
                     listWithCategories[el.category] = [];
                     listWithCategories[el.category].push(el);
                 }
             })
-            writeFileSync(equipmentJsonPath, JSON.stringify(listWithCategories, null, 2), error => {
+            await writeFileSync(equipmentJsonPath, JSON.stringify(listWithCategories, null, 2), error => {
                 if (error) {
                     reject(`Ошибка записи данных на сервере: ${error}. Сообщите о ней администратору`);
-                    return;
                 }
-                resolve('База данных оборудования обновлена');
+
             })
+            resolve(equipment.dbIsReloadedMsg);
         })
     })
 }
@@ -144,9 +159,12 @@ async function getEquipmentList() {
     })
 }
 
+
+
 module.exports = {
     startWorkWithEquipment,
     endWorkWithEquipment,
     getEquipmentList,
     createEquipmentDbFromGSheet,
+    reloadEquipmentDB
 }

@@ -1,7 +1,7 @@
-const {updateUserData, deleteUser} = require("./users");
+const {updateUserData, deleteUser, processUserConfirmation} = require("./users");
 const {startWorkWithEquipment, endWorkWithEquipment} = require("./equipments");
 const localisations = require("../assets/constants/localisations");
-const {confirmApplication, denyApplication} = localisations.superAdministratorActions;
+const {denyApplication} = localisations.superAdministratorActions;
 
 async function updateUserDataPost(req, res, bot) {
     const {body} = req;
@@ -9,7 +9,8 @@ async function updateUserDataPost(req, res, bot) {
     try {
         return await updateUserData(+chatID, formData)
             .then(userList => {
-                if (formData?.isUserConfirmed) bot.sendMessage(chatID, confirmApplication);
+                const accountData = userList.find(el => el.chatID === +chatID);
+                if (formData?.isUserConfirmed) processUserConfirmation(bot, chatID, accountData);
                 return userList;
             })
             .then(data => res.status(200).json(data));

@@ -3,8 +3,11 @@ const path = require("path");
 const jsonPath = path.join(__dirname, '..', 'assets', 'db', 'db.json');
 const fs = require("fs");
 const md5 = require('md5');
-const {newPerson, newPersonCheckingRules, superAdminsChatID} = require("../assets/constants/users");
+const {newPerson, newPersonCheckingRules, superAdminsChatID, ConfirmedUserData} = require("../assets/constants/users");
+const {superAdministratorActions} = require("../assets/constants/localisations");
 const {createDate} = require("./helpers");
+const {equipmentOperations, confirmedUsers} = require("../assets/constants/gSpreadSheets");
+const {StartData} = require("../assets/constants/equipments");
 
 let md5Previous = null;
 let fsWait = false;
@@ -195,6 +198,20 @@ function checkIsAllFieldsComplete(object) {
     return isComplete;
 }
 
+async function processUserConfirmation(bot, chatID, accountData) {
+    const {confirmApplication} = superAdministratorActions;
+    await bot.sendMessage(chatID, confirmApplication);
+        try {
+            await confirmedUsers.loadInfo();
+            let sheet = confirmedUsers.sheetsByIndex[0];
+            const data = new ConfirmedUserData(392584400, accountData);
+            await sheet.addRow(data);
+            await sheet.saveUpdatedCells();
+        } catch (e) {
+            await bot.sendMessage(chatID, `Не удалось сохранить данные подтвержденного пользователя в гугл-таблице. Ошибка ${e}`);
+    }
+}
+
 function checkIsUserSuperAdmin(chatID) {
     const result = {resolved: true, errorMsg: ""};
     if(!superAdminsChatID.includes(chatID)) {
@@ -203,6 +220,7 @@ function checkIsUserSuperAdmin(chatID) {
     }
     return result;
 }
+
 
 // updateNewUserFields();
 
@@ -214,5 +232,6 @@ module.exports = {
     addRandomUser,
     deleteUsersWithEmptyChatID,
     checkIsUserSuperAdmin,
+    processUserConfirmation
 }
 
