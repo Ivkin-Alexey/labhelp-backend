@@ -198,17 +198,17 @@ function checkIsAllFieldsComplete(object) {
     return isComplete;
 }
 
-async function processUserConfirmation(bot, chatID, accountData) {
+async function processUserConfirmation(bot, accountData) {
     const {confirmApplication} = superAdministratorActions;
-    await bot.sendMessage(chatID, confirmApplication);
+    await bot.sendMessage(accountData.chatID, confirmApplication);
         try {
             await confirmedUsers.loadInfo();
             let sheet = confirmedUsers.sheetsByIndex[0];
-            const data = new ConfirmedUserData(392584400, accountData);
+            const data = new ConfirmedUserData(accountData);
             await sheet.addRow(data);
             await sheet.saveUpdatedCells();
         } catch (e) {
-            await bot.sendMessage(chatID, `Не удалось сохранить данные подтвержденного пользователя в гугл-таблице. Ошибка ${e}`);
+            await bot.sendMessage(accountData, `Не удалось сохранить данные подтвержденного пользователя в гугл-таблице. Ошибка ${e}`);
     }
 }
 

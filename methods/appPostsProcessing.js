@@ -9,8 +9,8 @@ async function updateUserDataPost(req, res, bot) {
     try {
         return await updateUserData(+chatID, formData)
             .then(userList => {
-                const accountData = userList.find(el => el.chatID === +chatID);
-                if (formData?.isUserConfirmed) processUserConfirmation(bot, chatID, accountData);
+                const userData = userList.find(el => el.chatID === +chatID);
+                if (formData?.isUserConfirmed) processUserConfirmation(bot, userData);
                 return userList;
             })
             .then(data => res.status(200).json(data));

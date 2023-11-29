@@ -40,8 +40,8 @@ const newPersonCheckingRules = {
     requirements: "unRequired"
 };
 
-function ConfirmedUserData(chatID, accountData) {
-    this.chatID = chatID;
+function ConfirmedUserData(accountData) {
+    this.chatID = accountData.chatID;
     this.position = accountData.position;
     this.fullName = createFullName(accountData);
     this.position = accountData.position;
