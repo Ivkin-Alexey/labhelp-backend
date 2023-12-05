@@ -5,6 +5,7 @@ const cors = require('cors');
 const fs = require("fs");
 const https = require('https');
 const http = require('http');
+const {app} = require("./server")
 
 const {HTTPS_PORT, PORT} = require("./assets/constants/constants");
 const {equipment} = require("./assets/constants/localisations");
@@ -27,18 +28,9 @@ process.on('uncaughtException', function (err) {
 
 process.traceDeprecation = true;
 process.env.NTBA_FIX_350 = true;
-const app = express();
 const token = process.env.TELEGRAM_TOKEN;
 
 const bot = new TelegramBot(token, {polling: true});
-
-app.use(express.json());
-app.use(cors());
-const httpServer = http.createServer(app);
-const httpsServer = https.createServer({
-    key: fs.readFileSync('ssl/key.pem'),
-    cert: fs.readFileSync('ssl/cert.pem'),
-}, app);
 
 bot.on('message', async msg => {
     const chatID = msg.chat.id;
@@ -148,14 +140,6 @@ app.get('/researches', async (req, res) => {
         return res.status(500).json(e);
     }
 });
-
-httpServer.listen(PORT, () => {
-    console.log(`HTTP Server running on port ${PORT}`);
-})
-
-httpsServer.listen(HTTPS_PORT, () => {
-    console.log(`HTTPS Server running on port ${HTTPS_PORT}`);
-})
 
 app.post("/updatePersonData", async (req, res) => await updateUserDataPost(req, res, bot));
 app.post("/deletePerson", async (req, res) => await deletePersonPost(req, res, bot));
