@@ -38,7 +38,7 @@ async function equipmentStartPost(req, res, bot) {
     const {chatID, accountData, equipment} = body;
     try {
         return await startWorkWithEquipment(+chatID, accountData, equipment)
-            .then(data => res.status(200).json(data));
+            .then(data => res.status(200).json(data))
     } catch (e) {
         return res.status(500).json(e);
     }

@@ -1,10 +1,17 @@
 const {EquipmentItem} = require("../assets/constants/equipments");
 const {equipment} = require("../assets/constants/localisations")
-const {equipmentOperations, equipmentList, imgUrl, imgColumn, equipmentListSheetID} = require("../assets/constants/gSpreadSheets");
+const {
+    equipmentOperations,
+    equipmentList,
+    imgUrl,
+    imgColumn,
+    equipmentListSheetID
+} = require("../assets/constants/gSpreadSheets");
 const {StartData} = require("../assets/constants/equipments");
 const {readFile, writeFile, writeFileSync} = require("fs");
 const path = require("path");
 const {checkIsUserSuperAdmin} = require("./users");
+const {createDate, createTime} = require("./helpers");
 const equipmentJsonPath = path.join(__dirname, '..', 'assets', 'db', 'equipment.json');
 
 async function startWorkWithEquipment(chatID = 392584400, accountData, equipment) {
@@ -28,15 +35,23 @@ async function endWorkWithEquipment(chatID = 392584400, accountData, equipment) 
     const {category, id} = equipment;
     return new Promise(async (resolve, reject) => {
         try {
+            await equipmentOperations.loadInfo();
+            let sheet = equipmentOperations.sheetsByIndex[0];
             const equipment = await updateEquipmentUsingStatus(category, id, chatID);
-            // await equipmentOperations.loadInfo();
-            // let sheet = equipmentOperations.sheetsByIndex[0];
-            // let rows = await sheet.getRows();
-            // rows.forEach((el, i) => {
-            //     const equipmentID = rows[i].get("id");
-            //     if(equipmentID === id) rows[i].set("endTime", createTime());
-            // })
-            // await sheet.saveUpdatedCells();
+            const rows = await sheet.getRows();
+            let ended = false;
+            for(let i = 2; i < rows.length; i++) {
+                if(ended) break;
+                const endTime = rows[i].get("endTime");
+                if (endTime === "") {
+                    const rowData = rows[i]._rawData.join("");
+                    if (rowData.includes(chatID) && rowData.includes(id) && rowData.includes(createDate())) {
+                        ended = true;
+                        rows[i].set("endTime", createTime());
+                        await rows[i].save();
+                    }
+                }
+            }
             resolve(equipment);
         } catch (e) {
             reject(e);
@@ -156,8 +171,6 @@ async function getEquipmentList() {
         })
     })
 }
-
-
 
 module.exports = {
     startWorkWithEquipment,
