@@ -13,7 +13,6 @@ async function startWorkWithEquipment(chatID = 392584400, accountData, equipment
         try {
             const updatedEquipmentList = await updateEquipmentUsingStatus(category, id, chatID);
             await equipmentOperations.loadInfo();
-            const cells = await equipmentOperations.loadCells().then(res => console.log(res))
             let sheet = equipmentOperations.sheetsByIndex[0];
             const data = new StartData(chatID, accountData, equipment);
             await sheet.addRow(data);
@@ -131,7 +130,6 @@ async function updateEquipmentUsingStatus(equipmentCategory, equipmentID, chatID
             let equipment = parsedData[equipmentCategory][index];
             let {isUsing} = equipment;
             if (isUsing.includes(chatID)) isUsing = isUsing.filter(el => {
-                console.log(el, chatID);
                 return el !== chatID
             });
             else isUsing.push(chatID);
