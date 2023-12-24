@@ -3,9 +3,9 @@ const {timeZoneRelativeToUTC} = require("../assets/constants/constants");
 function createDate() {
     const date = new Date();
     let day, month, year;
-    day = date.getDate();
+    day = date.getUTCDate();
     if(+day<10) day= "0" + day;
-    month = +date.getMonth()+1;
+    month = +date.getUTCMonth()+1;
     if(+month<10) month= "0" + month;
     year = date.getFullYear();
     return day + "." + month + "." + year;
