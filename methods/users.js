@@ -112,9 +112,11 @@ async function updateUserData(chatID, userData) {
                             el[field] = userData[field];
                         }
                     }
-                    el.otherInfo.isUserDataSent = checkIsAllFieldsComplete(el);
-                    if (el.otherInfo.isUserDataSent) el.otherInfo.registrationDate = createDate();
-                    else el.otherInfo.registrationDate = "";
+
+                    let {isUserDataSent, registrationDate} = el.otherInfo;
+                    isUserDataSent = checkIsAllFieldsComplete(el);
+                    if (isUserDataSent === true && registrationDate === "") registrationDate = createDate();
+                    else registrationDate = "";
                     isNewUser = false;
                 }
                 return el;
