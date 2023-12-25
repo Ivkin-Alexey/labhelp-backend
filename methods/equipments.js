@@ -100,7 +100,7 @@ async function fetchEquipmentListFromGSheet() {
             await equipmentList.loadInfo();
             let sheet = equipmentList.sheetsById[equipmentListSheetID];
             const rows = await sheet.getRows();
-            for (let i = 10; i < 100; i++) {
+            for (let i = 0; i < 257; i++) {
                 const newEquipmentItem = new EquipmentItem;
                 newEquipmentItem.name = rows[i].get("Наименование оборудования");
                 newEquipmentItem.brand = rows[i].get("Изготовитель");
