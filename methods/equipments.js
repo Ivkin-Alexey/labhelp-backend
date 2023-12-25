@@ -59,19 +59,6 @@ async function endWorkWithEquipment(chatID = 392584400, accountData, equipment) 
     })
 }
 
-async function getCellImageUrl() {
-    try {
-        await equipmentList.loadInfo();
-        let sheet = equipmentList.sheetsById[equipmentListSheetID];
-        await sheet.loadCells('E1:E10');
-        const cell = sheet.getCellByA1("E10")
-        console.log(cell.getUrl())
-        return cell.getUrl();
-    } catch (e) {
-        return e;
-    }
-}
-
 async function reloadEquipmentDB(bot, chatID) {
     const result = checkIsUserSuperAdmin(chatID);
     if (result.resolved) {
@@ -119,7 +106,7 @@ async function fetchEquipmentListFromGSheet() {
                 newEquipmentItem.brand = rows[i].get("Изготовитель");
                 newEquipmentItem.model = rows[i].get("Модель");
                 newEquipmentItem.category = rows[i].get("Категория");
-                newEquipmentItem.imgUrl = imgUrl + imgColumn + (i + 2);
+                newEquipmentItem.imgUrl = rows[i].get("Ссылка на фото");
                 newEquipmentItem.filesUrl = rows[i].get("Файлы");
                 newEquipmentItem.id = rows[i].get("Заводской №") + newEquipmentItem.model;
                 equipment.push(newEquipmentItem);

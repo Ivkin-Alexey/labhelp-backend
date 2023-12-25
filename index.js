@@ -1,14 +1,7 @@
 require('dotenv').config();
 const TelegramBot = require('node-telegram-bot-api');
-const express = require('express');
-const cors = require('cors');
-const fs = require("fs");
-const https = require('https');
-const http = require('http');
 const {app} = require("./server")
 
-const {HTTPS_PORT, PORT} = require("./assets/constants/constants");
-const {equipment} = require("./assets/constants/localisations");
 const {researchesSelectOptions} = require("./assets/constants/researches");
 // const {getCellImageUrl} = require("./assets/constants/gSpreadSheets");
 const {checkIsUserSuperAdmin, updateUserData, getUserList, addRandomUser,
@@ -19,7 +12,6 @@ const {sendResearches, sendStartMessage, sendResearch, sendConfusedMessage} = re
 const {processAppPost, updateUserDataPost, deletePersonPost, equipmentStartPost, equipmentEndPost} = require("./methods/appPostsProcessing");
 const {checkTextIsResearch} = require("./methods/validation");
 
-const path = require("path");
 const {processCallbackQuery} = require("./methods/callbackQueriesProcessing");
 
 process.on('uncaughtException', function (err) {
