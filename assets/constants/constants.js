@@ -9,11 +9,21 @@ const webAppUrl = 'https://ephemeral-kringle-2c94b2.netlify.app';
 const editProfileUrl = webAppUrl + '/:chatID/editProfile';
 const smiles = {
     researches: "👨‍ ‍🔬 ",
-    closeMenu: "❌ "
+    closeMenu: "❌ ",
+    equipment: "🔬 ",
+    selectedEquipment: "⭐ ",
+    profile: "👤 ",
 }
+
+const defaultKeyBoard = [
+    [smiles.equipment + "Оборудование"],
+    [smiles.selectedEquipment + "Избранное оборудование"],
+    [smiles.profile + "Мой профиль"]
+];
 
 const keyboards = {
     researches: researches.map(el => [smiles.researches + "Направление \"" + el.name + "\""]),
+    default: defaultKeyBoard
 };
 
 const commands = [
