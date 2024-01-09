@@ -224,7 +224,7 @@ function checkIsUserSuperAdmin(chatID) {
 }
 
 
-// updateNewUserFields();
+updateNewUserFields();
 
 module.exports = {
     updateUserData,
