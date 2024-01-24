@@ -44,10 +44,13 @@ const commands = [
     },
 ];
 
-// start - старт
-// researches - научные направления
-// get_chat_id - узнать id чата
-// get_my_data - мои данные
+// start - Старт
+// researches - Научные направления
+// id - Узнать id чата
+// help - Список доступных команд
+
+
+
 
 const stickers = {
     hello: 'CAACAgIAAxkBAAEKTKtlA3vTRlxYTs35OSSO7Q3KDGFaogACIAADwZxgDGWWbaHi0krRMAQ',
