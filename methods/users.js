@@ -114,9 +114,9 @@ async function updateUserData(chatID, userData) {
                     }
 
                     let {isUserDataSent, registrationDate} = el.otherInfo;
-                    isUserDataSent = checkIsAllFieldsComplete(el);
-                    if (isUserDataSent === true && registrationDate === "") registrationDate = createDate();
-                    else registrationDate = "";
+                    el.otherInfo.isUserDataSent = checkIsAllFieldsComplete(el);
+                    if (isUserDataSent === true && registrationDate === "") el.otherInfo.registrationDate = createDate();
+                    else el.otherInfo.registrationDate = "";
                     isNewUser = false;
                 }
                 return el;
@@ -224,7 +224,7 @@ function checkIsUserSuperAdmin(chatID) {
 }
 
 
-updateNewUserFields();
+// updateNewUserFields();
 
 module.exports = {
     updateUserData,
