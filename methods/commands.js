@@ -2,7 +2,6 @@ const {checkTextIsResearch} = require("./validation");
 const {sendStartMessage, sendResearches, sendResearch, sendConfusedMessage} = require("./botAnswers");
 const {addRandomUser, deleteUsersWithEmptyChatID, updateUserData} = require("./users");
 const {reloadEquipmentDB} = require("./equipments");
-
 async function processCommand(bot, command) {
     const chatID = command.chat.id;
     let text = command.text;
