@@ -1,9 +1,4 @@
-const express = require("express");
-const cors = require("cors");
-const http = require("http");
-const https = require("https");
-const fs = require("fs");
-const {PORT, HTTPS_PORT} = require("./assets/constants/constants");
+const {app} = require("./index");
 const {getEquipmentList} = require("./methods/equipments");
 const {getUserList} = require("./methods/users");
 const {researchesSelectOptions} = require("./assets/constants/researches");
@@ -13,25 +8,6 @@ const {
     equipmentStartPost,
     equipmentEndPost
 } = require("./methods/appPostsProcessing");
-const {bot} = require("./index");
-
-const app = express();
-app.use(express.json());
-app.use(cors());
-
-const httpServer = http.createServer(app);
-const httpsServer = https.createServer({
-    key: fs.readFileSync('ssl/key.pem'),
-    cert: fs.readFileSync('ssl/cert.pem'),
-}, app);
-
-httpServer.listen(PORT, () => {
-    console.log(`HTTP Server running on port ${PORT}`);
-})
-
-httpsServer.listen(HTTPS_PORT, () => {
-    console.log(`HTTPS Server running on port ${HTTPS_PORT}`);
-})
 
 app.get('/hello', async (req, res) => {
     return res.status(200).json('Привет');
@@ -65,5 +41,3 @@ app.post("/updatePersonData", async (req, res) => await updateUserDataPost(req, 
 app.post("/deletePerson", async (req, res) => await deletePersonPost(req, res, bot));
 app.post("/equipmentStart", async (req, res) => await equipmentStartPost(req, res, bot))
 app.post("/equipmentEnd", async (req, res) => await equipmentEndPost(req, res, bot));
-
-module.exports = {app};
