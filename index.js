@@ -1,3 +1,4 @@
+const fs = require("fs");
 require('dotenv').config();
 const TelegramBot = require('node-telegram-bot-api');
 const {processCallbackQuery} = require("./methods/callbackQueriesProcessing");
@@ -17,7 +18,7 @@ const express = require("express");
 const cors = require("cors");
 const http = require("http");
 const https = require("https");
-const fs = require("fs");
+
 const {PORT, HTTPS_PORT} = require("./assets/constants/constants");
 const {getEquipmentList} = require("./methods/equipments");
 const {getUserList} = require("./methods/users");
