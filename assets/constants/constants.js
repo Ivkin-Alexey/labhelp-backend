@@ -15,6 +15,10 @@ const smiles = {
     profile: "👤 ",
 }
 
+const exceptions = {
+    equipmentCategories: ["Редукторы"]
+}
+
 const defaultKeyBoard = [
     [smiles.equipment + "Оборудование"],
     [smiles.selectedEquipment + "Избранное оборудование"],

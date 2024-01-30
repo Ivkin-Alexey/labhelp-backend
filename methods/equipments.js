@@ -3,8 +3,6 @@ const {equipment} = require("../assets/constants/localisations")
 const {
     equipmentOperations,
     equipmentList,
-    imgUrl,
-    imgColumn,
     equipmentListSheetID
 } = require("../assets/constants/gSpreadSheets");
 const {StartData} = require("../assets/constants/equipments");
@@ -12,6 +10,7 @@ const {readFile, writeFile, writeFileSync} = require("fs");
 const path = require("path");
 const {checkIsUserSuperAdmin} = require("./users");
 const {createDate, createTime} = require("./helpers");
+const {amountOfEquipment} = require("../assets/constants/equipments");
 const equipmentJsonPath = path.join(__dirname, '..', 'assets', 'db', 'equipment.json');
 
 async function startWorkWithEquipment(chatID = 392584400, accountData, equipment) {
@@ -100,15 +99,18 @@ async function fetchEquipmentListFromGSheet() {
             await equipmentList.loadInfo();
             let sheet = equipmentList.sheetsById[equipmentListSheetID];
             const rows = await sheet.getRows();
-            for (let i = 0; i < 257; i++) {
+            for (let i = 0; i < amountOfEquipment; i++) {
                 const newEquipmentItem = new EquipmentItem;
-                newEquipmentItem.name = rows[i].get("Наименование оборудования");
-                newEquipmentItem.brand = rows[i].get("Изготовитель");
-                newEquipmentItem.model = rows[i].get("Модель");
-                newEquipmentItem.category = rows[i].get("Категория");
-                newEquipmentItem.imgUrl = rows[i].get("Ссылка на фото");
-                newEquipmentItem.filesUrl = rows[i].get("Файлы");
-                newEquipmentItem.id = rows[i].get("Заводской №") + newEquipmentItem.model;
+                newEquipmentItem.name = rows[i].get("Наименование оборудования") || "";
+                newEquipmentItem.brand = rows[i].get("Изготовитель") || "";
+                newEquipmentItem.model = rows[i].get("Модель") || "";
+                newEquipmentItem.category = rows[i].get("Категория") || "";
+                newEquipmentItem.imgUrl = rows[i].get("Ссылки на фотографии") || "";
+                newEquipmentItem.filesUrl = rows[i].get("Эксплуатационно-техническая документация\n" +
+                    "(ссылка на облако)\n" +
+                    "\n" +
+                    "Паспорт/руководство по эксплуатации") || "";
+                newEquipmentItem.id = (rows[i].get("Заводской номер") + newEquipmentItem.model) || "";
                 equipment.push(newEquipmentItem);
             }
             resolve(equipment);

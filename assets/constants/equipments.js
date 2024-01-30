@@ -1,6 +1,8 @@
 const {createDate, createTime} = require("../../methods/helpers");
 const {createFullName} = require("../../methods/helpers");
 
+const amountOfEquipment = 600;
+
 function EquipmentItem() {
     this.id = "";
     this.category = "";
@@ -25,5 +27,6 @@ function StartData(chatID, accountData, equipment) {
 module.exports = {
     EquipmentItem,
     StartData,
+    amountOfEquipment
 }
 
