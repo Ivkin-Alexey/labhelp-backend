@@ -18,7 +18,8 @@ async function sendStartMessage(bot, chatID, first_name, last_name) {
 }
 
 async function sendWebAppButtonWithMessage(bot, chatID, message) {
-    // editProfileUrl = editProfileUrl.replace(":chatID", chatID)
+    editProfileUrl = editProfileUrl.replace(":chatID", chatID);
+    console.log(editProfileUrl);
     await bot.sendMessage(chatID, message, {
         reply_markup: {
             inline_keyboard: [

@@ -201,8 +201,8 @@ function checkIsAllFieldsComplete(object) {
 }
 
 async function processUserConfirmation(bot, accountData) {
-    const {confirmApplication} = superAdministratorActions;
-    await bot.sendMessage(accountData.chatID, confirmApplication);
+    const {confirmStudentApplication} = superAdministratorActions;
+    await bot.sendMessage(accountData.chatID, confirmStudentApplication);
         try {
             await confirmedUsers.loadInfo();
             let sheet = confirmedUsers.sheetsByIndex[0];

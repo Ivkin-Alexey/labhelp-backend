@@ -6,7 +6,7 @@ const HTTPS_PORT = 443;
 
 const timeZoneRelativeToUTC = 3;
 const webAppUrl = 'https://ephemeral-kringle-2c94b2.netlify.app';
-const editProfileUrl = webAppUrl + '/1516784245/editProfile';
+const editProfileUrl = webAppUrl + '/:chatID/editProfile';
 const smiles = {
     researches: "👨‍ ‍🔬 ",
     closeMenu: "❌ ",
