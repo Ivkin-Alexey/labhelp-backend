@@ -1,6 +1,7 @@
-const {updateUserData, deleteUser, processUserConfirmation} = require("./users");
+const {updateUserData, deleteUser, processUserConfirmation, checkIsUserAdmin} = require("./users");
 const {startWorkWithEquipment, endWorkWithEquipment} = require("./equipments");
 const localisations = require("../assets/constants/localisations");
+const {deleteReagentApplication, updateReagentApplications} = require("./reagents");
 const {denyApplication} = localisations.superAdministratorActions;
 
 async function updateUserDataPost(req, res, bot) {
@@ -55,4 +56,32 @@ async function equipmentEndPost(req, res) {
     }
 }
 
-module.exports = {updateUserDataPost, deletePersonPost, equipmentEndPost, equipmentStartPost}
+async function updateReagentApplicationPost(req, res) {
+    const {body} = req;
+    const {userData, applicationData} = body;
+    return new Promise(() => {
+        updateReagentApplications(userData, applicationData)
+            .then((applicationList) => res.status(200).json(applicationList))
+            .catch(error => res.status(500).json(error))
+    })
+}
+
+async function deleteReagentApplicationPost(req, res) {
+    const {body} = req;
+    const {applicationID, chatID} = body;
+    return new Promise(() => {
+        checkIsUserAdmin(chatID)
+            .then(() => deleteReagentApplication(applicationID))
+            .then((applicationList) => res.status(200).json(applicationList))
+            .catch(error => res.status(500).json(error))
+    })
+}
+
+module.exports = {
+    updateUserDataPost,
+    deletePersonPost,
+    equipmentEndPost,
+    equipmentStartPost,
+    updateReagentApplicationPost,
+    deleteReagentApplicationPost
+}

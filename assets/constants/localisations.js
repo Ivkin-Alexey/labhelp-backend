@@ -17,7 +17,14 @@ const localisations = {
     },
     postRequests: {
         startEquipment: {success: "Начата работа на оборудовании"}
+    },
+    users: {
+        errors: {
+            userAccessError: "Данное действие доступно только для администраторов",
+            unregisteredUserError: "Вам необходимо зарегистрироваться"
+        }
     }
 };
 
 module.exports = localisations;
+

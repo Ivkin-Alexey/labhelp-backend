@@ -27,7 +27,8 @@ const {
     updateUserDataPost,
     deletePersonPost,
     equipmentStartPost,
-    equipmentEndPost
+    equipmentEndPost,
+    updateReagentApplicationPost, deleteReagentApplicationPost
 } = require("./methods/appPostsProcessing");
 
 const app = express();
@@ -79,5 +80,7 @@ app.post("/updatePersonData", async (req, res) => await updateUserDataPost(req, 
 app.post("/deletePerson", async (req, res) => await deletePersonPost(req, res, bot));
 app.post("/equipmentStart", async (req, res) => await equipmentStartPost(req, res, bot))
 app.post("/equipmentEnd", async (req, res) => await equipmentEndPost(req, res, bot));
+app.post("/deleteReagentApplication", async (req, res) => await deleteReagentApplicationPost(req, res, bot));
+app.post("/updateReagentApplications", async (req, res) => await updateReagentApplicationPost(req, res, bot));
 
 module.exports = {app};

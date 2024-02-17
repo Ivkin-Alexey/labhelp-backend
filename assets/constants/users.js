@@ -3,6 +3,9 @@ const {createFullName} = require("../../methods/helpers");
 
 const superAdminsChatID = [392584400, 1516784245];
 
+const personRoles = {admin: "admin", superAdmin: "superAdmin", user: "user"};
+const personCategories = {student: "student", employee: "employee"};
+
 const newPerson = {
     chatID: "",
     firstName: "",
@@ -50,4 +53,4 @@ function ConfirmedUserData(accountData) {
     this.course = accountData.postGraduateEducationYear + accountData.studentsEducationYear;
 }
 
-module.exports = {newPerson, newPersonCheckingRules, superAdminsChatID, ConfirmedUserData}
+module.exports = {newPerson, newPersonCheckingRules, superAdminsChatID, ConfirmedUserData, personRoles, personCategories}

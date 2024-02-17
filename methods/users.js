@@ -3,8 +3,14 @@ const path = require("path");
 const jsonPath = path.join(__dirname, '..', 'assets', 'db', 'db.json');
 const fs = require("fs");
 const md5 = require('md5');
-const {newPerson, newPersonCheckingRules, superAdminsChatID, ConfirmedUserData} = require("../assets/constants/users");
-const {superAdministratorActions} = require("../assets/constants/localisations");
+const {
+    newPerson,
+    newPersonCheckingRules,
+    superAdminsChatID,
+    ConfirmedUserData,
+    personRoles
+} = require("../assets/constants/users");
+const {superAdministratorActions, users} = require("../assets/constants/localisations");
 const {createDate} = require("./helpers");
 const {equipmentOperations, confirmedUsers} = require("../assets/constants/gSpreadSheets");
 const {StartData} = require("../assets/constants/equipments");
@@ -203,24 +209,44 @@ function checkIsAllFieldsComplete(object) {
 async function processUserConfirmation(bot, accountData) {
     const {confirmStudentApplication} = superAdministratorActions;
     await bot.sendMessage(accountData.chatID, confirmStudentApplication);
-        try {
-            await confirmedUsers.loadInfo();
-            let sheet = confirmedUsers.sheetsByIndex[0];
-            const data = new ConfirmedUserData(accountData);
-            await sheet.addRow(data);
-            await sheet.saveUpdatedCells();
-        } catch (e) {
-            await bot.sendMessage(accountData, `Не удалось сохранить данные подтвержденного пользователя в гугл-таблице. Ошибка ${e}`);
+    try {
+        await confirmedUsers.loadInfo();
+        let sheet = confirmedUsers.sheetsByIndex[0];
+        const data = new ConfirmedUserData(accountData);
+        await sheet.addRow(data);
+        await sheet.saveUpdatedCells();
+    } catch (e) {
+        await bot.sendMessage(accountData, `Не удалось сохранить данные подтвержденного пользователя в гугл-таблице. Ошибка ${e}`);
     }
 }
 
-function checkIsUserSuperAdmin(chatID) {
-    const result = {resolved: true, errorMsg: ""};
-    if(!superAdminsChatID.includes(chatID)) {
-        result.resolved = false;
-        result.errorMsg = "Данную команду могут использовать только суперадминистраторы"
-    }
-    return result;
+async function checkIsUserSuperAdmin(chatID) {
+    return new Promise((resolve, reject) => {
+        if (superAdminsChatID.includes(chatID)) resolve();
+        else reject("Данную команду могут использовать только суперадминистраторы");
+    })
+}
+
+async function checkIsUserAdmin(chatID) {
+    return new Promise((resolve, reject) => {
+        readFile(jsonPath, 'utf8', (error, data) => {
+            if (error) {
+                reject(`Ошибка чтения данных на сервере: ${error}. Сообщите о ней администратору`);
+                return;
+            }
+
+            const parsedData = JSON.parse(Buffer.from(data));
+            const user = parsedData.find(el => el.chatID === chatID);
+
+            if (!user) reject(users.errors.unregisteredUserError)
+            else {
+                if (user.role === personRoles.admin || user.role === personRoles.superAdmin) resolve();
+            }
+            reject(users.errors.userAccessError);
+    })
+}
+
+)
 }
 
 
@@ -234,6 +260,7 @@ module.exports = {
     addRandomUser,
     deleteUsersWithEmptyChatID,
     checkIsUserSuperAdmin,
-    processUserConfirmation
+    processUserConfirmation,
+    checkIsUserAdmin
 }
 

@@ -27,4 +27,13 @@ function createFullName(userData) {
     return lastName + " " + firstName + " " + patronymic;
 }
 
-module.exports = {createDate, createTime, createFullName}
+function createNameWithInitials(userData) {
+    const {firstName, lastName, patronymic} = userData;
+    return lastName + " " + firstName[0] + "." + patronymic[0] + ".";
+}
+
+function createReagentID() {
+    return new Date().getTime();
+}
+
+module.exports = {createDate, createTime, createFullName, createReagentID, createNameWithInitials}
