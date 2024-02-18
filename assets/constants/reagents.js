@@ -16,7 +16,7 @@ function NewReagentApplication(userData) {
     this.chatID = userData.chatID;
     this.fullName = createNameWithInitials(userData);
     this.reagentName = "";
-    this.amount = "";
+    this.reagentAmount = "";
     this.date = createDate();
     this.status = reagentStatuses.inProcess;
 }
