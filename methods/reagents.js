@@ -33,6 +33,14 @@ async function updateReagentApplications(userData, applicationData) {
     })
 }
 
+async function getReagentApplications(applicationID) {
+    return new Promise((resolve, reject) => {
+        readJsonFile(jsonPath)
+            .then(parsedData => resolve(parsedData))
+            .catch(e => reject(e))
+    })
+}
+
 async function deleteReagentApplication(applicationID) {
     return new Promise((resolve, reject) => {
         readJsonFile(jsonPath)
@@ -70,4 +78,4 @@ async function writeJsonFile(path, parsedData) {
     })
 }
 
-module.exports = {updateReagentApplications, deleteReagentApplication}
+module.exports = {updateReagentApplications, deleteReagentApplication, getReagentApplications}

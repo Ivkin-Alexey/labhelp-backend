@@ -30,6 +30,7 @@ const {
     equipmentEndPost,
     updateReagentApplicationPost, deleteReagentApplicationPost
 } = require("./methods/appPostsProcessing");
+const {getReagentApplications} = require("./methods/reagents");
 
 const app = express();
 app.use(express.json());
@@ -62,7 +63,7 @@ app.get('/equipmentList', async (req, res) => {
 
 app.get('/persons', async (req, res) => {
     try {
-        return await getUserList().then(personList => res.status(200).json(personList))
+        return await getUserList().then(personList => res.status(200).json(personList));
     } catch (e) {
         return res.status(500).json(e);
     }
@@ -75,6 +76,17 @@ app.get('/researches', async (req, res) => {
         return res.status(500).json(e);
     }
 });
+
+app.get('/reagentApplications', async (req, res) => {
+    try {
+        return await getReagentApplications().then(list => res.status(200).json(list));
+    } catch (e) {
+        return res.status(500).json(e);
+    }
+});
+
+
+
 
 app.post("/updatePersonData", async (req, res) => await updateUserDataPost(req, res, bot));
 app.post("/deletePerson", async (req, res) => await deletePersonPost(req, res, bot));
