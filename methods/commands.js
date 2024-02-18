@@ -1,7 +1,8 @@
 const {checkTextIsResearch} = require("./validation");
-const {sendStartMessage, sendResearches, sendResearch, sendConfusedMessage} = require("./botAnswers");
-const {addRandomUser, deleteUsersWithEmptyChatID, updateUserData} = require("./users");
+const {sendStartMessage, sendResearches, sendResearch, sendConfusedMessage, sendCommandList} = require("./botAnswers");
+const {addRandomUser, deleteUsersWithEmptyChatID, updateUserData, checkIsUserSuperAdmin} = require("./users");
 const {reloadEquipmentDB} = require("./equipments");
+const {askReagentsManagerChatID} = require("./replyToMessage");
 async function processCommand(bot, command) {
     const chatID = command.chat.id;
     let text = command.text;
@@ -20,6 +21,9 @@ async function processCommand(bot, command) {
                 break;
             case "/start":
                 await sendStartMessage(bot, chatID, first_name, last_name);
+                break;
+            case "/help":
+                await sendCommandList(bot, chatID);
                 break;
             case "/addRandomUser":
                 await addRandomUser();
@@ -42,6 +46,11 @@ async function processCommand(bot, command) {
             case "/reloadEquipmentDB":
                 await reloadEquipmentDB(bot, chatID);
                 break;
+            case "/setReagentsManagerChatID":
+                await checkIsUserSuperAdmin(chatID)
+                    .then(() => askReagentsManagerChatID(bot, chatID))
+                    .catch(e => bot.sendMessage(chatID, e));
+                break;
             // case "/get_my_data":
             //     await getUserData(chatID).then(res => sendUserData(bot, chatID, res));
             //     break;
@@ -50,7 +59,9 @@ async function processCommand(bot, command) {
                 await updateUserData(chatID, {research: isResearch});
                 break;
             default:
-                await sendConfusedMessage(bot, chatID);
+                if(!command.reply_to_message) {
+                    await sendConfusedMessage(bot, chatID);
+                }
         }
     } catch (e) {
         console.log(e);

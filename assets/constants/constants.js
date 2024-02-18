@@ -32,29 +32,60 @@ const keyboards = {
 
 const commands = [
     {
-        command: "start",
-        description: "старт"
+        command: "/start",
+        description: "Старт",
+        access: "all"
     },
     {
-        command: "researches",
-        description: "научные направления"
+        command: "/help",
+        description: "Список команд",
+        access: "all"
     },
     {
-        command: "get_chat_id",
-        description: "узнать чат id"
-    }, {
-        command: "get_my_data",
-        description: "мои данные"
+        command: "/researches",
+        description: "Научные направления",
+        access: "all"
+    },
+    {
+        command: "/addRandomUser",
+        description: "Добавить случайного пользователя",
+        access: "superAdmin"
+    },
+    {
+        command: "/addRandomAdmin",
+        description: "Добавить случайного администратора",
+        access: "superAdmin"
+    },
+    {
+        command: "/addRandomSuperAdmin",
+        description: "Добавить случайного суперадминистратора",
+        access: "superAdmin"
+    },
+    {
+        command: "/deleteUsersWithEmptyChatID",
+        description: "Удалить пользователей с пустыми полями",
+        access: "superAdmin"
+    },
+    {
+        command: "/reloadEquipmentDB",
+        description: "Создать заново базу данных по оборудованию",
+        access: "superAdmin"
+    },
+    {
+        command: "/setReagentsManagerChatID",
+        description: "Установить чат ID менеджера по реактивам",
+        access: "superAdmin"
     },
 ];
 
-// start - Старт
-// researches - Научные направления
-// id - Узнать id чата
-// help - Список доступных команд
+const userCommands = commands.reduce((sum, cur) => {
+    if(cur.access === "all") return sum + "\n" + cur.command + ` - ` + cur.description
+    else return sum
+}, "");
 
-
-
+const superAdminCommands = commands.reduce((sum, cur) => {
+    return sum + "\n" + cur.command + ` - ` + cur.description
+}, "");
 
 const stickers = {
     hello: 'CAACAgIAAxkBAAEKTKtlA3vTRlxYTs35OSSO7Q3KDGFaogACIAADwZxgDGWWbaHi0krRMAQ',
@@ -75,5 +106,6 @@ module.exports = {
     smiles,
     editProfileUrl,
     timeZoneRelativeToUTC,
-    localisations
+    localisations,
+    userCommands
 };
