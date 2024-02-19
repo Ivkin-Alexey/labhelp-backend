@@ -1,7 +1,9 @@
 const fs = require("fs");
 
-let {keyboards, stickers, researches, editProfileUrl} = require("../assets/constants/constants");
+let {keyboards, stickers, researches, editProfileUrl, userCommands, superAdminCommands} = require("../assets/constants/constants");
 let localisations = require("../assets/constants/localisations");
+const {personRoles} = require("../assets/constants/users");
+const {checkIsUserAdmin, getUserData} = require("./users");
 
 async function sendStartMessage(bot, chatID, first_name, last_name) {
     await bot.sendSticker(chatID, stickers.hello);
@@ -19,7 +21,6 @@ async function sendStartMessage(bot, chatID, first_name, last_name) {
 
 async function sendWebAppButtonWithMessage(bot, chatID, message) {
     editProfileUrl = editProfileUrl.replace(":chatID", chatID);
-    console.log(editProfileUrl);
     await bot.sendMessage(chatID, message, {
         reply_markup: {
             inline_keyboard: [
@@ -39,6 +40,16 @@ async function sendResearches(bot, chatID) {
         },
         isResearch: true
     })
+}
+
+async function sendCommandList(bot, chatID) {
+    const {user} = personRoles;
+    await getUserData(chatID)
+        .then(userData => {
+            if(userData.role === user) bot.sendMessage(chatID, userCommands);
+            else bot.sendMessage(chatID, superAdminCommands);
+        })
+        .catch((err) => bot.sendMessage(chatID, err));
 }
 
 async function sendResearch(bot, chatID, researchTopic) {
@@ -76,4 +87,4 @@ async function sendUserData(bot, chatID, userData) {
         });
 }
 
-module.exports = {sendResearch, sendStartMessage, sendResearches, sendConfusedMessage, sendUserData, sendWebAppButtonWithMessage};
+module.exports = {sendResearch, sendStartMessage, sendResearches, sendConfusedMessage, sendWebAppButtonWithMessage, sendCommandList};

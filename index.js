@@ -85,9 +85,6 @@ app.get('/reagentApplications', async (req, res) => {
     }
 });
 
-
-
-
 app.post("/updatePersonData", async (req, res) => await updateUserDataPost(req, res, bot));
 app.post("/deletePerson", async (req, res) => await deletePersonPost(req, res, bot));
 app.post("/equipmentStart", async (req, res) => await equipmentStartPost(req, res, bot))

@@ -149,8 +149,18 @@ async function updateUserData(chatID, userData) {
 }
 
 async function getUserData(chatID) {
-    const file = await readFileSync(jsonPath);
-    return JSON.parse(Buffer.from(file))[chatID];
+    return new Promise((resolve, reject) => {
+        readFile(jsonPath, 'utf8', (error, data) => {
+            if (error) {
+                reject(`Ошибка чтения данных на сервере: ${error}. Сообщите о ней администратору`);
+                return;
+            }
+            const parsedData = JSON.parse(Buffer.from(data));
+            const user = parsedData.find(el => el.chatID === chatID);
+            if (!user) reject(users.errors.unregisteredUserError);
+            resolve(user);
+        })
+    });
 }
 
 async function getUserList() {
@@ -220,36 +230,6 @@ async function processUserConfirmation(bot, accountData) {
     }
 }
 
-async function checkIsUserSuperAdmin(chatID) {
-    return new Promise((resolve, reject) => {
-        if (superAdminsChatID.includes(chatID)) resolve();
-        else reject("Данную команду могут использовать только суперадминистраторы");
-    })
-}
-
-async function checkIsUserAdmin(chatID) {
-    return new Promise((resolve, reject) => {
-        readFile(jsonPath, 'utf8', (error, data) => {
-            if (error) {
-                reject(`Ошибка чтения данных на сервере: ${error}. Сообщите о ней администратору`);
-                return;
-            }
-
-            const parsedData = JSON.parse(Buffer.from(data));
-            const user = parsedData.find(el => el.chatID === chatID);
-
-            if (!user) reject(users.errors.unregisteredUserError)
-            else {
-                if (user.role === personRoles.admin || user.role === personRoles.superAdmin) resolve();
-            }
-            reject(users.errors.userAccessError);
-    })
-}
-
-)
-}
-
-
 // updateNewUserFields();
 
 module.exports = {
@@ -259,8 +239,6 @@ module.exports = {
     deleteUser,
     addRandomUser,
     deleteUsersWithEmptyChatID,
-    checkIsUserSuperAdmin,
     processUserConfirmation,
-    checkIsUserAdmin
 }
 

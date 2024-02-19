@@ -1,5 +1,6 @@
 const {webAppUrl} = require("../assets/constants/constants");
 const {updateUserData} = require("./users");
+const {updateConstantsDB} = require("./updateConstants");
 
 async function askUserPosition(bot, chatID) {
     await bot.sendMessage(chatID, "Выбери категорию обучающегося: ", {
@@ -33,7 +34,7 @@ async function askEducationalGroup(bot, chatID) {
 
     bot.onReplyToMessage(chatID, prompt.message_id, async function (answer) {
         await updateUserData(chatID, {study: answer.text});
-            });
+    });
 }
 
 async function askPhoneNumber(bot, chatID) {
@@ -44,18 +45,18 @@ async function askConfirmNewUser(bot, adminChatId, userData) {
     const {first_name, last_name, phone, position, study, research} = userData;
     await bot.sendMessage(adminChatId,
         `Новая заявка: \n${research}\n${position}, ${study}\n${last_name} ${first_name}\n${phone}`, {
-        reply_markup: {
-            inline_keyboard: [
-                [{text: 'Подтвердить', callback_data: "adminConfirmUser"}],
-                [{text: 'Отменить', callback_data: "adminDoesntConfirmUser"}],
-            ]
-        },
-    });
+            reply_markup: {
+                inline_keyboard: [
+                    [{text: 'Подтвердить', callback_data: "adminConfirmUser"}],
+                    [{text: 'Отменить', callback_data: "adminDoesntConfirmUser"}],
+                ]
+            },
+        });
 }
 
 async function askWhichFieldNeedToEdit(bot, chatID, userLocalData) {
     let keyboard = [];
-    for(let field in userLocalData) {
+    for (let field in userLocalData) {
         keyboard.push([{text: userLocalData[field], callback_data: "userWantToEdit_" + field}])
     }
     await bot.sendMessage(chatID, "Какие данные редактировать?", {
@@ -65,4 +66,11 @@ async function askWhichFieldNeedToEdit(bot, chatID, userLocalData) {
     });
 }
 
-module.exports = {askUserPosition, askEducationalGroup, askPhoneNumber, askConfirmNewUser, askWhichFieldNeedToEdit, askEducationYear};
+module.exports = {
+    askUserPosition,
+    askEducationalGroup,
+    askPhoneNumber,
+    askConfirmNewUser,
+    askWhichFieldNeedToEdit,
+    askEducationYear,
+};

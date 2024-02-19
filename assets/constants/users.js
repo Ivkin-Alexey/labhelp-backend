@@ -1,8 +1,6 @@
 const {defaultResearchSelectOption} = require("./researches")
 const {createFullName} = require("../../methods/helpers");
 
-const superAdminsChatID = [392584400, 1516784245];
-
 const personRoles = {admin: "admin", superAdmin: "superAdmin", user: "user"};
 const personCategories = {student: "student", employee: "employee"};
 
@@ -53,4 +51,4 @@ function ConfirmedUserData(accountData) {
     this.course = accountData.postGraduateEducationYear + accountData.studentsEducationYear;
 }
 
-module.exports = {newPerson, newPersonCheckingRules, superAdminsChatID, ConfirmedUserData, personRoles, personCategories}
+module.exports = {newPerson, newPersonCheckingRules, ConfirmedUserData, personRoles, personCategories}

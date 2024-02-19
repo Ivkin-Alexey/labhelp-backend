@@ -107,5 +107,6 @@ module.exports = {
     editProfileUrl,
     timeZoneRelativeToUTC,
     localisations,
-    userCommands
+    userCommands,
+    superAdminCommands
 };

@@ -1,7 +1,8 @@
-const {updateUserData, deleteUser, processUserConfirmation, checkIsUserAdmin} = require("./users");
+const {updateUserData, deleteUser, processUserConfirmation, getUserData} = require("./users");
 const {startWorkWithEquipment, endWorkWithEquipment} = require("./equipments");
 const localisations = require("../assets/constants/localisations");
 const {deleteReagentApplication, updateReagentApplications} = require("./reagents");
+const {personRoles} = require("../assets/constants/users");
 const {denyApplication} = localisations.superAdministratorActions;
 
 async function updateUserDataPost(req, res, bot) {
@@ -56,11 +57,11 @@ async function equipmentEndPost(req, res) {
     }
 }
 
-async function updateReagentApplicationPost(req, res) {
+async function updateReagentApplicationPost(req, res, bot) {
     const {body} = req;
     const {userData, applicationData} = body;
     return new Promise(() => {
-        updateReagentApplications(userData, applicationData)
+        updateReagentApplications(userData, applicationData, bot)
             .then((applicationList) => res.status(200).json(applicationList))
             .catch(error => res.status(500).json(error))
     })
@@ -70,9 +71,11 @@ async function deleteReagentApplicationPost(req, res) {
     const {body} = req;
     const {applicationID, chatID} = body;
     return new Promise(() => {
-        checkIsUserAdmin(chatID)
-            .then(() => deleteReagentApplication(applicationID))
-            .then((applicationList) => res.status(200).json(applicationList))
+        getUserData(chatID)
+            .then((userData) => {
+                if(userData.role === personRoles.superAdmin) deleteReagentApplication(applicationID);
+            })
+            .then(applicationList => res.status(200).json(applicationList))
             .catch(error => res.status(500).json(error))
     })
 }

@@ -20,8 +20,8 @@ const localisations = {
     },
     users: {
         errors: {
-            userAccessError: "Данное действие доступно только для администраторов",
-            unregisteredUserError: "Вам необходимо зарегистрироваться"
+            userAccessError: "Данное действие доступно только для суперадминистраторов",
+            unregisteredUserError: "Пользователь с таким chat ID не зарегистрирован"
         }
     }
 };
