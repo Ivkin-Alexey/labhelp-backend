@@ -14,6 +14,12 @@ function EquipmentItem() {
     this.isUsing = [];
 }
 
+function WorkingEquipmentItem() {
+    this.equipmentID = "";
+    this.userTGchatID = [];
+    this.longUse = false;
+}
+
 function StartData(chatID, accountData, equipment) {
     this.equipmentID = equipment.id;
     this.date = createDate();
@@ -27,6 +33,7 @@ function StartData(chatID, accountData, equipment) {
 module.exports = {
     EquipmentItem,
     StartData,
-    amountOfEquipment
+    WorkingEquipmentItem,
+    amountOfEquipment,
 }
 
