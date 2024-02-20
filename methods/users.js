@@ -14,6 +14,7 @@ const {superAdministratorActions, users} = require("../assets/constants/localisa
 const {createDate} = require("./helpers");
 const {equipmentOperations, confirmedUsers} = require("../assets/constants/gSpreadSheets");
 const {StartData} = require("../assets/constants/equipments");
+const {getConstantFromDB} = require("./updateConstants");
 
 let md5Previous = null;
 let fsWait = false;
@@ -230,6 +231,17 @@ async function processUserConfirmation(bot, accountData) {
     }
 }
 
+async function checkIsUserReagentManager(chatID) {
+    return new Promise((resolve, reject) => {
+        getConstantFromDB("reagents", "reagentsManagerChatID")
+            .then(value => {
+                if (value === chatID) resolve();
+                else reject("Пользователь не уполномочен выдавать реактивы")
+            })
+            .catch(e => reject(e))
+    })
+}
+
 // updateNewUserFields();
 
 module.exports = {
@@ -240,5 +252,6 @@ module.exports = {
     addRandomUser,
     deleteUsersWithEmptyChatID,
     processUserConfirmation,
+    checkIsUserReagentManager
 }
 

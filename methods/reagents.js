@@ -37,12 +37,18 @@ async function updateReagentApplications(userData, applicationData, bot) {
     })
 }
 
-async function getReagentApplications(applicationID) {
+async function getReagentApplications() {
     return new Promise((resolve, reject) => {
         readJsonFile(jsonPath)
             .then(parsedData => resolve(parsedData))
             .catch(e => reject(e))
     })
+}
+
+async function getReagentApplication(applicationID) {
+    return await getReagentApplications()
+        .then(list => list.find(el => el.id === applicationID))
+        .catch(e => e);
 }
 
 async function deleteReagentApplication(applicationID) {
@@ -64,8 +70,8 @@ async function sendReagentApplicationDataToManager(managerChatID, applicationDat
         reply_markup: {
             inline_keyboard: [
                 [
-                    {text: 'Подтвердить', callback_data: JSON.stringify({topic: "reagents", applicationID: id})},
-                    {text: 'Отклонить', callback_data: JSON.stringify({topic: "reagents", applicationID: id})}
+                    {text: 'Подтвердить', callback_data: JSON.stringify({userAnswer: "confirmReagentApp", applicationID: id})},
+                    {text: 'Отклонить', callback_data: JSON.stringify({userAnswer: "rejectReagentApp", applicationID: id})}
                 ],
             ]
         }
@@ -102,4 +108,4 @@ async function writeJsonFile(path, parsedData) {
     })
 }
 
-module.exports = {updateReagentApplications, deleteReagentApplication, getReagentApplications}
+module.exports = {updateReagentApplications, deleteReagentApplication, getReagentApplications, getReagentApplication}

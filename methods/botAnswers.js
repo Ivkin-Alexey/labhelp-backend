@@ -52,6 +52,10 @@ async function sendCommandList(bot, chatID) {
         .catch((err) => bot.sendMessage(chatID, err));
 }
 
+async function sendNotification(bot, chatID, message) {
+    await bot.sendMessage(chatID, message);
+}
+
 async function sendResearch(bot, chatID, researchTopic) {
     editProfileUrl = editProfileUrl.replace(":chatID", chatID);
     const research = researches.find(el => el.name === researchTopic);
@@ -87,4 +91,4 @@ async function sendUserData(bot, chatID, userData) {
         });
 }
 
-module.exports = {sendResearch, sendStartMessage, sendResearches, sendConfusedMessage, sendWebAppButtonWithMessage, sendCommandList};
+module.exports = {sendResearch, sendStartMessage, sendResearches, sendConfusedMessage, sendWebAppButtonWithMessage, sendCommandList, sendNotification};

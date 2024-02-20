@@ -18,6 +18,12 @@ const localisations = {
     postRequests: {
         startEquipment: {success: "Начата работа на оборудовании"}
     },
+    reagents: {
+        notifications: {
+           appConfirmation: "Ваша заявка подтверждена. Получите реактивы в установленном порядке",
+           appRejection: "Ваша заявка отклонена"
+        }
+    },
     users: {
         errors: {
             userAccessError: "Данное действие доступно только для суперадминистраторов",
