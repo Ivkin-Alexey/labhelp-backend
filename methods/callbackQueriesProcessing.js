@@ -3,6 +3,7 @@ const localisations = require("../assets/constants/localisations");
 const {updateUserData, checkIsUserReagentManager} = require("./users");
 const {sendResearches, sendWebAppButtonWithMessage, sendNotification} = require("./botAnswers");
 const {getReagentApplication} = require("./reagents");
+const {app} = require("../index");
 
 const {invitationToRegistration} = localisations.botAnswers;
 const {appConfirmation, appRejection} = localisations.reagents.notifications;

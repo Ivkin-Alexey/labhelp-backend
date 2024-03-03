@@ -4,6 +4,7 @@ const bot = require("../index");
 const {NewReagentApplication} = require("../assets/constants/reagents.js");
 const {getConstantFromDB} = require("./updateConstants");
 const localisations = require("../assets/constants/localisations");
+const {sendPrompt} = require("./prompt");
 
 const jsonPath = path.join(__dirname, '..', 'assets', 'db', 'reagents.json');
 
@@ -47,7 +48,10 @@ async function getReagentApplications() {
 
 async function getReagentApplication(applicationID) {
     return await getReagentApplications()
-        .then(list => list.find(el => el.id === applicationID))
+        .then(list => {
+            const app = list.find(el => el.id === applicationID);
+            console.log(app);
+        })
         .catch(e => e);
 }
 
@@ -65,17 +69,14 @@ async function deleteReagentApplication(applicationID) {
 
 async function sendReagentApplicationDataToManager(managerChatID, applicationData, bot) {
     const id = applicationData.id.toString();
-
-    await bot.sendMessage(managerChatID, createApplication(applicationData), {
-        reply_markup: {
-            inline_keyboard: [
-                [
-                    {text: 'Подтвердить', callback_data: JSON.stringify({userAnswer: "confirmReagentApp", applicationID: id})},
-                    {text: 'Отклонить', callback_data: JSON.stringify({userAnswer: "rejectReagentApp", applicationID: id})}
-                ],
-            ]
-        }
-    })
+    const promptData = {topic: "reagents", appID: id};
+    const keyboard = [
+        [
+            {text: 'Подтвердить', callback_data: JSON.stringify({answer: "confirm"})},
+            {text: 'Отклонить', callback_data: JSON.stringify({answer: "reject"})}
+        ],
+    ];
+    await sendPrompt(bot, managerChatID, createApplication(applicationData), keyboard, promptData);
 }
 
 function createApplication(applicationData) {
@@ -108,4 +109,4 @@ async function writeJsonFile(path, parsedData) {
     })
 }
 
-module.exports = {updateReagentApplications, deleteReagentApplication, getReagentApplications, getReagentApplication}
+module.exports = {updateReagentApplications, deleteReagentApplication, getReagentApplications, getReagentApplication, writeJsonFile, readJsonFile}

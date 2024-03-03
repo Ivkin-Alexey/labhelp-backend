@@ -235,7 +235,7 @@ async function checkIsUserReagentManager(chatID) {
     return new Promise((resolve, reject) => {
         getConstantFromDB("reagents", "reagentsManagerChatID")
             .then(value => {
-                if (value === chatID) resolve();
+                if (+value === chatID) resolve();
                 else reject("Пользователь не уполномочен выдавать реактивы")
             })
             .catch(e => reject(e))
