@@ -12,7 +12,7 @@ const {askReagentsManagerChatID} = require("./replyToMessage");
 const {personRoles} = require("../assets/constants/users");
 const localisations = require("../assets/constants/localisations");
 
-async function processCommand(bot, command) {
+async function  processCommand(bot, command) {
     const chatID = command.chat.id;
     let text = command.text;
     const {first_name, last_name} = command.chat;
