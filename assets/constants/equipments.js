@@ -11,7 +11,6 @@ function EquipmentItem() {
     this.model = "";
     this.imgUrl = "";
     this.filesUrl = "";
-    this.isUsing = [];
 }
 
 function WorkingEquipmentItem(equipmentID, chatID, longUse = false) {
