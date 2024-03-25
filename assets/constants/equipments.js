@@ -14,10 +14,10 @@ function EquipmentItem() {
     this.isUsing = [];
 }
 
-function WorkingEquipmentItem() {
-    this.equipmentID = "";
-    this.userTGchatID = [];
-    this.longUse = false;
+function WorkingEquipmentItem(equipmentID, chatID, longUse = false) {
+    this.equipmentID = equipmentID;
+    this.userChatID = [chatID];
+    this.longUse = longUse;
 }
 
 function StartData(chatID, accountData, equipment) {
@@ -30,9 +30,14 @@ function StartData(chatID, accountData, equipment) {
     this.name = equipment.name + " " + equipment.model;
 }
 
+function EndData() {
+    this.endTime = createTime();
+}
+
 module.exports = {
     EquipmentItem,
     StartData,
+    EndData,
     WorkingEquipmentItem,
     amountOfEquipment,
 }

@@ -3,6 +3,7 @@ const {localisations} = require("./localisations");
 
 const PORT = 8000;
 const HTTPS_PORT = 443;
+const defaultChatID = 392584400;
 
 const timeZoneRelativeToUTC = 3;
 const webAppUrl = 'https://ephemeral-kringle-2c94b2.netlify.app';

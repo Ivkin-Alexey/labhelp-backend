@@ -1,11 +1,11 @@
-const {EquipmentItem} = require("../assets/constants/equipments");
+const {EquipmentItem, WorkingEquipmentItem, EndData} = require("../assets/constants/equipments");
 const {equipment} = require("../assets/constants/localisations");
 const fs = require('fs');
 const request = require('request');
 const {
     equipmentOperations,
     equipmentList,
-    equipmentListSheetID
+    equipmentListSheetID, equipmentOperationsTableID, equipmentOperationsSheetIndex
 } = require("../assets/constants/gSpreadSheets");
 const {StartData} = require("../assets/constants/equipments");
 const {readFile, writeFile, writeFileSync} = require("fs");
@@ -13,51 +13,40 @@ const path = require("path");
 const {getUserData} = require("./users");
 const {createDate, createTime} = require("./helpers");
 const {amountOfEquipment} = require("../assets/constants/equipments");
+const {defaultChatID} = require("../assets/constants/constants");
 const {personRoles} = require("../assets/constants/users");
 const localisations = require("../assets/constants/localisations");
+const {updateRowInGSheet, updateDataInGSheetCell, addNewRowInGSheet} = require("./gSheets");
+const {readJsonFile, writeJsonFile} = require("./fs");
+const {updateEquipmentUsingStatusInDB, getWorkingEquipmentListFromDB} = require("./db/equipment");
 const equipmentJsonPath = path.join(__dirname, '..', 'assets', 'db', 'equipment.json');
-const workingEquipmentJsonPath = path.join(__dirname, '..', 'assets', 'db', 'workingEquipment.json');
 const imagesPath = path.join(__dirname, '..', 'assets', 'images', 'equipments');
 
-async function startWorkWithEquipment(chatID = 392584400, accountData, equipment) {
+async function startWorkWithEquipment(chatID, accountData, equipment) {
     const {category, id} = equipment;
     return new Promise(async (resolve, reject) => {
         try {
-            const updatedEquipmentList = await updateEquipmentUsingStatus(category, id, chatID);
-            await equipmentOperations.loadInfo();
-            let sheet = equipmentOperations.sheetsByIndex[0];
+            await updateEquipmentUsingStatusInDB(category, id, chatID, "start");
             const data = new StartData(chatID, accountData, equipment);
-            await sheet.addRow(data);
-            await sheet.saveUpdatedCells();
-            resolve(updatedEquipmentList);
+            await addNewRowInGSheet(equipmentOperations, equipmentOperationsSheetIndex, data);
+            resolve(data);
         } catch (e) {
             reject(e);
         }
     })
 }
 
-async function endWorkWithEquipment(chatID = 392584400, accountData, equipment) {
+async function endWorkWithEquipment(chatID, accountData, equipment) {
     const {category, id} = equipment;
     return new Promise(async (resolve, reject) => {
         try {
-            await equipmentOperations.loadInfo();
-            let sheet = equipmentOperations.sheetsByIndex[0];
-            const equipment = await updateEquipmentUsingStatus(category, id, chatID);
-            const rows = await sheet.getRows();
-            let ended = false;
-            for(let i = 2; i < rows.length; i++) {
-                if(ended) break;
-                const endTime = rows[i].get("endTime");
-                if (endTime === "") {
-                    const rowData = rows[i]._rawData.join("");
-                    if (rowData.includes(chatID) && rowData.includes(id) && rowData.includes(createDate())) {
-                        ended = true;
-                        rows[i].set("endTime", createTime());
-                        await rows[i].save();
-                    }
-                }
-            }
-            resolve(equipment);
+            const equipmentList = await getWorkingEquipmentListFromDB();
+            const equipment = equipmentList[category].find(el => el.equipmentID = id);
+            console.log(equipmentList, equipment);
+            await updateEquipmentUsingStatusInDB(category, id, chatID, "end");
+            const data = new EndData();
+            await updateDataInGSheetCell(equipmentOperations, equipmentOperationsSheetIndex, equipment, "endTime", data.endTime);
+            resolve(data);
         } catch (e) {
             reject(e);
         }
@@ -65,7 +54,6 @@ async function endWorkWithEquipment(chatID = 392584400, accountData, equipment) 
 }
 
 async function reloadEquipmentDB(bot, chatID) {
-
     const userData = await getUserData(chatID);
     if (userData.role === personRoles.superAdmin) {
         await bot.sendMessage(chatID, equipment.dbIsReloading);
@@ -125,70 +113,6 @@ async function fetchEquipmentListFromGSheet() {
         } catch (e) {
             reject(e);
         }
-    })
-}
-
-async function downloadEquipmentImage(uri, filename, callback) {
-        request.head(uri, function(err, res, body) {
-            request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
-        });
-    };
-
-// async function updateEquipmentUsingStatus(equipmentCategory, equipmentID, chatID) {
-//     return new Promise((resolve, reject) => {
-//         readFile(workingEquipmentJsonPath, 'utf8', (error, data) => {
-//
-//             if (error) {
-//                 reject(`Ошибка чтения данных на сервере: ${error}. Сообщите о ней администратору`);
-//                 return;
-//             }
-//
-//             let parsedData = JSON.parse(Buffer.from(data));
-//             let index = parsedData[equipmentCategory].findIndex(el => el.id === equipmentID);
-//             let equipment = parsedData[equipmentCategory][index];
-//             let {isUsing} = equipment;
-//             if (isUsing.includes(chatID)) isUsing = isUsing.filter(el => {
-//                 return el !== chatID
-//             });
-//             else isUsing.push(chatID);
-//             parsedData[equipmentCategory][index].isUsing = isUsing;
-//             writeFile(equipmentJsonPath, JSON.stringify(parsedData, null, 2), (error) => {
-//                 if (error) {
-//                     reject(`Ошибка записи данных на сервере: ${error}. Сообщите о ней администратору`);
-//                     return;
-//                 }
-//                 resolve(parsedData);
-//             });
-//         })
-//     })
-// }
-
-async function updateEquipmentUsingStatus(equipmentCategory, equipmentID, chatID) {
-    return new Promise((resolve, reject) => {
-        readFile(workingEquipmentJsonPath, 'utf8', (error, data) => {
-
-            if (error) {
-                reject(`Ошибка чтения данных на сервере: ${error}. Сообщите о ней администратору`);
-                return;
-            }
-
-            let parsedData = JSON.parse(Buffer.from(data));
-            let index = parsedData[equipmentCategory].findIndex(el => el.id === equipmentID);
-            let equipment = parsedData[equipmentCategory][index];
-            let {isUsing} = equipment;
-            if (isUsing.includes(chatID)) isUsing = isUsing.filter(el => {
-                return el !== chatID
-            });
-            else isUsing.push(chatID);
-            parsedData[equipmentCategory][index].isUsing = isUsing;
-            writeFile(equipmentJsonPath, JSON.stringify(parsedData, null, 2), (error) => {
-                if (error) {
-                    reject(`Ошибка записи данных на сервере: ${error}. Сообщите о ней администратору`);
-                    return;
-                }
-                resolve(parsedData);
-            });
-        })
     })
 }
 
