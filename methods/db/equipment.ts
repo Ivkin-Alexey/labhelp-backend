@@ -1,9 +1,11 @@
+import {IEquipmentWorkingAction} from "../../assets/types/equipment";
+
 const {readJsonFile, writeJsonFile} = require("../fs");
 const {WorkingEquipmentItem} = require("../../assets/constants/equipments");
 const path = require("path");
 const workingEquipmentJsonPath = path.join(__dirname, '..', '..', 'assets', 'db', 'workingEquipment.json');
 
-async function updateEquipmentUsingStatusInDB(equipmentCategory, equipmentID, chatID, action, longUse = false) {
+async function updateWorkingEquipmentListInDB(equipmentCategory: string, equipmentID: string, chatID: string, action: IEquipmentWorkingAction, longUse: boolean = false) {
     return new Promise(async (resolve, reject) => {
         try {
             await readJsonFile(workingEquipmentJsonPath)
@@ -38,4 +40,4 @@ async function getWorkingEquipmentListFromDB() {
     });
 }
 
-module.exports = {updateEquipmentUsingStatusInDB, getWorkingEquipmentListFromDB};
+module.exports = {updateWorkingEquipmentListInDB, getWorkingEquipmentListFromDB};

@@ -28,9 +28,10 @@ const {
     deletePersonPost,
     equipmentStartPost,
     equipmentEndPost,
-    updateReagentApplicationPost, deleteReagentApplicationPost
+    updateReagentApplicationPost, deleteReagentApplicationPost, addNewReagentAppToDBPost
 } = require("./methods/appPostsProcessing");
-const {getReagentApplications} = require("./methods/reagents");
+const {getReagentApplications, addNewReagentAppToDB} = require("./methods/reagents");
+const {getWorkingEquipmentListFromDB} = require("./methods/db/equipment");
 
 const app = express();
 app.use(express.json());
@@ -56,6 +57,14 @@ app.get('/hello', async (req, res) => {
 app.get('/equipmentList', async (req, res) => {
     try {
         return await getEquipmentList().then(equipmentList => res.status(200).json(equipmentList))
+    } catch (e) {
+        return res.status(500).json(e);
+    }
+});
+
+app.get('/workingEquipmentList', async (req, res) => {
+    try {
+        return await getWorkingEquipmentListFromDB().then(list => res.status(200).json(list))
     } catch (e) {
         return res.status(500).json(e);
     }
@@ -91,5 +100,4 @@ app.post("/equipmentStart", async (req, res) => await equipmentStartPost(req, re
 app.post("/equipmentEnd", async (req, res) => await equipmentEndPost(req, res, bot));
 app.post("/deleteReagentApplication", async (req, res) => await deleteReagentApplicationPost(req, res, bot));
 app.post("/updateReagentApplications", async (req, res) => await updateReagentApplicationPost(req, res, bot));
-
-module.exports = {app};
+app.post("/addNewReagentAppToDB", async (req, res) => await addNewReagentAppToDBPost(req, res, bot));

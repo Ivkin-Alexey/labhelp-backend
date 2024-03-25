@@ -18,7 +18,7 @@ const {personRoles} = require("../assets/constants/users");
 const localisations = require("../assets/constants/localisations");
 const {updateRowInGSheet, updateDataInGSheetCell, addNewRowInGSheet} = require("./gSheets");
 const {readJsonFile, writeJsonFile} = require("./fs");
-const {updateEquipmentUsingStatusInDB, getWorkingEquipmentListFromDB} = require("./db/equipment");
+const {updateWorkingEquipmentListInDB, getWorkingEquipmentListFromDB} = require("./db/equipment");
 const equipmentJsonPath = path.join(__dirname, '..', 'assets', 'db', 'equipment.json');
 const imagesPath = path.join(__dirname, '..', 'assets', 'images', 'equipments');
 
@@ -26,7 +26,7 @@ async function startWorkWithEquipment(chatID, accountData, equipment) {
     const {category, id} = equipment;
     return new Promise(async (resolve, reject) => {
         try {
-            await updateEquipmentUsingStatusInDB(category, id, chatID, "start");
+            await updateWorkingEquipmentListInDB(category, id, chatID, "start");
             const data = new StartData(chatID, accountData, equipment);
             await addNewRowInGSheet(equipmentOperations, equipmentOperationsSheetIndex, data);
             resolve(data);
@@ -40,13 +40,16 @@ async function endWorkWithEquipment(chatID, accountData, equipment) {
     const {category, id} = equipment;
     return new Promise(async (resolve, reject) => {
         try {
-            const equipmentList = await getWorkingEquipmentListFromDB();
-            const equipment = equipmentList[category].find(el => el.equipmentID = id);
-            console.log(equipmentList, equipment);
-            await updateEquipmentUsingStatusInDB(category, id, chatID, "end");
-            const data = new EndData();
-            await updateDataInGSheetCell(equipmentOperations, equipmentOperationsSheetIndex, equipment, "endTime", data.endTime);
-            resolve(data);
+            const workingEquipmentList = await getWorkingEquipmentListFromDB();
+            const equipment = workingEquipmentList[category]?.find(el => el.equipmentID = id);
+            if(equipment) {
+                await updateWorkingEquipmentListInDB(category, id, chatID, "end");
+                const data = new EndData();
+                await updateDataInGSheetCell(equipmentOperations, equipmentOperationsSheetIndex, equipment, "endTime", data.endTime);
+                resolve(data);
+            } else {
+                reject("Такого оборудования нет в списке работающего")
+            }
         } catch (e) {
             reject(e);
         }

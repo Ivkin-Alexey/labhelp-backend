@@ -13,9 +13,15 @@ function EquipmentItem() {
     this.filesUrl = "";
 }
 
-function WorkingEquipmentItem(equipmentID, chatID, longUse = false) {
-    this.equipmentID = equipmentID;
-    this.userChatID = [chatID];
+function WorkingEquipmentItem(chatID, longUse = false) {
+    this.id = "";
+    this.category = "";
+    this.name = "";
+    this.brand = "";
+    this.model = "";
+    this.imgUrl = "";
+    this.filesUrl = "";
+    this.chatID = chatID;
     this.longUse = longUse;
 }
 
