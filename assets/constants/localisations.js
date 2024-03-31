@@ -18,10 +18,15 @@ const localisations = {
     postRequests: {
         startEquipment: {success: "Начата работа на оборудовании"}
     },
+    prompts: {
+        topicDoesntExist: "Промпта с такой темой не существует"
+    },
     reagents: {
         notifications: {
-           appConfirmation: "Ваша заявка подтверждена. Получите реактивы в установленном порядке",
-           appRejection: "Ваша заявка отклонена"
+            appConfirmationForManager: "Заявка подтверждена",
+            appDoesntExist: "Такой заявки не существует",
+            appConfirmation: "Ваша заявка подтверждена. Получите реактивы в установленном порядке",
+            appRejection: "Ваша заявка отклонена"
         }
     },
     users: {
