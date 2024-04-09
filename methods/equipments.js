@@ -58,6 +58,7 @@ async function endWorkWithEquipment(chatID, accountData, equipment) {
 
 async function reloadEquipmentDB(bot, chatID) {
     const userData = await getUserData(chatID);
+
     if (userData.role === personRoles.superAdmin) {
         await bot.sendMessage(chatID, equipment.dbIsReloading);
         await createEquipmentDbFromGSheet()
@@ -119,6 +120,38 @@ async function fetchEquipmentListFromGSheet() {
     })
 }
 
+<<<<<<< Updated upstream
+=======
+async function updateEquipmentUsingStatus(equipmentCategory, equipmentID, chatID) {
+    return new Promise((resolve, reject) => {
+        readFile(workingEquipmentJsonPath, 'utf8', (error, data) => {
+
+            if (error) {
+                reject(`Ошибка чтения данных на сервере: ${error}. Сообщите о ней администратору`);
+                return;
+            }
+
+            let parsedData = JSON.parse(Buffer.from(data));
+            let index = parsedData[equipmentCategory].findIndex(el => el.id === equipmentID);
+            let equipment = parsedData[equipmentCategory][index];
+            let {isUsing} = equipment;
+            if (isUsing.includes(chatID)) isUsing = isUsing.filter(el => {
+                return el !== chatID
+            });
+            else isUsing.push(chatID);
+            parsedData[equipmentCategory][index].isUsing = isUsing;
+            writeFile(equipmentJsonPath, JSON.stringify(parsedData, null, 2), (error) => {
+                if (error) {
+                    reject(`Ошибка записи данных на сервере: ${error}. Сообщите о ней администратору`);
+                    return;
+                }
+                resolve(parsedData);
+            });
+        })
+    })
+}
+
+>>>>>>> Stashed changes
 async function getEquipmentList() {
     return new Promise((resolve, reject) => {
         readFile(equipmentJsonPath, 'utf8', (error, data) => {
@@ -129,6 +162,18 @@ async function getEquipmentList() {
             resolve(JSON.parse(Buffer.from(data)));
         })
     })
+}
+
+async function getWorkingEquipmentList() {
+    return new Promise((resolve, reject) => {
+        readFile(equipmentJsonPath, 'utf8', (error, data) => {
+            if (error) {
+                reject(`Ошибка чтения данных на сервере: ${error}. Сообщите о ней администратору`);
+                return;
+            }
+            resolve(JSON.parse(Buffer.from(data)));
+        })
+    }) 
 }
 
 module.exports = {

@@ -54,6 +54,8 @@ httpsServer.listen(HTTPS_PORT, () => {
 app.get('/hello', async (req, res) => {
     return res.status(200).json('Привет');
 });
+
+
 app.get('/equipmentList', async (req, res) => {
     try {
         return await getEquipmentList().then(equipmentList => res.status(200).json(equipmentList))
@@ -73,6 +75,14 @@ app.get('/workingEquipmentList', async (req, res) => {
 app.get('/persons', async (req, res) => {
     try {
         return await getUserList().then(personList => res.status(200).json(personList));
+    } catch (e) {
+        return res.status(500).json(e);
+    }
+});
+
+app.get('/workingEquipment', async (req, res) => {
+    try {
+        return await getWorkingEquipmentList().then(list => res.status(200).json(list));
     } catch (e) {
         return res.status(500).json(e);
     }
