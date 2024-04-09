@@ -120,8 +120,6 @@ async function fetchEquipmentListFromGSheet() {
     })
 }
 
-<<<<<<< Updated upstream
-=======
 async function updateEquipmentUsingStatus(equipmentCategory, equipmentID, chatID) {
     return new Promise((resolve, reject) => {
         readFile(workingEquipmentJsonPath, 'utf8', (error, data) => {
@@ -151,7 +149,6 @@ async function updateEquipmentUsingStatus(equipmentCategory, equipmentID, chatID
     })
 }
 
->>>>>>> Stashed changes
 async function getEquipmentList() {
     return new Promise((resolve, reject) => {
         readFile(equipmentJsonPath, 'utf8', (error, data) => {
