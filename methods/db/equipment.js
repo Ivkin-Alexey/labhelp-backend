@@ -1,11 +1,9 @@
-const {IEquipmentWorkingAction} = require("../../assets/types/equipment.ts");
-
-const {readJsonFile, writeJsonFile} = require("../fs");
-const {WorkingEquipmentItem} = require("../../assets/constants/equipments");
+const {readJsonFile, writeJsonFile} = require("../fs.js");
+const {WorkingEquipmentItem} = require("../../assets/constants/equipments.js");
 const path = require("path");
 const workingEquipmentJsonPath = path.join(__dirname, '..', '..', 'assets', 'db', 'workingEquipment.json');
 
-async function updateWorkingEquipmentListInDB(equipmentCategory: string, equipmentID: string, chatID: string, action, longUse: boolean = false) {
+async function updateWorkingEquipmentListInDB(equipmentCategory, equipmentID, chatID, action, longUse = false) {
     return new Promise(async (resolve, reject) => {
         try {
 

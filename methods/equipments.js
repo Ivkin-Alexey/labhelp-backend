@@ -18,7 +18,7 @@ const {personRoles} = require("../assets/constants/users");
 const localisations = require("../assets/constants/localisations");
 const {updateRowInGSheet, updateDataInGSheetCell, addNewRowInGSheet} = require("./gSheets");
 const {readJsonFile, writeJsonFile} = require("./fs");
-const {updateWorkingEquipmentListInDB, getWorkingEquipmentListFromDB} = require("./db/equipment.ts");
+const {updateWorkingEquipmentListInDB, getWorkingEquipmentListFromDB} = require("./db/equipment");
 const equipmentJsonPath = path.join(__dirname, '..', 'assets', 'db', 'equipment.json');
 const imagesPath = path.join(__dirname, '..', 'assets', 'images', 'equipments');
 
