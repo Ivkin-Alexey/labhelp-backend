@@ -80,9 +80,9 @@ app.get('/persons', async (req, res) => {
     }
 });
 
-app.get('/workingEquipment', async (req, res) => {
+app.get('/workingEquipmentList', async (req, res) => {
     try {
-        return await getWorkingEquipmentList().then(list => res.status(200).json(list));
+        return await getWorkingEquipmentListFromDB().then(list => res.status(200).json(list));
     } catch (e) {
         return res.status(500).json(e);
     }
