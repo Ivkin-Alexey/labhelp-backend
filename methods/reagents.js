@@ -1,41 +1,46 @@
-const {readFile, writeFile} = require("fs");
 const path = require("path");
 const bot = require("../index");
 const {NewReagentApplication} = require("../assets/constants/reagents.js");
 const {getConstantFromDB} = require("./updateConstants");
 const localisations = require("../assets/constants/localisations");
-const {sendPrompt} = require("./prompt");
+const {sendPrompt, addNewPromptToDB} = require("./prompts");
+const {readJsonFile, writeJsonFile} = require("./fs");
 
 const jsonPath = path.join(__dirname, '..', 'assets', 'db', 'reagents.json');
 
-async function updateReagentApplications(userData, applicationData, bot) {
-    const applicationID = applicationData.id ?? null;
+async function updateReagentApps(appID, updatedData) {
     return new Promise((resolve, reject) => {
         readJsonFile(jsonPath)
             .then(async parsedData => {
-                if (!applicationID) {
-                    const newApplication = new NewReagentApplication(userData);
-                    for (let key in applicationData) {
-                        newApplication[key] = applicationData[key];
-                    }
-                    const reagentManagerChatID = await getConstantFromDB("reagents", "reagentsManagerChatID");
-                    await sendReagentApplicationDataToManager(reagentManagerChatID, newApplication, bot);
-                    parsedData.push(newApplication)
-                } else {
                     parsedData = parsedData.map(el => {
-                        if (el.id === applicationID) {
-                            for (let key in applicationData) {
-                                el[key] = applicationData[key];
+                        if (el.id === appID) {
+                            for (let key in updatedData) {
+                                el[key] = updatedData[key];
                             }
                         }
                         return el;
                     })
-                }
-                await writeJsonFile(jsonPath, parsedData)
-                resolve(parsedData)
-            })
+                await writeJsonFile(jsonPath, parsedData);
+                resolve(parsedData);
+                })
             .catch(e => reject(e))
-    })
+    });
+}
+
+async function addNewReagentAppToDB(userData, applicationData, bot) {
+    return new Promise((resolve, reject) => {
+        readJsonFile(jsonPath)
+            .then(async parsedData => {
+                const newApplication = new NewReagentApplication(userData);
+                for (let key in applicationData) {
+                    newApplication[key] = applicationData[key];
+                }
+                parsedData.push(newApplication)
+                await writeJsonFile(jsonPath, parsedData);
+                resolve(newApplication);
+            })
+            .catch(e => reject(e));
+    });
 }
 
 async function getReagentApplications() {
@@ -48,10 +53,7 @@ async function getReagentApplications() {
 
 async function getReagentApplication(applicationID) {
     return await getReagentApplications()
-        .then(list => {
-            const app = list.find(el => el.id === applicationID);
-            console.log(app);
-        })
+        .then(list => list.find(el => el.id === applicationID))
         .catch(e => e);
 }
 
@@ -67,46 +69,30 @@ async function deleteReagentApplication(applicationID) {
     })
 }
 
-async function sendReagentApplicationDataToManager(managerChatID, applicationData, bot) {
-    const id = applicationData.id.toString();
-    const promptData = {topic: "reagents", appID: id};
+async function sendReagentAppDataToManager(appData, bot) {
+    const reagentManagerChatID = await getConstantFromDB("reagents", "reagentsManagerChatID");
+    const id = appData.id.toString();
+    const promptData = {appID: id, chatID: appData.chatID};
     const keyboard = [
         [
             {text: 'Подтвердить', callback_data: JSON.stringify({answer: "confirm"})},
             {text: 'Отклонить', callback_data: JSON.stringify({answer: "reject"})}
         ],
     ];
-    await sendPrompt(bot, managerChatID, createApplication(applicationData), keyboard, promptData);
+    await sendPrompt(bot, reagentManagerChatID, createApplication(appData), keyboard, promptData)
+        .then(prompt => addNewPromptToDB(prompt.message_id, "reagents", promptData));
 }
 
 function createApplication(applicationData) {
     const {fullName, reagentName, reagentAmount, date} = applicationData;
-    return 'Новая заявка:' + '\n' + 'Дата:' + date + '\n' + 'ФИО: ' + fullName + '\n' + 'Реактив: ' + reagentName + '\n' + 'Количество: ' + reagentAmount
+    return 'Новая заявка: ' + '\n' + 'Дата: ' + date + '\n' + 'ФИО: ' + fullName + '\n' + 'Реактив: ' + reagentName + '\n' + 'Количество: ' + reagentAmount
 }
 
-async function readJsonFile(path) {
-    return new Promise((resolve, reject) => {
-        readFile(path, 'utf8', (error, data) => {
-            if (error) {
-                reject(`Ошибка чтения данных на сервере: ${error}. Сообщите о ней администратору`);
-                return;
-            }
-            const parsedData = JSON.parse(Buffer.from(data));
-            resolve(parsedData);
-        })
-    })
+module.exports = {
+    updateReagentApplications: updateReagentApps,
+    deleteReagentApplication,
+    getReagentApplications,
+    getReagentApplication,
+    addNewReagentAppToDB,
+    sendReagentAppDataToManager
 }
-
-async function writeJsonFile(path, parsedData) {
-    return new Promise((resolve, reject) => {
-        writeFile(path, JSON.stringify(parsedData, null, 2), (error) => {
-            if (error) {
-                reject(`Ошибка записи данных на сервере: ${error}. Сообщите о ней администратору`);
-                return;
-            }
-            resolve();
-        });
-    })
-}
-
-module.exports = {updateReagentApplications, deleteReagentApplication, getReagentApplications, getReagentApplication, writeJsonFile, readJsonFile}

@@ -2,28 +2,33 @@ const {stickers, superAdminsChatID} = require("../assets/constants/constants");
 const localisations = require("../assets/constants/localisations");
 const {updateUserData, checkIsUserReagentManager} = require("./users");
 const {sendResearches, sendWebAppButtonWithMessage, sendNotification} = require("./botAnswers");
-const {getReagentApplication} = require("./reagents");
-const {app} = require("../index");
+const {getReagentApplication, updateReagentApplications} = require("./reagents");
+const {updatePrompts, deletePrompt, getPrompt} = require("./prompts");
+const {notifyProgrammer} = require("./notifications");
 
 const {invitationToRegistration} = localisations.botAnswers;
-const {appConfirmation, appRejection} = localisations.reagents.notifications;
+const {appConfirmation, appRejection, appConfirmationForManager} = localisations.reagents.notifications;
 
 async function processCallbackQuery(bot, ctx) {
     const {id, first_name, last_name} = ctx.message.chat;
+    const msgID = ctx.message?.message_id;
     const chatID = id;
-    console.log(ctx);
     let messageData = JSON.parse(ctx.data);
     messageData.first_name = first_name;
     messageData.last_name = last_name;
 
     try {
         let answer = undefined;
-        if(messageData?.userAnswer) answer = messageData.userAnswer;
-        if(messageData?.research) answer = "research";
+        if (messageData?.answer) answer = messageData.answer;
+        if (messageData?.research) answer = "research";
         switch (answer) {
             case "Yes":
                 await bot.sendSticker(chatID, stickers.agree);
-                await updateUserData(chatID, {firstName: messageData.first_name, lastName: messageData.last_name, chatID});
+                await updateUserData(chatID, {
+                    firstName: messageData.first_name,
+                    lastName: messageData.last_name,
+                    chatID
+                });
                 await sendResearches(bot, chatID);
                 break;
             case "No":
@@ -40,10 +45,10 @@ async function processCallbackQuery(bot, ctx) {
             case "adminDoesntConfirmUser":
                 await bot.sendMessage(superAdminsChatID[0], "Заявка отменена")
                 break;
-            case "confirmReagentApp":
-                await processReagentAppConfirmation(chatID, messageData.applicationID, bot);
+            case "confirm":
+                await processReagentAppConfirmation(chatID, msgID, bot);
                 break;
-            case "rejectReagentApp":
+            case "reject":
                 await bot.sendMessage(superAdminsChatID[0], "Заявка отменена")
                 break;
         }
@@ -52,18 +57,21 @@ async function processCallbackQuery(bot, ctx) {
     }
 }
 
-async function processReagentAppConfirmation(chatID, applicationID, bot) {
-    checkIsUserReagentManager(chatID)
-        .then(() => getReagentApplication(applicationID))
-        .then(app => {
-            // updateRowInGSheet(app)
-            sendNotification(bot, app.chatID, appConfirmation)
-            console.log(appConfirmation);
-        })
-        .catch(e => {
-            sendNotification(bot, chatID, e)
-            console.log(e);
-        })
+async function processReagentAppConfirmation(reagentManagerChatID, msgID, bot) {
+        try {
+            await checkIsUserReagentManager(reagentManagerChatID)
+                .then(() => getPrompt(bot, msgID, "reagents"))
+                .then(prompt => {
+                    console.log(prompt);
+                    updateReagentApplications(prompt.data.appID, {status: "confirmed"})
+                        .then(() => sendNotification(bot, prompt.data.chatID, appConfirmation))
+                })
+                .then(() => sendNotification(bot, reagentManagerChatID, appConfirmationForManager))
+                // .then(() => updateDataInReagentGSheet())
+                .then(() => deletePrompt(msgID, "reagents"))
+        } catch (e) {
+            await notifyProgrammer(bot, e);
+        }
 }
 
 module.exports = {processCallbackQuery}

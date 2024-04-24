@@ -1,7 +1,7 @@
 const {updateUserData, deleteUser, processUserConfirmation, getUserData} = require("./users");
 const {startWorkWithEquipment, endWorkWithEquipment} = require("./equipments");
 const localisations = require("../assets/constants/localisations");
-const {deleteReagentApplication, updateReagentApplications} = require("./reagents");
+const {deleteReagentApplication, updateReagentApplications, addNewReagentAppToDB, sendReagentAppDataToManager} = require("./reagents");
 const {personRoles} = require("../assets/constants/users");
 const {denyApplication} = localisations.superAdministratorActions;
 
@@ -53,8 +53,22 @@ async function equipmentEndPost(req, res) {
         return await endWorkWithEquipment(+chatID, accountData, equipment)
             .then(data => res.status(200).json(data));
     } catch (e) {
+        console.log(e);
         return res.status(500).json(e);
     }
+}
+
+async function addNewReagentAppToDBPost(req, res, bot) {
+    const {body} = req;
+    const {userData, applicationData} = body;
+    return new Promise(() => {
+        addNewReagentAppToDB(userData, applicationData, bot)
+            .then(app => {
+                sendReagentAppDataToManager(app, bot)
+                return res.status(200).json(app)
+            })
+            .catch(error => res.status(500).json(error))
+    })
 }
 
 async function updateReagentApplicationPost(req, res, bot) {
@@ -86,5 +100,6 @@ module.exports = {
     equipmentEndPost,
     equipmentStartPost,
     updateReagentApplicationPost,
-    deleteReagentApplicationPost
+    deleteReagentApplicationPost,
+    addNewReagentAppToDBPost
 }

@@ -18,7 +18,7 @@ const {personRoles} = require("../assets/constants/users");
 const localisations = require("../assets/constants/localisations");
 const {updateRowInGSheet, updateDataInGSheetCell, addNewRowInGSheet} = require("./gSheets");
 const {readJsonFile, writeJsonFile} = require("./fs");
-const {updateEquipmentUsingStatusInDB, getWorkingEquipmentListFromDB} = require("./db/equipment");
+const {updateWorkingEquipmentListInDB, getWorkingEquipmentListFromDB} = require("./db/equipment");
 const equipmentJsonPath = path.join(__dirname, '..', 'assets', 'db', 'equipment.json');
 const imagesPath = path.join(__dirname, '..', 'assets', 'images', 'equipments');
 
@@ -26,7 +26,7 @@ async function startWorkWithEquipment(chatID, accountData, equipment) {
     const {category, id} = equipment;
     return new Promise(async (resolve, reject) => {
         try {
-            await updateEquipmentUsingStatusInDB(category, id, chatID, "start");
+            await updateWorkingEquipmentListInDB(category, id, chatID, "start");
             const data = new StartData(chatID, accountData, equipment);
             await addNewRowInGSheet(equipmentOperations, equipmentOperationsSheetIndex, data);
             resolve(data);
@@ -40,13 +40,16 @@ async function endWorkWithEquipment(chatID, accountData, equipment) {
     const {category, id} = equipment;
     return new Promise(async (resolve, reject) => {
         try {
-            const equipmentList = await getWorkingEquipmentListFromDB();
-            const equipment = equipmentList[category].find(el => el.equipmentID = id);
-            console.log(equipmentList, equipment);
-            await updateEquipmentUsingStatusInDB(category, id, chatID, "end");
-            const data = new EndData();
-            await updateDataInGSheetCell(equipmentOperations, equipmentOperationsSheetIndex, equipment, "endTime", data.endTime);
-            resolve(data);
+            const workingEquipmentList = await getWorkingEquipmentListFromDB();
+            const equipment = workingEquipmentList[category]?.find(el => el.equipmentID = id);
+            if(equipment) {
+                await updateWorkingEquipmentListInDB(category, id, chatID, "end");
+                const data = new EndData();
+                await updateDataInGSheetCell(equipmentOperations, equipmentOperationsSheetIndex, equipment, "endTime", data.endTime);
+                resolve(data);
+            } else {
+                reject("Такого оборудования нет в списке работающего")
+            }
         } catch (e) {
             reject(e);
         }
@@ -55,6 +58,7 @@ async function endWorkWithEquipment(chatID, accountData, equipment) {
 
 async function reloadEquipmentDB(bot, chatID) {
     const userData = await getUserData(chatID);
+
     if (userData.role === personRoles.superAdmin) {
         await bot.sendMessage(chatID, equipment.dbIsReloading);
         await createEquipmentDbFromGSheet()
@@ -116,6 +120,35 @@ async function fetchEquipmentListFromGSheet() {
     })
 }
 
+async function updateEquipmentUsingStatus(equipmentCategory, equipmentID, chatID) {
+    return new Promise((resolve, reject) => {
+        readFile(workingEquipmentJsonPath, 'utf8', (error, data) => {
+
+            if (error) {
+                reject(`Ошибка чтения данных на сервере: ${error}. Сообщите о ней администратору`);
+                return;
+            }
+
+            let parsedData = JSON.parse(Buffer.from(data));
+            let index = parsedData[equipmentCategory].findIndex(el => el.id === equipmentID);
+            let equipment = parsedData[equipmentCategory][index];
+            let {isUsing} = equipment;
+            if (isUsing.includes(chatID)) isUsing = isUsing.filter(el => {
+                return el !== chatID
+            });
+            else isUsing.push(chatID);
+            parsedData[equipmentCategory][index].isUsing = isUsing;
+            writeFile(equipmentJsonPath, JSON.stringify(parsedData, null, 2), (error) => {
+                if (error) {
+                    reject(`Ошибка записи данных на сервере: ${error}. Сообщите о ней администратору`);
+                    return;
+                }
+                resolve(parsedData);
+            });
+        })
+    })
+}
+
 async function getEquipmentList() {
     return new Promise((resolve, reject) => {
         readFile(equipmentJsonPath, 'utf8', (error, data) => {
@@ -126,6 +159,18 @@ async function getEquipmentList() {
             resolve(JSON.parse(Buffer.from(data)));
         })
     })
+}
+
+async function getWorkingEquipmentList() {
+    return new Promise((resolve, reject) => {
+        readFile(equipmentJsonPath, 'utf8', (error, data) => {
+            if (error) {
+                reject(`Ошибка чтения данных на сервере: ${error}. Сообщите о ней администратору`);
+                return;
+            }
+            resolve(JSON.parse(Buffer.from(data)));
+        })
+    }) 
 }
 
 module.exports = {

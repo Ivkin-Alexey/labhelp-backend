@@ -1,11 +1,12 @@
-const {readJsonFile, writeJsonFile} = require("../fs");
-const {WorkingEquipmentItem} = require("../../assets/constants/equipments");
+const {readJsonFile, writeJsonFile} = require("../fs.js");
+const {WorkingEquipmentItem} = require("../../assets/constants/equipments.js");
 const path = require("path");
 const workingEquipmentJsonPath = path.join(__dirname, '..', '..', 'assets', 'db', 'workingEquipment.json');
 
-async function updateEquipmentUsingStatusInDB(equipmentCategory, equipmentID, chatID, action, longUse = false) {
+async function updateWorkingEquipmentListInDB(equipmentCategory, equipmentID, chatID, action, longUse = false) {
     return new Promise(async (resolve, reject) => {
         try {
+
             await readJsonFile(workingEquipmentJsonPath)
                 .then(parsedData => {
                     if (!parsedData[equipmentCategory] && action === "start") parsedData[equipmentCategory] = [];
@@ -38,4 +39,4 @@ async function getWorkingEquipmentListFromDB() {
     });
 }
 
-module.exports = {updateEquipmentUsingStatusInDB, getWorkingEquipmentListFromDB};
+module.exports = {updateWorkingEquipmentListInDB, getWorkingEquipmentListFromDB};
