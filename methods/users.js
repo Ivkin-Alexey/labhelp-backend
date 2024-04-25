@@ -1,20 +1,20 @@
-const {writeFile, readFile, readFileSync} = require("fs");
-const path = require("path");
+import {writeFile, readFile, readFileSync} from "fs";
+import path from "path";
 const jsonPath = path.join(__dirname, '..', 'assets', 'db', 'db.json');
-const fs = require("fs");
-const md5 = require('md5');
-const {
+import fs from "fs";
+import md5 from 'md5';
+import {
     newPerson,
     newPersonCheckingRules,
     superAdminsChatID,
     ConfirmedUserData,
     personRoles
-} = require("../assets/constants/users");
-const {superAdministratorActions, users} = require("../assets/constants/localisations");
-const {createDate} = require("./helpers");
-const {equipmentOperations, confirmedUsers} = require("../assets/constants/gSpreadSheets");
-const {StartData} = require("../assets/constants/equipments");
-const {getConstantFromDB} = require("./updateConstants");
+} from "../assets/constants/users.js";
+import localisations from "../assets/constants/localisations.js";
+import {createDate} from "./helpers.js";
+import {equipmentOperations, confirmedUsers} from "../assets/constants/gSpreadSheets.js";
+import {StartData} from "../assets/constants/equipments.js";
+import {getConstantFromDB} from "./updateConstants.js";
 
 let md5Previous = null;
 let fsWait = false;
@@ -244,7 +244,7 @@ async function checkIsUserReagentManager(chatID) {
 
 // updateNewUserFields();
 
-module.exports = {
+export {
     updateUserData,
     getUserData,
     getUserList,

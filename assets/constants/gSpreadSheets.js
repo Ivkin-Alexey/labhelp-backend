@@ -1,6 +1,6 @@
 require('dotenv').config();
-const GoogleSpreadsheet = require('google-spreadsheet');
-const JWT = require('google-auth-library');
+import {GoogleSpreadsheet} from 'google-spreadsheet';
+import JWT from 'google-auth-library';
 
 const equipmentOperationsTableID = "1UZ21neg8OevoKReVYHIAkUmw9v388zF8AwpykXs-EsE";
 const equipmentOperationsSheetIndex = "0";
@@ -20,7 +20,7 @@ const equipmentOperations = new GoogleSpreadsheet.GoogleSpreadsheet(equipmentOpe
 const equipmentList = new GoogleSpreadsheet.GoogleSpreadsheet(equipmentListTableID, serviceAccountAuth);
 const confirmedUsers = new GoogleSpreadsheet.GoogleSpreadsheet(confirmedUsersTableID, serviceAccountAuth);
 
-module.exports = {
+export {
     equipmentOperationsTableID,
     equipmentListTableID,
     equipmentListSheetID,

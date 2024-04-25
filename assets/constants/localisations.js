@@ -37,5 +37,5 @@ const localisations = {
     }
 };
 
-module.exports = localisations;
+export default localisations;
 

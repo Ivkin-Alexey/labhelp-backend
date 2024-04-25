@@ -1,6 +1,5 @@
-const {readJsonFile, writeJsonFile} = require("../fs.js");
-const {WorkingEquipmentItem} = require("../../assets/constants/equipments.js");
-const path = require("path");
+import {readJsonFile, writeJsonFile} from "../fs.js";
+import path from "path";
 const workingEquipmentJsonPath = path.join(__dirname, '..', '..', 'assets', 'db', 'workingEquipment.json');
 
 async function updateWorkingEquipmentListInDB(equipmentCategory, equipmentID, chatID, action, longUse = false) {
@@ -39,4 +38,4 @@ async function getWorkingEquipmentListFromDB() {
     });
 }
 
-module.exports = {updateWorkingEquipmentListInDB, getWorkingEquipmentListFromDB};
+export {updateWorkingEquipmentListInDB, getWorkingEquipmentListFromDB};

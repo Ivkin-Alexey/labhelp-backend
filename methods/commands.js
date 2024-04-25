@@ -1,16 +1,16 @@
-const {checkTextIsResearch} = require("./validation");
-const {sendStartMessage, sendResearches, sendResearch, sendConfusedMessage, sendCommandList} = require("./botAnswers");
-const {
+import {checkTextIsResearch} from "./validation.js";
+import {sendStartMessage, sendResearches, sendResearch, sendConfusedMessage, sendCommandList} from "./botAnswers.js";
+import {
     addRandomUser,
     deleteUsersWithEmptyChatID,
     updateUserData,
     checkIsUserSuperAdmin,
     getUserData
-} = require("./users");
-const {reloadEquipmentDB} = require("./equipments");
-const {askReagentsManagerChatID} = require("./replyToMessage");
-const {personRoles} = require("../assets/constants/users");
-const localisations = require("../assets/constants/localisations");
+} from "./users.js";
+import {reloadEquipmentDB} from "./equipments.js";
+import {askReagentsManagerChatID} from "./replyToMessage.js";
+import {personRoles} from "../assets/constants/users.js";
+import localisations from "../assets/constants/localisations.js";
 
 async function  processCommand(bot, command) {
     const chatID = command.chat.id;
@@ -89,4 +89,4 @@ async function  processCommand(bot, command) {
     // }
 }
 
-module.exports = {processCommand};
+export {processCommand};

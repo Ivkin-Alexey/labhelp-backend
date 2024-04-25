@@ -1,4 +1,4 @@
-const {createDate, createReagentID, createFullName, createNameWithInitials} = require("../../methods/helpers");
+import {createDate, createReagentID, createFullName, createNameWithInitials} from "../../methods/helpers.js";
 
 const reagentStatuses = {inProcess: "inProcess", completed: "completed", rejected: "rejected"};
 

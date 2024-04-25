@@ -1,5 +1,4 @@
-const {createDate, createTime} = require("../../methods/helpers");
-const {createFullName} = require("../../methods/helpers");
+import {createDate, createTime,createFullName} from "../../methods/helpers.js";
 
 const amountOfEquipment = 600;
 
@@ -39,7 +38,7 @@ function EndData() {
     this.endTime = createTime();
 }
 
-module.exports = {
+export {
     EquipmentItem,
     StartData,
     EndData,

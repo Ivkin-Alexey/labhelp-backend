@@ -21,4 +21,4 @@ const researchTopics = researches.map(el => el.name);
 
 const researchesSelectOptions = researches.reduce((sum, cur) => ([...sum, {value: cur.name, label: cur.name}]), [defaultResearchSelectOption]);
 
-module.exports = {researchesSelectOptions, researches, researchTopics, defaultResearchSelectOption};
+export {researchesSelectOptions, researches, researchTopics, defaultResearchSelectOption};

@@ -1,6 +1,6 @@
-const {webAppUrl} = require("../assets/constants/constants");
-const {updateUserData} = require("./users");
-const {updateConstantsDB} = require("./updateConstants");
+import {webAppUrl} from "../assets/constants/constants";
+import {updateUserData} from "./users";
+import {updateConstantsDB} from "./updateConstants";
 
 async function askUserPosition(bot, chatID) {
     await bot.sendMessage(chatID, "Выбери категорию обучающегося: ", {
@@ -38,7 +38,7 @@ async function askEducationalGroup(bot, chatID) {
 }
 
 async function askPhoneNumber(bot, chatID) {
-    await bot.sendMessage(chatID, "Напиши свой номер телефона в формате  \"+79876543210\"");
+    await bot.sendMessage(chatID, "Напиши свой номер телефона в формате  \"+79876543210\"";
 }
 
 async function askConfirmNewUser(bot, adminChatId, userData) {

@@ -1,5 +1,5 @@
-const {updateConstantsDB} = require("./updateConstants");
-const {getUserData} = require("./users");
+import {updateConstantsDB} from "./updateConstants.js";
+import {getUserData} from "./users.js";
 
 async function askReagentsManagerChatID(bot, chatID) {
     const prompt = await bot.sendMessage(chatID, "Введите chatID менеджера по реактивам", {

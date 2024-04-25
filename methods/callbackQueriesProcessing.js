@@ -1,10 +1,10 @@
-const {stickers, superAdminsChatID} = require("../assets/constants/constants");
-const localisations = require("../assets/constants/localisations");
-const {updateUserData, checkIsUserReagentManager} = require("./users");
-const {sendResearches, sendWebAppButtonWithMessage, sendNotification} = require("./botAnswers");
-const {getReagentApplication, updateReagentApplications} = require("./reagents");
-const {updatePrompts, deletePrompt, getPrompt} = require("./prompts");
-const {notifyProgrammer} = require("./notifications");
+import {stickers, superAdminsChatID} from "../assets/constants/constants.js";
+import localisations from "../assets/constants/localisations.js";
+import {updateUserData, checkIsUserReagentManager} from "./users.js";
+import {sendResearches, sendWebAppButtonWithMessage, sendNotification} from "./botAnswers.js";
+import {getReagentApplication, updateReagentApplications} from "./reagents.js";
+import {updatePrompts, deletePrompt, getPrompt} from "./prompts.js";
+import {notifyProgrammer} from "./notifications.js";
 
 const {invitationToRegistration} = localisations.botAnswers;
 const {appConfirmation, appRejection, appConfirmationForManager} = localisations.reagents.notifications;
@@ -74,4 +74,4 @@ async function processReagentAppConfirmation(reagentManagerChatID, msgID, bot) {
         }
 }
 
-module.exports = {processCallbackQuery}
+export {processCallbackQuery}

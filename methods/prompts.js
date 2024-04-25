@@ -1,11 +1,11 @@
-const {NewReagentApplication} = require("../assets/constants/reagents");
-const {getConstantFromDB} = require("./updateConstants");
-const path = require("path");
-const {Prompt} = require("../assets/constants/prompt");
-const {readJsonFile, writeJsonFile} = require("./fs");
-const {sendNotification} = require("./botAnswers");
-const {notifyProgrammer} = require("./notifications");
-const {localisations} = require("../assets/constants/constants");
+import {NewReagentApplication} from "../assets/constants/reagents.js";
+import {getConstantFromDB} from "./updateConstants.js";
+import path from "path";
+import {Prompt} from "../assets/constants/prompt.js";
+import {readJsonFile, writeJsonFile} from "./fs.js";
+import {sendNotification} from "./botAnswers.js";
+import {notifyProgrammer} from "./notifications.js";
+import {localisations} from "../assets/constants/constants.js";
 const jsonPath = path.join(__dirname, '..', 'assets', 'db', 'prompts.json');
 
 async function sendPrompt(bot, chatID, msg, keyboard, promptData) {

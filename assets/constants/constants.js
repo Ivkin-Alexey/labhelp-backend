@@ -1,5 +1,5 @@
-const {researches} = require("./researches");
-const {localisations} = require("./localisations");
+import {researches} from "./researches.js";
+import localisations from "./localisations.js";
 
 const PORT = 8000;
 const HTTPS_PORT = 443;
@@ -96,7 +96,7 @@ const stickers = {
     ok: 'CAACAgIAAxkBAAEKTlNlBLDJzNKqxAvp52WGuh4FS4TLeAACLAADwZxgDLDdeXbj2CCVMAQ'
 }
 
-module.exports = {
+export {
     PORT,
     HTTPS_PORT,
     webAppUrl,

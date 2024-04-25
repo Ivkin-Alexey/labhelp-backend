@@ -1,4 +1,4 @@
-const {readFile, writeFile} = require("fs");
+import {readFile, writeFile} from "fs";
 
 async function readJsonFile(path) {
     return new Promise((resolve, reject) => {

@@ -1,8 +1,9 @@
-const fs = require("fs");
-require('dotenv').config();
-const TelegramBot = require('node-telegram-bot-api');
-const {processCallbackQuery} = require("./methods/callbackQueriesProcessing");
-const {processCommand} = require("./methods/commands");
+import fs from "fs";
+import * as dotenv from 'dotenv';
+dotenv.config();
+import TelegramBot from 'node-telegram-bot-api';
+import {processCallbackQuery} from "./methods/callbackQueriesProcessing.js";
+import {processCommand} from "./methods/commands.js";
 
 process.on('uncaughtException', err => console.log(err));
 
@@ -14,42 +15,45 @@ const bot = new TelegramBot(token, {polling: true});
 bot.on('message', async msg => await processCommand(bot, msg));
 bot.on('callback_query', async ctx => await processCallbackQuery(bot, ctx));
 
-const express = require("express");
-const cors = require("cors");
-const http = require("http");
-const https = require("https");
 
-const {PORT, HTTPS_PORT} = require("./assets/constants/constants");
-const {getEquipmentList} = require("./methods/equipments");
-const {getUserList} = require("./methods/users");
-const {researchesSelectOptions} = require("./assets/constants/researches");
-const {
+import express from "express";
+import cors from "cors" ;
+import http from "http";
+import https from "https";
+
+import {PORT} from "./assets/constants/constants.js";
+import {getEquipmentList} from "./methods/equipments.js";
+import {getUserList} from "./methods/users.js";
+import{researchesSelectOptions} from "./assets/constants/researches.js";
+import {
     updateUserDataPost,
     deletePersonPost,
     equipmentStartPost,
     equipmentEndPost,
     updateReagentApplicationPost, deleteReagentApplicationPost, addNewReagentAppToDBPost
-} = require("./methods/appPostsProcessing");
-const {getReagentApplications, addNewReagentAppToDB} = require("./methods/reagents");
-const {getWorkingEquipmentListFromDB} = require("./methods/db/equipment");
+} from "./methods/appPostsProcessing.js";
+import {getReagentApplications, addNewReagentAppToDB} from "./methods/reagents.js";
+import {getWorkingEquipmentListFromDB} from "./methods/db/equipment.js";
 
 const app = express();
+
+console.log(app)
 app.use(express.json());
 app.use(cors());
 
 const httpServer = http.createServer(app);
-const httpsServer = https.createServer({
-    key: fs.readFileSync('ssl/key.pem'),
-    cert: fs.readFileSync('ssl/cert.pem'),
-}, app);
+// const httpsServer = https.createServer({
+//     key: fs.readFileSync('ssl/key.pem'),
+//     cert: fs.readFileSync('ssl/cert.pem'),
+// }, app);
 
 httpServer.listen(PORT, () => {
     console.log(`HTTP Server running on port ${PORT}`);
 })
 
-httpsServer.listen(HTTPS_PORT, () => {
-    console.log(`HTTPS Server running on port ${HTTPS_PORT}`);
-})
+// httpsServer.listen(HTTPS_PORT, () => {
+//     console.log(`HTTPS Server running on port ${HTTPS_PORT}`);
+// })
 
 app.get('/hello', async (req, res) => {
     return res.status(200).json('Привет');
@@ -111,3 +115,5 @@ app.post("/equipmentEnd", async (req, res) => await equipmentEndPost(req, res, b
 app.post("/deleteReagentApplication", async (req, res) => await deleteReagentApplicationPost(req, res, bot));
 app.post("/updateReagentApplications", async (req, res) => await updateReagentApplicationPost(req, res, bot));
 app.post("/addNewReagentAppToDB", async (req, res) => await addNewReagentAppToDBPost(req, res, bot));
+
+export default app;

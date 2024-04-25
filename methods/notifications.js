@@ -1,5 +1,5 @@
-const {getConstantFromDB} = require("./updateConstants");
-const {sendNotification} = require("./botAnswers");
+import {getConstantFromDB} from "./updateConstants.js";
+import {sendNotification} from "./botAnswers.js";
 
 async function notifyProgrammer(bot, message) {
     const programmerChatID = await getConstantFromDB("general", "programmerChatID");

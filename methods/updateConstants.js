@@ -1,5 +1,5 @@
-const {readFile, writeFile} = require("fs");
-const path = require("path");
+import {readFile, writeFile} from "fs";
+import path from "path";
 const constantsJsonPath = path.join(__dirname, '..', 'assets', 'db', 'constants.json');
 
 async function updateConstantsDB(field, data) {
@@ -43,4 +43,4 @@ async function getConstantFromDB(field, constant) {
     })
 }
 
-module.exports = {updateConstantsDB, getConstantFromDB};
+export {updateConstantsDB, getConstantFromDB};

@@ -1,4 +1,4 @@
-const constants = require("../assets/constants/constants");
+const constants from "../assets/constants/constants";
 const {CEOChatID} = constants.constants;
 const {researches, keyboards} = constants;
 

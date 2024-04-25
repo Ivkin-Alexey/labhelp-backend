@@ -1,4 +1,4 @@
-const {researchTopics} = require("../assets/constants/researches");
+import {researchTopics} from "../assets/constants/researches.js";
 
 function checkTextIsResearch(text) {
     let research = null;

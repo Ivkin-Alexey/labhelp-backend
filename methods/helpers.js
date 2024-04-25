@@ -1,4 +1,4 @@
-const {timeZoneRelativeToUTC} = require("../assets/constants/constants");
+import {timeZoneRelativeToUTC} from "../assets/constants/constants.js";
 
 function createDate() {
     const date = new Date();
@@ -36,4 +36,4 @@ function createReagentID() {
     return new Date().getTime();
 }
 
-module.exports = {createDate, createTime, createFullName, createReagentID, createNameWithInitials}
+export {createDate, createTime, createFullName, createReagentID, createNameWithInitials}

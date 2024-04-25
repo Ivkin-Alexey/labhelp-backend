@@ -1,5 +1,5 @@
-const {equipmentOperations} = require("../assets/constants/gSpreadSheets");
-const {createDate, createTime} = require("./helpers");
+import {equipmentOperations} from "../assets/constants/gSpreadSheets.js";
+import {createDate, createTime} from "./helpers.js";
 
 async function addNewRowInGSheet(table, sheetIndex, data) {
     return new Promise(async (resolve, reject) => {

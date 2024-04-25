@@ -1,5 +1,5 @@
-const {defaultResearchSelectOption} = require("./researches")
-const {createFullName} = require("../../methods/helpers");
+import {defaultResearchSelectOption} from "./researches.js";
+import {createFullName} from "../../methods/helpers.js";
 
 const personRoles = {admin: "admin", superAdmin: "superAdmin", user: "user"};
 const personCategories = {student: "student", employee: "employee"};
@@ -51,4 +51,4 @@ function ConfirmedUserData(accountData) {
     this.course = accountData.postGraduateEducationYear + accountData.studentsEducationYear;
 }
 
-module.exports = {newPerson, newPersonCheckingRules, ConfirmedUserData, personRoles, personCategories}
+export {newPerson, newPersonCheckingRules, ConfirmedUserData, personRoles, personCategories}

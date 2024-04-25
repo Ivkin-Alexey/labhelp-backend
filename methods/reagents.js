@@ -1,10 +1,10 @@
-const path = require("path");
-const bot = require("../index");
-const {NewReagentApplication} = require("../assets/constants/reagents.js");
-const {getConstantFromDB} = require("./updateConstants");
-const localisations = require("../assets/constants/localisations");
-const {sendPrompt, addNewPromptToDB} = require("./prompts");
-const {readJsonFile, writeJsonFile} = require("./fs");
+import path from "path";
+import bot from "../index.js";
+import {NewReagentApplication} from "../assets/constants/reagents.js";
+import {getConstantFromDB} from "./updateConstants.js";
+import localisations from "../assets/constants/localisations.js";
+import {sendPrompt, addNewPromptToDB} from "./prompts.js";
+import {readJsonFile, writeJsonFile} from "./fs.js";
 
 const jsonPath = path.join(__dirname, '..', 'assets', 'db', 'reagents.json');
 
@@ -88,8 +88,8 @@ function createApplication(applicationData) {
     return 'Новая заявка: ' + '\n' + 'Дата: ' + date + '\n' + 'ФИО: ' + fullName + '\n' + 'Реактив: ' + reagentName + '\n' + 'Количество: ' + reagentAmount
 }
 
-module.exports = {
-    updateReagentApplications: updateReagentApps,
+export {
+    updateReagentApps,
     deleteReagentApplication,
     getReagentApplications,
     getReagentApplication,

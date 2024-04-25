@@ -1,9 +1,8 @@
-const fs = require("fs");
-
-let {keyboards, stickers, researches, editProfileUrl, userCommands, superAdminCommands} = require("../assets/constants/constants");
-let localisations = require("../assets/constants/localisations");
-const {personRoles} = require("../assets/constants/users");
-const {checkIsUserAdmin, getUserData} = require("./users");
+import fs from "fs";
+import {keyboards, stickers, researches, editProfileUrl, userCommands, superAdminCommands} from "../assets/constants/constants.js";
+import localisations from "../assets/constants/localisations.js";
+import {personRoles} from "../assets/constants/users.js";
+import {checkIsUserAdmin, getUserData} from "./users.js";
 
 async function sendStartMessage(bot, chatID, first_name, last_name) {
     await bot.sendSticker(chatID, stickers.hello);

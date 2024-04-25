@@ -1,8 +1,8 @@
-const {updateUserData, deleteUser, processUserConfirmation, getUserData} = require("./users");
-const {startWorkWithEquipment, endWorkWithEquipment} = require("./equipments");
-const localisations = require("../assets/constants/localisations");
-const {deleteReagentApplication, updateReagentApplications, addNewReagentAppToDB, sendReagentAppDataToManager} = require("./reagents");
-const {personRoles} = require("../assets/constants/users");
+import {updateUserData, deleteUser, processUserConfirmation, getUserData} from "./users.js";
+import {startWorkWithEquipment, endWorkWithEquipment} from "./equipments.js";
+import localisations from "../assets/constants/localisations.js";
+import {deleteReagentApplication, updateReagentApplications, addNewReagentAppToDB, sendReagentAppDataToManager} from "./reagents.js";
+import {personRoles} from "../assets/constants/users.js";
 const {denyApplication} = localisations.superAdministratorActions;
 
 async function updateUserDataPost(req, res, bot) {
@@ -94,7 +94,7 @@ async function deleteReagentApplicationPost(req, res) {
     })
 }
 
-module.exports = {
+export {
     updateUserDataPost,
     deletePersonPost,
     equipmentEndPost,
