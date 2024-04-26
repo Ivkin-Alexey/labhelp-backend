@@ -90,4 +90,4 @@ async function deletePrompt(id, topic) {
     })
 };
 
-module.exports = {sendPrompt, updatePrompts, deletePrompt, getPrompt, addNewPromptToDB};
+export {sendPrompt, updatePrompts, deletePrompt, getPrompt, addNewPromptToDB};

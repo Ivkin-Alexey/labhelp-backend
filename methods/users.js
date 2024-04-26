@@ -6,7 +6,6 @@ import md5 from 'md5';
 import {
     newPerson,
     newPersonCheckingRules,
-    superAdminsChatID,
     ConfirmedUserData,
     personRoles
 } from "../assets/constants/users.js";
@@ -62,17 +61,18 @@ async function updateNewUserFields() {
 async function deleteUsersWithEmptyChatID(chatID) {
     return new Promise((resolve, reject) => {
         try {
-            if (!superAdminsChatID.includes(+chatID)) reject("Ошибка сервера. Вы не администратор")
-            readFile(jsonPath, 'utf8', (error, data) => {
-                if (error) {
-                    reject(error);
-                    return;
-                }
-                let parsedData = JSON.parse(Buffer.from(data));
-                parsedData = parsedData.filter(el => el.chatID !== "")
-                writeFile(jsonPath, JSON.stringify(parsedData, null, 2), (error) => {
-                    if (error) reject(error);
-                });
+            checkIsUserSuperAdmin(chatID).then(() => {
+                readFile(jsonPath, 'utf8', (error, data) => {
+                    if (error) {
+                        reject(error);
+                        return;
+                    }
+                    let parsedData = JSON.parse(Buffer.from(data));
+                    parsedData = parsedData.filter(el => el.chatID !== "")
+                    writeFile(jsonPath, JSON.stringify(parsedData, null, 2), (error) => {
+                        if (error) reject(error);
+                    });
+                })
             })
         } catch (e) {
             reject(e);
@@ -242,6 +242,17 @@ async function checkIsUserReagentManager(chatID) {
     })
 }
 
+async function checkIsUserSuperAdmin(chatID) {
+    return new Promise((resolve, reject) => {
+        getConstantFromDB("persons", "superAdminChatID")
+            .then(value => {
+                if (value.some(chatID)) resolve();
+                else reject(localisations.users.errors.userAccessError)
+            })
+            .catch(e => reject(e))
+    })
+}
+
 // updateNewUserFields();
 
 export {
@@ -252,6 +263,7 @@ export {
     addRandomUser,
     deleteUsersWithEmptyChatID,
     processUserConfirmation,
-    checkIsUserReagentManager
+    checkIsUserReagentManager,
+    checkIsUserSuperAdmin
 }
 

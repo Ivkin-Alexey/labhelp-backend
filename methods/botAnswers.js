@@ -2,7 +2,7 @@ import fs from "fs";
 import {keyboards, stickers, researches, editProfileUrl, userCommands, superAdminCommands} from "../assets/constants/constants.js";
 import localisations from "../assets/constants/localisations.js";
 import {personRoles} from "../assets/constants/users.js";
-import {checkIsUserAdmin, getUserData} from "./users.js";
+import {getUserData} from "./users.js";
 
 async function sendStartMessage(bot, chatID, first_name, last_name) {
     await bot.sendSticker(chatID, stickers.hello);
@@ -90,4 +90,4 @@ async function sendUserData(bot, chatID, userData) {
         });
 }
 
-module.exports = {sendResearch, sendStartMessage, sendResearches, sendConfusedMessage, sendWebAppButtonWithMessage, sendCommandList, sendNotification};
+export {sendResearch, sendStartMessage, sendResearches, sendConfusedMessage, sendWebAppButtonWithMessage, sendCommandList, sendNotification};
