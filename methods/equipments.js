@@ -1,5 +1,4 @@
 import {EquipmentItem, WorkingEquipmentItem, EndData} from "../assets/constants/equipments.js";
-import {equipment} from "../assets/constants/localisations.js";
 import * as fs from 'node:fs/promises';
 import request from 'request';
 import {
@@ -13,12 +12,12 @@ import path from "path";
 import {getUserData} from "./users.js";
 import {createDate, createTime} from "./helpers.js";
 import {amountOfEquipment} from "../assets/constants/equipments.js";
-import {defaultChatID} from "../assets/constants/constants.js";
 import {personRoles} from "../assets/constants/users.js";
 import localisations from "../assets/constants/localisations.js";
-import {updateRowInGSheet, updateDataInGSheetCell, addNewRowInGSheet} from "./gSheets.js";
+import {updateDataInGSheetCell, addNewRowInGSheet} from "./gSheets.js";
 import {readJsonFile, writeJsonFile} from "./fs.js";
 import {updateWorkingEquipmentListInDB, getWorkingEquipmentListFromDB} from "./db/equipment.js";
+import __dirname from "../utils/__dirname.js";
 const equipmentJsonPath = path.join(__dirname, '..', 'assets', 'db', 'equipment.json');
 const imagesPath = path.join(__dirname, '..', 'assets', 'images', 'equipments');
 

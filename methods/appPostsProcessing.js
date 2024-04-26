@@ -1,7 +1,7 @@
 import {updateUserData, deleteUser, processUserConfirmation, getUserData} from "./users.js";
 import {startWorkWithEquipment, endWorkWithEquipment} from "./equipments.js";
 import localisations from "../assets/constants/localisations.js";
-import {deleteReagentApplication, updateReagentApplications, addNewReagentAppToDB, sendReagentAppDataToManager} from "./reagents.js";
+import {deleteReagentApplication, addNewReagentAppToDB, sendReagentAppDataToManager} from "./reagents.js";
 import {personRoles} from "../assets/constants/users.js";
 const {denyApplication} = localisations.superAdministratorActions;
 

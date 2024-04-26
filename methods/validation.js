@@ -8,4 +8,4 @@ function checkTextIsResearch(text) {
     return research;
 }
 
-module.exports = {checkTextIsResearch};
+export {checkTextIsResearch};

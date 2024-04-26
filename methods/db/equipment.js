@@ -1,5 +1,6 @@
 import {readJsonFile, writeJsonFile} from "../fs.js";
 import path from "path";
+import __dirname from "../../utils/__dirname.js";
 const workingEquipmentJsonPath = path.join(__dirname, '..', '..', 'assets', 'db', 'workingEquipment.json');
 
 async function updateWorkingEquipmentListInDB(equipmentCategory, equipmentID, chatID, action, longUse = false) {

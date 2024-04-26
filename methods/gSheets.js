@@ -45,4 +45,4 @@ async function updateDataInGSheetCell(table, sheetIndex, dataForSearching, colum
     })
 }
 
-module.exports = {addNewRowInGSheet, updateDataInGSheetCell};
+export {addNewRowInGSheet, updateDataInGSheetCell};

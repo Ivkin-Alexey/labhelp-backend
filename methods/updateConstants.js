@@ -1,5 +1,8 @@
 import {readFile, writeFile} from "fs";
 import path from "path";
+import {fileURLToPath} from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const constantsJsonPath = path.join(__dirname, '..', 'assets', 'db', 'constants.json');
 
 async function updateConstantsDB(field, data) {

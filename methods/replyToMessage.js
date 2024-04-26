@@ -20,4 +20,4 @@ async function askReagentsManagerChatID(bot, chatID) {
     });
 }
 
-module.exports = {askReagentsManagerChatID}
+export {askReagentsManagerChatID}

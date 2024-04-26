@@ -4,4 +4,4 @@ function Prompt(messageID, topic, data) {
     this.data = data;
 }
 
-module.exports = {Prompt}
+export {Prompt}

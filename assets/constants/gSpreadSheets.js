@@ -1,4 +1,5 @@
-require('dotenv').config();
+import * as dotenv from 'dotenv';
+dotenv.config();
 import {GoogleSpreadsheet} from 'google-spreadsheet';
 import JWT from 'google-auth-library';
 
@@ -16,9 +17,9 @@ const serviceAccountAuth = new JWT.JWT({
     ],
 });
 
-const equipmentOperations = new GoogleSpreadsheet.GoogleSpreadsheet(equipmentOperationsTableID, serviceAccountAuth);
-const equipmentList = new GoogleSpreadsheet.GoogleSpreadsheet(equipmentListTableID, serviceAccountAuth);
-const confirmedUsers = new GoogleSpreadsheet.GoogleSpreadsheet(confirmedUsersTableID, serviceAccountAuth);
+const equipmentOperations = new GoogleSpreadsheet(equipmentOperationsTableID, serviceAccountAuth);
+const equipmentList = new GoogleSpreadsheet(equipmentListTableID, serviceAccountAuth);
+const confirmedUsers = new GoogleSpreadsheet(confirmedUsersTableID, serviceAccountAuth);
 
 export {
     equipmentOperationsTableID,

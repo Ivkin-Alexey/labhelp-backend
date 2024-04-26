@@ -1,5 +1,6 @@
 import {writeFile, readFile, readFileSync} from "fs";
 import path from "path";
+import __dirname from "../utils/__dirname.js";
 const jsonPath = path.join(__dirname, '..', 'assets', 'db', 'db.json');
 import fs from "fs";
 import md5 from 'md5';

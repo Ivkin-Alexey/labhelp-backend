@@ -25,4 +25,4 @@ async function writeJsonFile(path, parsedData) {
     })
 }
 
-module.exports = {readJsonFile, writeJsonFile};
+export {readJsonFile, writeJsonFile};

@@ -21,5 +21,5 @@ function NewReagentApplication(userData) {
     this.status = reagentStatuses.inProcess;
 }
 
-module.exports = {NewReagentApplication}
+export  {NewReagentApplication}
 

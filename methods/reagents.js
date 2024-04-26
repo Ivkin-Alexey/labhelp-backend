@@ -5,6 +5,7 @@ import {getConstantFromDB} from "./updateConstants.js";
 import localisations from "../assets/constants/localisations.js";
 import {sendPrompt, addNewPromptToDB} from "./prompts.js";
 import {readJsonFile, writeJsonFile} from "./fs.js";
+import __dirname from "../utils/__dirname.js";
 
 const jsonPath = path.join(__dirname, '..', 'assets', 'db', 'reagents.json');
 

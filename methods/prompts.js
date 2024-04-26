@@ -4,8 +4,10 @@ import path from "path";
 import {Prompt} from "../assets/constants/prompt.js";
 import {readJsonFile, writeJsonFile} from "./fs.js";
 import {sendNotification} from "./botAnswers.js";
-import {notifyProgrammer} from "./notifications.js";
 import {localisations} from "../assets/constants/constants.js";
+import {fileURLToPath} from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const jsonPath = path.join(__dirname, '..', 'assets', 'db', 'prompts.json');
 
 async function sendPrompt(bot, chatID, msg, keyboard, promptData) {

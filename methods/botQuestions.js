@@ -38,7 +38,7 @@ async function askEducationalGroup(bot, chatID) {
 }
 
 async function askPhoneNumber(bot, chatID) {
-    await bot.sendMessage(chatID, "Напиши свой номер телефона в формате  \"+79876543210\"";
+    await bot.sendMessage(chatID, "Напиши свой номер телефона в формате  \"+79876543210\"");
 }
 
 async function askConfirmNewUser(bot, adminChatId, userData) {
@@ -66,7 +66,7 @@ async function askWhichFieldNeedToEdit(bot, chatID, userLocalData) {
     });
 }
 
-module.exports = {
+export {
     askUserPosition,
     askEducationalGroup,
     askPhoneNumber,

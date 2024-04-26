@@ -6,5 +6,5 @@ async function notifyProgrammer(bot, message) {
     await sendNotification(bot, programmerChatID, message);
 }
 
-module.exports = {notifyProgrammer};
+export {notifyProgrammer};
 
