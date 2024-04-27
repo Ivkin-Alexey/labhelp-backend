@@ -1,5 +1,4 @@
 import path from "path";
-import bot from "../index.js";
 import {NewReagentApplication} from "../assets/constants/reagents.js";
 import {getConstantFromDB} from "./updateConstants.js";
 import localisations from "../assets/constants/localisations.js";
@@ -8,6 +7,7 @@ import {readJsonFile, writeJsonFile} from "./fs.js";
 import __dirname from "../utils/__dirname.js";
 
 const jsonPath = path.join(__dirname, '..', 'assets', 'db', 'reagents.json');
+
 
 async function updateReagentApps(appID, updatedData) {
     return new Promise((resolve, reject) => {

@@ -1,9 +1,15 @@
-import fs from "fs";
 import * as dotenv from 'dotenv';
 dotenv.config();
 import TelegramBot from 'node-telegram-bot-api';
 import {processCallbackQuery} from "./methods/callbackQueriesProcessing.js";
 import {processCommand} from "./methods/commands.js";
+import get from'./routes/get.js';
+import post from'./routes/post.js';
+import express from "express";
+import cors from "cors" ;
+import http from "http";
+import https from "https";
+import {PORT} from "./assets/constants/constants.js";
 
 process.on('uncaughtException', err => console.log(err));
 
@@ -15,31 +21,11 @@ const bot = new TelegramBot(token, {polling: true});
 bot.on('message', async msg => await processCommand(bot, msg));
 bot.on('callback_query', async ctx => await processCallbackQuery(bot, ctx));
 
-
-import express from "express";
-import cors from "cors" ;
-import http from "http";
-import https from "https";
-
-import {PORT} from "./assets/constants/constants.js";
-import {getEquipmentList} from "./methods/equipments.js";
-import {getUserList} from "./methods/users.js";
-import{researchesSelectOptions} from "./assets/constants/researches.js";
-import {
-    updateUserDataPost,
-    deletePersonPost,
-    equipmentStartPost,
-    equipmentEndPost,
-    updateReagentApplicationPost, deleteReagentApplicationPost, addNewReagentAppToDBPost
-} from "./methods/appPostsProcessing.js";
-import {getReagentApplications, addNewReagentAppToDB} from "./methods/reagents.js";
-import {getWorkingEquipmentListFromDB} from "./methods/db/equipment.js";
-
 const app = express();
-
-console.log(app)
 app.use(express.json());
 app.use(cors());
+get(app);
+post(app);
 
 const httpServer = http.createServer(app);
 // const httpsServer = https.createServer({
@@ -54,66 +40,3 @@ httpServer.listen(PORT, () => {
 // httpsServer.listen(HTTPS_PORT, () => {
 //     console.log(`HTTPS Server running on port ${HTTPS_PORT}`);
 // })
-
-app.get('/hello', async (req, res) => {
-    return res.status(200).json('Привет');
-});
-
-
-app.get('/equipmentList', async (req, res) => {
-    try {
-        return await getEquipmentList().then(equipmentList => res.status(200).json(equipmentList))
-    } catch (e) {
-        return res.status(500).json(e);
-    }
-});
-
-app.get('/workingEquipmentList', async (req, res) => {
-    try {
-        return await getWorkingEquipmentListFromDB().then(list => res.status(200).json(list))
-    } catch (e) {
-        return res.status(500).json(e);
-    }
-});
-
-app.get('/persons', async (req, res) => {
-    try {
-        return await getUserList().then(personList => res.status(200).json(personList));
-    } catch (e) {
-        return res.status(500).json(e);
-    }
-});
-
-app.get('/workingEquipmentList', async (req, res) => {
-    try {
-        return await getWorkingEquipmentListFromDB().then(list => res.status(200).json(list));
-    } catch (e) {
-        return res.status(500).json(e);
-    }
-});
-
-app.get('/researches', async (req, res) => {
-    try {
-        return res.status(200).json(researchesSelectOptions);
-    } catch (e) {
-        return res.status(500).json(e);
-    }
-});
-
-app.get('/reagentApplications', async (req, res) => {
-    try {
-        return await getReagentApplications().then(list => res.status(200).json(list));
-    } catch (e) {
-        return res.status(500).json(e);
-    }
-});
-
-app.post("/updatePersonData", async (req, res) => await updateUserDataPost(req, res, bot));
-app.post("/deletePerson", async (req, res) => await deletePersonPost(req, res, bot));
-app.post("/equipmentStart", async (req, res) => await equipmentStartPost(req, res, bot))
-app.post("/equipmentEnd", async (req, res) => await equipmentEndPost(req, res, bot));
-app.post("/deleteReagentApplication", async (req, res) => await deleteReagentApplicationPost(req, res, bot));
-app.post("/updateReagentApplications", async (req, res) => await updateReagentApplicationPost(req, res, bot));
-app.post("/addNewReagentAppToDB", async (req, res) => await addNewReagentAppToDBPost(req, res, bot));
-
-export default app;
