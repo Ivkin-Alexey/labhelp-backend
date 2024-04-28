@@ -26,3 +26,5 @@ yarn-debug.log*
 yarn-error.log*
 .idea
 index.js
+index.ts
+todo.md
