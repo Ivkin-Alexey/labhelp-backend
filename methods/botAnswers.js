@@ -19,12 +19,12 @@ async function sendStartMessage(bot, chatID, first_name, last_name) {
 }
 
 async function sendWebAppButtonWithMessage(bot, chatID, message) {
-    editProfileUrl = editProfileUrl.replace(":chatID", chatID);
+    const url = editProfileUrl.replace(":chatID", chatID);
     await bot.sendMessage(chatID, message, {
         reply_markup: {
             inline_keyboard: [
                 [
-                    {text: 'Заполнить', web_app: {url: editProfileUrl}},
+                    {text: 'Заполнить', web_app: {url}},
                 ],
             ]
         }
@@ -56,7 +56,6 @@ async function sendNotification(bot, chatID, message) {
 }
 
 async function sendResearch(bot, chatID, researchTopic) {
-    editProfileUrl = editProfileUrl.replace(":chatID", chatID);
     const research = researches.find(el => el.name === researchTopic);
     const {id, degree, advisor} = research;
     const imageStream = fs.createReadStream(`./assets/images/${id}.jpg`);

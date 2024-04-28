@@ -7,7 +7,7 @@ const defaultChatID = 392584400;
 
 const timeZoneRelativeToUTC = 3;
 const webAppUrl = 'https://ephemeral-kringle-2c94b2.netlify.app';
-const editProfileUrl = webAppUrl + '/:chatID/editProfile';
+let editProfileUrl = webAppUrl + '/:chatID/editProfile';
 const smiles = {
     researches: "👨‍ ‍🔬 ",
     closeMenu: "❌ ",
