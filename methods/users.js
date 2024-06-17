@@ -158,7 +158,7 @@ async function getUserData(chatID) {
                 return;
             }
             const parsedData = JSON.parse(Buffer.from(data));
-            const user = parsedData.find(el => el.chatID === chatID);
+            const user = parsedData.find(el => el.chatID === +chatID);
             if (!user) reject(users.errors.unregisteredUserError);
             resolve(user);
         })
