@@ -11,7 +11,8 @@ export default function get(app) {
 
     app.get('/equipmentList', async (req, res) => {
         try {
-            return await getEquipmentList().then(equipmentList => res.status(200).json(equipmentList))
+            const category = req.query.category
+            return await getEquipmentList(category).then(equipmentList => res.status(200).json(equipmentList))
         } catch (e) {
             return res.status(500).json(e);
         }
