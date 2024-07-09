@@ -86,7 +86,7 @@ async function reloadEquipmentDB(bot, chatID) {
   const userData = await getUserData(chatID);
 
   if (userData.role === personRoles.superAdmin) {
-    await bot.sendMessage(chatID, equipment.dbIsReloading);
+    await bot.sendMessage(chatID, localisations.equipment.dbIsReloading);
     await createEquipmentDbFromGSheet()
       .then((r) => bot.sendMessage(chatID, r))
       .catch((err) => bot.sendMessage(chatID, err));
@@ -118,7 +118,7 @@ async function createEquipmentDbFromGSheet() {
           }
         }
       );
-      resolve(equipment.dbIsReloadedMsg);
+      resolve(localisations.equipment.dbIsReloadedMsg);
     });
   });
 }
