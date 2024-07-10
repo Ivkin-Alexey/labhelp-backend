@@ -1,4 +1,4 @@
-import {getEquipmentList} from "../methods/equipments.js";
+import {getEquipmentList, getEquipment} from "../methods/equipments.js";
 import {getUserData, getUserList} from "../methods/users.js";
 import{researchesSelectOptions} from "../assets/constants/researches.js";
 import {getReagentApplications, addNewReagentAppToDB} from "../methods/reagents.js";
@@ -11,8 +11,15 @@ export default function get(app) {
 
     app.get('/equipmentList', async (req, res) => {
         try {
-            const category = req.query.category
-            return await getEquipmentList(category).then(equipmentList => res.status(200).json(equipmentList))
+            const {category, equipmentID} = req.query
+
+            if(typeof equipmentID === "string") {
+              return await getEquipment(equipmentID)
+              .then(equipmentData => res.status(200).json(equipmentData))
+              .catch(error => res.status(404).json(error))
+            }
+
+            return await getEquipmentList(category).then(equipmentList => res.status(200).json(equipmentList));
         } catch (e) {
             return res.status(500).json(e);
         }
@@ -20,7 +27,7 @@ export default function get(app) {
     
     app.get('/workingEquipmentList', async (req, res) => {
         try {
-            return await getWorkingEquipmentListFromDB().then(list => res.status(200).json(list))
+            return await getWorkingEquipmentListFromDB().then(list => res.status(200).json(list));
         } catch (e) {
             return res.status(500).json(e);
         }

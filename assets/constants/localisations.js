@@ -6,6 +6,7 @@ const localisations = {
     equipment: {
         dbIsReloadedMsg: "База данных обновлена",
         dbIsReloading: "База данных обновляется...",
+        searchError: "Оборудование с таким ID не найдено"
     },
     botAnswers: {
         invitationToRegistration: "Отлично! Для отправки заявки необходимо заполнить еще некоторые данные о себе",

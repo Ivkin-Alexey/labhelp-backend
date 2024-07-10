@@ -218,10 +218,43 @@ async function getEquipmentList(category) {
   });
 }
 
+async function getEquipment(equipmentID) {
+  return new Promise((resolve, reject) => {
+    readFile(equipmentJsonPath, "utf8", (error, data) => {
+      if (error) {
+        reject(
+          `Ошибка чтения данных на сервере: ${error}. Сообщите о ней администратору`
+        );
+        return;
+      }
+
+      const parsedData = JSON.parse(Buffer.from(data));
+
+      const equipmentData = findEquipment(parsedData, equipmentID);
+
+      if(equipmentData) resolve(equipmentData);
+      else reject(localisations.equipment.searchError);
+    });
+  });
+}
+
+function findEquipment(object, equipmentID) {
+  let equipmentData;
+
+  for (const key in object) {
+    const arr = object[key];
+    equipmentData = arr.find(el => el.id === equipmentID);
+    if (equipmentData) {
+      return equipmentData;
+    }
+  }
+}
+
 export {
   startWorkWithEquipment,
   endWorkWithEquipment,
   getEquipmentList,
   createEquipmentDbFromGSheet,
   reloadEquipmentDB,
+  getEquipment
 };
