@@ -133,7 +133,8 @@ async function fetchEquipmentListFromGSheet() {
       for (let i = 0; i < amountOfEquipment; i++) {
         const newEquipmentItem = new EquipmentItem();
         newEquipmentItem.name = rows[i].get("Наименование оборудования") || "";
-        newEquipmentItem.description = rows[i].get("Область применения оборудования") || "";
+        newEquipmentItem.description =
+          rows[i].get("Область применения оборудования") || "";
         newEquipmentItem.brand = rows[i].get("Изготовитель") || "";
         newEquipmentItem.model = rows[i].get("Модель") || "";
         newEquipmentItem.category = rows[i].get("Категория") || "";
@@ -200,7 +201,7 @@ async function updateEquipmentUsingStatus(
   });
 }
 
-async function getEquipmentList(category) {
+async function getEquipmentList() {
   return new Promise((resolve, reject) => {
     readFile(equipmentJsonPath, "utf8", (error, data) => {
       if (error) {
@@ -209,14 +210,28 @@ async function getEquipmentList(category) {
         );
         return;
       }
-
       const parsedData = JSON.parse(Buffer.from(data));
-
-      if (category) resolve(parsedData[category]);
-
       resolve(parsedData);
     });
   });
+}
+
+async function getEquipmentListByCategory(category) {
+  try {
+    const list = await getEquipmentList();
+    return list[category];
+  } catch (e) {
+    return e;
+  }
+}
+
+async function getEquipmentListBySearch(search) {
+  try {
+    const list = await getEquipmentList();
+    return list[search];
+  } catch (e) {
+    return e;
+  }
 }
 
 async function getEquipment(equipmentID) {
@@ -233,7 +248,7 @@ async function getEquipment(equipmentID) {
 
       const equipmentData = findEquipment(parsedData, equipmentID);
 
-      if(equipmentData) resolve(equipmentData);
+      if (equipmentData) resolve(equipmentData);
       else reject(localisations.equipment.searchError);
     });
   });
@@ -244,7 +259,7 @@ function findEquipment(object, equipmentID) {
 
   for (const key in object) {
     const arr = object[key];
-    equipmentData = arr.find(el => el.id === equipmentID);
+    equipmentData = arr.find((el) => el.id === equipmentID);
     if (equipmentData) {
       return equipmentData;
     }
@@ -255,7 +270,9 @@ export {
   startWorkWithEquipment,
   endWorkWithEquipment,
   getEquipmentList,
+  getEquipmentListByCategory,
+  getEquipmentListBySearch,
   createEquipmentDbFromGSheet,
   reloadEquipmentDB,
-  getEquipment
+  getEquipment,
 };
