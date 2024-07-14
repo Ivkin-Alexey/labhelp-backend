@@ -6,6 +6,7 @@ function EquipmentItem() {
     this.id = "";
     this.category = "";
     this.name = "";
+    this.description = "";
     this.brand = "";
     this.model = "";
     this.imgUrl = "";

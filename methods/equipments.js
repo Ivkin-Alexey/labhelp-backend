@@ -133,6 +133,7 @@ async function fetchEquipmentListFromGSheet() {
       for (let i = 0; i < amountOfEquipment; i++) {
         const newEquipmentItem = new EquipmentItem();
         newEquipmentItem.name = rows[i].get("Наименование оборудования") || "";
+        newEquipmentItem.description = rows[i].get("Область применения оборудования") || "";
         newEquipmentItem.brand = rows[i].get("Изготовитель") || "";
         newEquipmentItem.model = rows[i].get("Модель") || "";
         newEquipmentItem.category = rows[i].get("Категория") || "";
