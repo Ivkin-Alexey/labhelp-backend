@@ -16,7 +16,7 @@ import { StartData } from "../assets/constants/equipments.js";
 import { readFile, writeFile, writeFileSync } from "fs";
 import path from "path";
 import { getUserData } from "./users.js";
-import { createDate, createTime } from "./helpers.js";
+import { createDate, createTime, checkEquipmentID } from "./helpers.js";
 import { amountOfEquipment } from "../assets/constants/equipments.js";
 import { personRoles } from "../assets/constants/users.js";
 import localisations from "../assets/constants/localisations.js";
@@ -145,11 +145,14 @@ async function fetchEquipmentListFromGSheet() {
               "\n" +
               "Паспорт/руководство по эксплуатации"
           ) || "";
-        newEquipmentItem.id =
-          rows[i].get("Заводской номер") + newEquipmentItem.model || "";
         newEquipmentItem.imgUrl = rows[i].get("Ссылки на фотографии") || "";
+
+        const id = rows[i].get("Заводской номер");
+        if (checkEquipmentID(id)) newEquipmentItem.id = id
+          
+        else continue
+        
         equipment.push(newEquipmentItem);
-        // if(newEquipmentItem.name === "Реакторная система") await downloadEquipmentImage(newEquipmentItem.imgUrl, imagesPath + newEquipmentItem.id + ".jpeg",  () => console.log(newEquipmentItem.id + ".jpeg"));
       }
       resolve(equipment);
     } catch (e) {

@@ -36,4 +36,9 @@ function createReagentID() {
     return new Date().getTime();
 }
 
-export {createDate, createTime, createFullName, createReagentID, createNameWithInitials}
+function checkEquipmentID(id) {
+    const arr = ["нд", "нет", ""];
+    return !arr.includes(id);
+}
+
+export {createDate, createTime, createFullName, createReagentID, createNameWithInitials, checkEquipmentID}
