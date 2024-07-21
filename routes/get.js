@@ -2,7 +2,7 @@ import {
   getEquipmentList,
   getEquipment,
   getEquipmentListByCategory,
-  getEquipmentListBySearch
+  getEquipmentListBySearch,
 } from "../methods/equipments.js";
 import { getUserData, getUserList } from "../methods/users.js";
 import { researchesSelectOptions } from "../assets/constants/researches.js";
@@ -11,9 +11,14 @@ import {
   addNewReagentAppToDB,
 } from "../methods/reagents.js";
 import { getWorkingEquipmentListFromDB } from "../methods/db/equipment.js";
+import {generateAccessToken, authenticateToken} from "../methods/jwt.js"
 
 export default function get(app) {
   app.get("/hello", async (req, res) => {
+    return res.status(200).json("Привет");
+  });
+
+  app.get("/jwtHello", authenticateToken, (req, res) => {
     return res.status(200).json("Привет");
   });
 
@@ -38,12 +43,13 @@ export default function get(app) {
           (equipmentList) => res.status(200).json(equipmentList)
         );
       }
+      
     } catch (e) {
       return res.status(500).json(e);
     }
   });
 
-  app.get("/workingEquipmentList", async (req, res) => {
+  app.get("/workingEquipmentList", authenticateToken, async (req, res) => {
     try {
       return await getWorkingEquipmentListFromDB().then((list) =>
         res.status(200).json(list)
@@ -53,7 +59,7 @@ export default function get(app) {
     }
   });
 
-  app.get("/person/:chatID", async (req, res) => {
+  app.get("/person/:chatID", authenticateToken, async (req, res) => {
     try {
       const chatID = req.params.chatID;
       return await getUserData(chatID).then((person) =>
@@ -64,7 +70,7 @@ export default function get(app) {
     }
   });
 
-  app.get("/persons/:chatID", async (req, res) => {
+  app.get("/persons/:chatID", authenticateToken, async (req, res) => {
     try {
       return await getUserList().then((personList) =>
         res.status(200).json(personList)
@@ -74,17 +80,7 @@ export default function get(app) {
     }
   });
 
-  app.get("/workingEquipmentList", async (req, res) => {
-    try {
-      return await getWorkingEquipmentListFromDB().then((list) =>
-        res.status(200).json(list)
-      );
-    } catch (e) {
-      return res.status(500).json(e);
-    }
-  });
-
-  app.get("/researches", async (req, res) => {
+  app.get("/researches", authenticateToken, async (req, res) => {
     try {
       return res.status(200).json(researchesSelectOptions);
     } catch (e) {
