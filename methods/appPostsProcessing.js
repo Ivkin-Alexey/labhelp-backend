@@ -68,12 +68,7 @@ async function loginPersonPost(req, res, bot) {
 
   try {
     if (!login || !password) {
-      console.log("Логин или пароль отсутствуют");
-      return res.status(400).json({
-        login,
-        password,
-        message: "Ошибка. Неверный логин или пароль",
-      });
+      return res.status(400).json("Логин или пароль отсутствуют");
     }
   
     const users = await getUserList();
@@ -84,11 +79,7 @@ async function loginPersonPost(req, res, bot) {
   
     if (!user) {
       console.log("Пользователь не найден");
-      return res.status(400).json({
-        login,
-        password,
-        message: "Ошибка. Неверный логин или пароль",
-      });
+      return res.status(400).json("Пользователь не найден");
     }
   
     const token = generateAccessToken(login, password);
