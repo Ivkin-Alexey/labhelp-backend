@@ -66,33 +66,40 @@ async function createNewPersonPost(req, res, bot) {
 async function loginPersonPost(req, res, bot) {
   const { login, password } = req.body;
 
-  if (!login || !password) {
-    return res.status(400).json({
-      login,
-      password,
-      message: "Ошибка. Неверный логин или пароль",
+  try {
+    if (!login || !password) {
+      return res.status(400).json({
+        login,
+        password,
+        message: "Ошибка. Неверный логин или пароль",
+      });
+    }
+  
+    const users = await getUserList();
+  
+    const user = users.find(
+      (user) => user.login === login && user.password === password
+    );
+  
+    if (!user) {
+      return res.status(400).json({
+        login,
+        password,
+        message: "Ошибка. Неверный логин или пароль",
+      });
+    }
+  
+    const token = generateAccessToken(login, password);
+  
+    return res.status(200).json({
+      token: token,
     });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json(e);
   }
 
-  const users = await getUserList();
 
-  const user = users.find(
-    (user) => user.login === login && user.password === password
-  );
-
-  if (!user) {
-    return res.status(400).json({
-      login,
-      password,
-      message: "Ошибка. Неверный логин или пароль",
-    });
-  }
-
-  const token = generateAccessToken(login, password);
-
-  return res.status(200).json({
-    token: token,
-  });
 }
 
 async function equipmentStartPost(req, res, bot) {
