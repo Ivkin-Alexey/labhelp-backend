@@ -47,13 +47,13 @@ async function deletePersonPost(req, res, bot) {
 }
 
 async function createNewPersonPost(req, res, bot) {
-  const { chatID, login, password, personData } = req.body;
+  const { login, password } = req.body;
   try {
     const token = generateAccessToken({
       login,
       password,
     });
-    return await createNewPerson(chatID, login, password, personData).then(
+    return await createNewPerson(login, password).then(
       notification => res.status(200).json({ notification, token })
     );
   } catch (e) {

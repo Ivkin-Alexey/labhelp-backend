@@ -104,7 +104,7 @@ async function addRandomUser(type = "user") {
   await updateUserData(user.chatID, user);
 }
 
-async function createNewPerson(chatID, login, password, userData) {
+async function createNewPerson(login, password) {
   return new Promise((resolve, reject) => {
     readFile(jsonPath, "utf8", (error, data) => {
       if (error) {
@@ -115,23 +115,21 @@ async function createNewPerson(chatID, login, password, userData) {
       }
       let parsedData = JSON.parse(Buffer.from(data));
 
-      const user = parsedData.find((el) => {
-        if (login) return el.login === login;
-        if (chatID) return el.chatID === chatID;
-      });
+      const user = parsedData.find((el) => el.login === login);
 
-      if (user) reject(`Такой пользователь уже существует!`);
-      else parsedData.push({ ...userData, login, password, chatID });
-
-      writeFile(jsonPath, JSON.stringify(parsedData, null, 2), (error) => {
-        if (error) {
-          reject(
-            `Ошибка записи данных на сервере: ${error}. Сообщите о ней администратору`
-          );
-          return;
-        }
-        resolve("Пользователь успешно создан");
-      });
+      if (!user) {
+        const newPerson = { login, password };
+        parsedData.push(newPerson);
+        writeFile(jsonPath, JSON.stringify(parsedData, null, 2), (error) => {
+          if (error) {
+            reject(
+              `Ошибка записи данных на сервере: ${error}. Сообщите о ней администратору`
+            );
+            return;
+          }
+          resolve("Пользователь успешно создан");
+        });
+      } else reject(`Такой пользователь уже существует!`);
     });
   });
 }
