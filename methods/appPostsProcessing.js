@@ -4,10 +4,11 @@ import {
   processUserConfirmation,
   getUserData,
   createNewPerson,
+  getUserList
 } from "./users.js";
 import { startWorkWithEquipment, endWorkWithEquipment } from "./equipments.js";
 import localisations from "../assets/constants/localisations.js";
-import {generateAccessToken} from "./jwt.js";
+import { generateAccessToken } from "./jwt.js";
 import {
   deleteReagentApplication,
   addNewReagentAppToDB,
@@ -53,13 +54,45 @@ async function createNewPersonPost(req, res, bot) {
       login,
       password,
     });
-    return await createNewPerson(login, password).then(
-      notification => res.status(200).json({ notification, token })
+    return await createNewPerson(login, password).then((notification) =>
+      res.status(200).json({ notification, token })
     );
   } catch (e) {
-    console.log(e)
+    console.log(e);
     return res.status(500).json(e);
   }
+}
+
+async function loginPersonPost(req, res, bot) {
+  const { login, password } = req.body;
+
+  if (!login || !password) {
+    return res.status(400).json({
+      login,
+      password,
+      message: "Ошибка. Неверный логин или пароль",
+    });
+  }
+
+  const users = await getUserList();
+
+  const user = users.find(
+    (user) => user.login === login && user.password === password
+  );
+
+  if (!user) {
+    return res.status(400).json({
+      login,
+      password,
+      message: "Ошибка. Неверный логин или пароль",
+    });
+  }
+
+  const token = generateAccessToken(login, password);
+
+  return res.status(200).json({
+    token: token,
+  });
 }
 
 async function equipmentStartPost(req, res, bot) {
@@ -132,5 +165,6 @@ export {
   updateReagentApplicationPost,
   deleteReagentApplicationPost,
   addNewReagentAppToDBPost,
-  createNewPersonPost
+  createNewPersonPost,
+  loginPersonPost,
 };

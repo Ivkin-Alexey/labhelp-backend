@@ -7,10 +7,11 @@ import {
   deleteReagentApplicationPost,
   addNewReagentAppToDBPost,
   createNewPersonPost,
+  loginPersonPost
 } from "../methods/appPostsProcessing.js";
 import { getUserList } from "../methods/users.js";
 
-import {bot} from "../index.js"
+import { bot } from "../index.js";
 
 import { generateAccessToken, authenticateToken } from "../methods/jwt.js";
 
@@ -62,31 +63,5 @@ export default function post(app) {
     async (req, res) => await createNewPersonPost(req, res, bot)
   );
 
-  app.post("/login", async (req, res) => {
-    const { login, password } = req.body;
-
-    if (!login || !password) {
-      return res.status(400).json({
-        message: "Ошибка. Неверный логин или пароль",
-      });
-    }
-
-    const users = await getUserList();
-
-    const user = users.find(
-      (user) => user.login === login && user.password === password
-    );
-
-    if (!user) {
-      return res.status(400).json({
-        message: "Ошибка. Неверный логин или пароль",
-      });
-    }
-
-    const token = generateAccessToken(login, password);
-
-    return res.json({
-      token: token,
-    });
-  });
+  app.post("/login", async (req, res) => await loginPersonPost(req, res, bot));
 }
