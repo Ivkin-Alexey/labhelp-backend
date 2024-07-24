@@ -50,12 +50,15 @@ async function deletePersonPost(req, res, bot) {
 async function createNewPersonPost(req, res, bot) {
   const { login, password } = req.body;
   try {
-    const token = generateAccessToken({
-      login,
-      password,
-    });
-    return await createNewPerson(login, password).then((notification) =>
-      res.status(200).json({ notification, token })
+    return await createNewPerson(login, password)
+      .then((notification) => {
+        const token = generateAccessToken({
+          login,
+          password,
+        });
+        res.status(200).json({ notification, token })
+      })
+        .catch(error => res.status(500).json(error)
     );
   } catch (e) {
     console.log(e);
