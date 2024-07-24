@@ -64,4 +64,6 @@ export default function post(app) {
   );
 
   app.post("/login", async (req, res) => await loginPersonPost(req, res, bot));
+
+  app.post("/signin", async (req, res) => await loginPersonPost(req, res, bot));
 }
