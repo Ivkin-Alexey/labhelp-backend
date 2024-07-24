@@ -68,6 +68,7 @@ async function loginPersonPost(req, res, bot) {
 
   try {
     if (!login || !password) {
+      console.log("Логин или пароль отсутствуют");
       return res.status(400).json({
         login,
         password,
@@ -82,6 +83,7 @@ async function loginPersonPost(req, res, bot) {
     );
   
     if (!user) {
+      console.log("Пользователь не найден");
       return res.status(400).json({
         login,
         password,
