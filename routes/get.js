@@ -72,7 +72,7 @@ export default function get(app) {
   });
 
   app.get("/favoriteEquipments", async (req, res) => {
-    const { login } = req.params;
+    const { login } = req.query;
     console.log(login)
     try {
       return await getFavoriteEquipmentsFromDB(login).then((list) =>
