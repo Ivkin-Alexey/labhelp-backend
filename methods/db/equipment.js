@@ -131,6 +131,7 @@ export function addFavoriteEquipmentToDB(login, equipmentID) {
             const equipment = parsedData[login].find(el => el.id === equipmentID)
             if (equipment) {
               reject(localizations.equipment.favorite.errors.notUnique);
+              return;
             }
           }
           const equipment = await getEquipment(equipmentID);
