@@ -83,6 +83,7 @@ export default function post(app) {
         );
       }
     } catch (e) {
+      console.log(e);
       return res.status(500).json(e);
     }
   });

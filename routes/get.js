@@ -19,7 +19,6 @@ import {
 import { generateAccessToken, authenticateToken } from "../methods/jwt.js";
 
 export default function get(app) {
-
   // app.use((req, res, next) => {
   //   res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
   //   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
@@ -73,13 +72,13 @@ export default function get(app) {
 
   app.get("/favoriteEquipments", async (req, res) => {
     const { login } = req.query;
-    console.log(req.query)
+    console.log(req.query);
     try {
       return await getFavoriteEquipmentsFromDB(login).then((list) =>
         res.status(200).json(list)
       );
     } catch (e) {
-
+      console.log(e);
       return res.status(500).json(e);
     }
   });
