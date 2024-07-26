@@ -14,7 +14,10 @@ import { getUserList } from "../methods/users.js";
 import { bot } from "../index.js";
 
 import { generateAccessToken, authenticateToken } from "../methods/jwt.js";
-import { addFavoriteEquipmentToDB, removeFavoriteEquipmentFromDB } from "../methods/db/equipment.js";
+import {
+  addFavoriteEquipmentToDB,
+  removeFavoriteEquipmentFromDB,
+} from "../methods/db/equipment.js";
 
 export default function post(app) {
   app.post(
@@ -71,13 +74,12 @@ export default function post(app) {
     const { login, equipmentID } = req.body;
     try {
       if (add) {
-        return await addFavoriteEquipmentToDB(login, equipmentID).then((msg) =>
-          res.status(200).json(msg)
-        );
+        return await addFavoriteEquipmentToDB(login, equipmentID)
+          .then((msg) => res.status(200).json(msg))
       }
       if (remove) {
-        return await removeFavoriteEquipmentFromDB(login, equipmentID).then((msg) =>
-          res.status(200).json(msg)
+        return await removeFavoriteEquipmentFromDB(login, equipmentID).then(
+          (msg) => res.status(200).json(msg)
         );
       }
     } catch (e) {

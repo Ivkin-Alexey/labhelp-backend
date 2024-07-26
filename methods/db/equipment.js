@@ -2,6 +2,7 @@ import { readJsonFile, writeJsonFile } from "../fs.js";
 import path from "path";
 import __dirname from "../../utils/__dirname.js";
 import localizations from "../../assets/constants/localizations.js";
+import { getEquipment } from "../equipments.js";
 const workingEquipmentJsonPath = path.join(
   __dirname,
   "..",
@@ -71,7 +72,7 @@ export async function getWorkingEquipmentListFromDB() {
   });
 }
 
-export function getFavoriteEquipmentsFromDB(login) {
+export async function getFavoriteEquipmentsFromDB(login) {
   return new Promise(async (resolve, reject) => {
     try {
       await readJsonFile(favoriteEquipmentsJsonPath).then((parsedData) => {
@@ -90,20 +91,20 @@ export function getFavoriteEquipmentsFromDB(login) {
   });
 }
 
-export function removeFavoriteEquipmentFromDB(login, equipmentID) {
+export async function removeFavoriteEquipmentFromDB(login, equipmentID) {
   return new Promise(async (resolve, reject) => {
     try {
       await readJsonFile(favoriteEquipmentsJsonPath)
         .then((parsedData) => {
           if (
             !parsedData[login] ||
-            !parsedData[login].find((el) => el === equipmentID)
+            !parsedData[login].find((el) => el.id === equipmentID)
           ) {
             reject(localizations.equipment.favorite.errors.notExist);
             return;
           }
           parsedData[login] = parsedData[login].filter(
-            (el) => el !== equipmentID
+            (el) => el.id !== equipmentID
           );
           if (parsedData[login].length === 0) delete parsedData[login];
           return parsedData;
@@ -119,16 +120,21 @@ export function removeFavoriteEquipmentFromDB(login, equipmentID) {
 }
 
 export function addFavoriteEquipmentToDB(login, equipmentID) {
+
   return new Promise(async (resolve, reject) => {
     try {
       await readJsonFile(favoriteEquipmentsJsonPath)
-        .then((parsedData) => {
+        .then(async (parsedData) => {
+
           if (!parsedData[login]) parsedData[login] = [];
-          if (parsedData[login].includes(equipmentID)) {
-            reject(localizations.equipment.favorite.errors.notUnique);
-            return;
+          else if (parsedData[login].length !== 0) {
+            const equipment = parsedData[login].find(el => el.id === equipmentID)
+            if (equipment) {
+              reject(localizations.equipment.favorite.errors.notUnique);
+            }
           }
-          parsedData[login].push(equipmentID);
+          const equipment = await getEquipment(equipmentID);
+          parsedData[login].push(equipment);
           return parsedData;
         })
         .then((updatedParsedData) => {
