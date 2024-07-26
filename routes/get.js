@@ -10,8 +10,13 @@ import {
   getReagentApplications,
   addNewReagentAppToDB,
 } from "../methods/reagents.js";
-import { getWorkingEquipmentListFromDB } from "../methods/db/equipment.js";
-import {generateAccessToken, authenticateToken} from "../methods/jwt.js"
+import {
+  getWorkingEquipmentListFromDB,
+  getFavoriteEquipmentsFromDB,
+  addFavoriteEquipmentToDB,
+  removeFavoriteEquipmentFromDB,
+} from "../methods/db/equipment.js";
+import { generateAccessToken, authenticateToken } from "../methods/jwt.js";
 
 export default function get(app) {
   app.get("/hello", async (req, res) => {
@@ -43,7 +48,6 @@ export default function get(app) {
           (equipmentList) => res.status(200).json(equipmentList)
         );
       }
-      
     } catch (e) {
       return res.status(500).json(e);
     }
@@ -55,6 +59,18 @@ export default function get(app) {
         res.status(200).json(list)
       );
     } catch (e) {
+      return res.status(500).json(e);
+    }
+  });
+
+  app.get("/favoriteEquipments", authenticateToken, async (req, res) => {
+    const { login } = req.body;
+    try {
+      return await getFavoriteEquipmentsFromDB(login).then((list) =>
+        res.status(200).json(list)
+      );
+    } catch (e) {
+
       return res.status(500).json(e);
     }
   });

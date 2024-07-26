@@ -19,7 +19,7 @@ import { getUserData } from "./users.js";
 import { createDate, createTime, checkEquipmentID } from "./helpers.js";
 import { amountOfEquipment } from "../assets/constants/equipments.js";
 import { personRoles } from "../assets/constants/users.js";
-import localisations from "../assets/constants/localisations.js";
+import localizations from "../assets/constants/localizations.js";
 import { updateDataInGSheetCell, addNewRowInGSheet } from "./gSheets.js";
 import { readJsonFile, writeJsonFile } from "./fs.js";
 import {
@@ -86,12 +86,12 @@ async function reloadEquipmentDB(bot, chatID) {
   const userData = await getUserData(chatID);
 
   if (userData.role === personRoles.superAdmin) {
-    await bot.sendMessage(chatID, localisations.equipment.dbIsReloading);
+    await bot.sendMessage(chatID, localizations.equipment.dbIsReloading);
     await createEquipmentDbFromGSheet()
       .then((r) => bot.sendMessage(chatID, r))
       .catch((err) => bot.sendMessage(chatID, err));
   } else {
-    await bot.sendMessage(chatID, localisations.users.errors.userAccessError);
+    await bot.sendMessage(chatID, localizations.users.errors.userAccessError);
   }
 }
 
@@ -118,7 +118,7 @@ async function createEquipmentDbFromGSheet() {
           }
         }
       );
-      resolve(localisations.equipment.dbIsReloadedMsg);
+      resolve(localizations.equipment.dbIsReloadedMsg);
     });
   });
 }
@@ -148,10 +148,9 @@ async function fetchEquipmentListFromGSheet() {
         newEquipmentItem.imgUrl = rows[i].get("Ссылки на фотографии") || "";
 
         const id = rows[i].get("Заводской номер");
-        if (checkEquipmentID(id)) newEquipmentItem.id = id
-          
-        else continue
-        
+        if (checkEquipmentID(id)) newEquipmentItem.id = id;
+        else continue;
+
         equipment.push(newEquipmentItem);
       }
       resolve(equipment);
@@ -252,7 +251,7 @@ async function getEquipment(equipmentID) {
       const equipmentData = findEquipment(parsedData, equipmentID);
 
       if (equipmentData) resolve(equipmentData);
-      else reject(localisations.equipment.searchError);
+      else reject(localizations.equipment.searchError);
     });
   });
 }

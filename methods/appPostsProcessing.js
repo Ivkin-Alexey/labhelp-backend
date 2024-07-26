@@ -4,10 +4,10 @@ import {
   processUserConfirmation,
   getUserData,
   createNewPerson,
-  getUserList
+  getUserList,
 } from "./users.js";
 import { startWorkWithEquipment, endWorkWithEquipment } from "./equipments.js";
-import localisations from "../assets/constants/localisations.js";
+import localizations from "../assets/constants/localizations.js";
 import { generateAccessToken } from "./jwt.js";
 import {
   deleteReagentApplication,
@@ -15,7 +15,7 @@ import {
   sendReagentAppDataToManager,
 } from "./reagents.js";
 import { personRoles } from "../assets/constants/users.js";
-const { denyApplication } = localisations.superAdministratorActions;
+const { denyApplication } = localizations.superAdministratorActions;
 
 async function updateUserDataPost(req, res, bot) {
   const { body } = req;
@@ -56,10 +56,9 @@ async function createNewPersonPost(req, res, bot) {
           login,
           password,
         });
-        res.status(200).json({ notification, token })
+        res.status(200).json({ notification, token });
       })
-        .catch(error => res.status(500).json(error)
-    );
+      .catch((error) => res.status(500).json(error));
   } catch (e) {
     console.log(e);
     return res.status(500).json(e);
@@ -73,20 +72,20 @@ async function loginPersonPost(req, res, bot) {
     if (!login || !password) {
       return res.status(400).json("Логин или пароль отсутствуют");
     }
-  
+
     const users = await getUserList();
-  
+
     const user = users.find(
       (user) => user.login === login && user.password === password
     );
-  
+
     if (!user) {
       console.log("Пользователь не найден");
       return res.status(400).json("Пользователь не найден");
     }
-  
+
     const token = generateAccessToken(login, password);
-  
+
     return res.status(200).json({
       token: token,
     });
@@ -94,8 +93,6 @@ async function loginPersonPost(req, res, bot) {
     console.log(e);
     return res.status(500).json(e);
   }
-
-
 }
 
 async function equipmentStartPost(req, res, bot) {

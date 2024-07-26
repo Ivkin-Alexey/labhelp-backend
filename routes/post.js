@@ -7,13 +7,14 @@ import {
   deleteReagentApplicationPost,
   addNewReagentAppToDBPost,
   createNewPersonPost,
-  loginPersonPost
+  loginPersonPost,
 } from "../methods/appPostsProcessing.js";
 import { getUserList } from "../methods/users.js";
 
 import { bot } from "../index.js";
 
 import { generateAccessToken, authenticateToken } from "../methods/jwt.js";
+import { addFavoriteEquipmentToDB, removeFavoriteEquipmentFromDB } from "../methods/db/equipment.js";
 
 export default function post(app) {
   app.post(
@@ -65,5 +66,22 @@ export default function post(app) {
 
   app.post("/login", async (req, res) => await loginPersonPost(req, res, bot));
 
-  app.post("/signin", async (req, res) => await loginPersonPost(req, res, bot));
+  app.post("/favoriteEquipment", authenticateToken, async (req, res) => {
+    const { add, remove } = req.query;
+    const { login, equipmentID } = req.body;
+    try {
+      if (add) {
+        return await addFavoriteEquipmentToDB(login, equipmentID).then((msg) =>
+          res.status(200).json(msg)
+        );
+      }
+      if (remove) {
+        return await removeFavoriteEquipmentFromDB(login, equipmentID).then((msg) =>
+          res.status(200).json(msg)
+        );
+      }
+    } catch (e) {
+      return res.status(500).json(e);
+    }
+  });
 }

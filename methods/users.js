@@ -10,7 +10,7 @@ import {
   ConfirmedUserData,
   personRoles,
 } from "../assets/constants/users.js";
-import localisations from "../assets/constants/localisations.js";
+import localizations from "../assets/constants/localizations.js";
 import { createDate } from "./helpers.js";
 import {
   equipmentOperations,
@@ -304,7 +304,7 @@ async function checkIsUserSuperAdmin(chatID) {
     getConstantFromDB("persons", "superAdminChatID")
       .then((value) => {
         if (value.some(chatID)) resolve();
-        else reject(localisations.users.errors.userAccessError);
+        else reject(localizations.users.errors.userAccessError);
       })
       .catch((e) => reject(e));
   });

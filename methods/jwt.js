@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { jwtToken } from "../index.js";
+import { jwtLifeTime } from "../assets/constants/constants.js";
 
 function generateAccessToken(login, password, role = "user") {
   return jwt.sign(
@@ -10,7 +11,7 @@ function generateAccessToken(login, password, role = "user") {
     },
     jwtToken,
     {
-      expiresIn: "180s",
+      expiresIn: jwtLifeTime,
     }
   );
 }
