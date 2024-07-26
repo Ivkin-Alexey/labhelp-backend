@@ -92,6 +92,7 @@ export async function getFavoriteEquipmentsFromDB(login) {
 }
 
 export async function removeFavoriteEquipmentFromDB(login, equipmentID) {
+  console.log("Событие: Удаление оборудования из избранного. Данные: ", login, equipmentID)
   return new Promise(async (resolve, reject) => {
     try {
       await readJsonFile(favoriteEquipmentsJsonPath)
