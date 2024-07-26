@@ -66,7 +66,7 @@ export default function post(app) {
 
   app.post("/login", async (req, res) => await loginPersonPost(req, res, bot));
 
-  app.post("/favoriteEquipment", authenticateToken, async (req, res) => {
+  app.post("/favoriteEquipment", async (req, res) => {
     const { add, remove } = req.query;
     const { login, equipmentID } = req.body;
     try {
