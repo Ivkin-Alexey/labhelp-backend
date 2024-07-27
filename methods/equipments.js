@@ -221,7 +221,7 @@ async function getEquipmentList() {
 async function getEquipmentListByCategory(category) {
   try {
     const list = await getEquipmentList();
-    return list[category];
+    return list[category] || [];
   } catch (e) {
     return e;
   }
@@ -230,7 +230,7 @@ async function getEquipmentListByCategory(category) {
 async function getEquipmentListBySearch(search) {
   try {
     const list = await getEquipmentList();
-    return list[search];
+    return list[search] || [];
   } catch (e) {
     return e;
   }
