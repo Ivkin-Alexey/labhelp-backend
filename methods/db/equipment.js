@@ -186,7 +186,7 @@ export function addSearchTermToDB(login, term) {
           else if (parsedData[login].length !== 0) {
             const searchTerm = parsedData[login].find(el => el === term)
             if (searchTerm) {
-              reject(localizations.equipment.searchHistory.errors.notUnique);
+              resolve(localizations.equipment.searchHistory.errors.notUnique);
               return;
             }
           }
