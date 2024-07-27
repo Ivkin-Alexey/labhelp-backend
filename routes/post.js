@@ -17,6 +17,8 @@ import { generateAccessToken, authenticateToken } from "../methods/jwt.js";
 import {
   addFavoriteEquipmentToDB,
   removeFavoriteEquipmentFromDB,
+  addSearchTermToDB,
+  removeSearchTermFromDB,
 } from "../methods/db/equipment.js";
 
 export default function post(app) {
@@ -74,12 +76,33 @@ export default function post(app) {
     const { login, equipmentID } = req.body;
     try {
       if (add) {
-        return await addFavoriteEquipmentToDB(login, equipmentID)
-          .then((msg) => res.status(200).json(msg))
+        return await addFavoriteEquipmentToDB(login, equipmentID).then((msg) =>
+          res.status(200).json(msg)
+        );
       }
       if (remove) {
         return await removeFavoriteEquipmentFromDB(login, equipmentID).then(
           (msg) => res.status(200).json(msg)
+        );
+      }
+    } catch (e) {
+      console.log(e);
+      return res.status(500).json(e);
+    }
+  });
+
+  app.post("/equipmentSearchHistory", async (req, res) => {
+    const { add, remove } = req.query;
+    const { login, term } = req.body;
+    try {
+      if (add) {
+        return await addSearchTermToDB(login, term).then((msg) =>
+          res.status(200).json(msg)
+        );
+      }
+      if (remove) {
+        return await removeSearchTermFromDB(login, term).then((msg) =>
+          res.status(200).json(msg)
         );
       }
     } catch (e) {

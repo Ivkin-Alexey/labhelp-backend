@@ -13,8 +13,7 @@ import {
 import {
   getWorkingEquipmentListFromDB,
   getFavoriteEquipmentsFromDB,
-  addFavoriteEquipmentToDB,
-  removeFavoriteEquipmentFromDB,
+  getSearchHistoryFromDB
 } from "../methods/db/equipment.js";
 import { generateAccessToken, authenticateToken } from "../methods/jwt.js";
 
@@ -75,6 +74,19 @@ export default function get(app) {
     console.log(req.query);
     try {
       return await getFavoriteEquipmentsFromDB(login).then((list) =>
+        res.status(200).json(list)
+      );
+    } catch (e) {
+      console.log(e);
+      return res.status(500).json(e);
+    }
+  });
+
+  app.get("/equipmentSearchHistory", async (req, res) => {
+    const { login } = req.query;
+    console.log(req.query);
+    try {
+      return await getSearchHistoryFromDB(login).then((list) =>
         res.status(200).json(list)
       );
     } catch (e) {

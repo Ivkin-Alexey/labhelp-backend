@@ -15,6 +15,15 @@ const localizations = {
                 notExist: "Такого оборудования нет в избранном",
                 emptyList: "Список избранного пуст",
             }
+        },
+        searchHistory: {
+            addedToDB: "Поисковый запрос сохранен",
+            deletedFromDB: "Поисковый запрос удален",
+            errors: {
+                notUnique: "Такой поисковый запрос уже сохранен",
+                emptyList: "Список поисковых запросов пуст",
+                notExist: "Такого поискового запроса не найдено"
+            }
         }
     },
     botAnswers: {

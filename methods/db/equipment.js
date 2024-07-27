@@ -17,6 +17,13 @@ const favoriteEquipmentsJsonPath = path.join(
   "db",
   "favoriteEquipments.json"
 );
+const searchHistoryJsonPath = path.join(
+  __dirname,
+  "..",
+  "assets",
+  "db",
+  "searchHistory.json"
+);
 
 export async function updateWorkingEquipmentListInDB(
   equipmentCategory,
@@ -143,6 +150,82 @@ export function addFavoriteEquipmentToDB(login, equipmentID) {
           writeJsonFile(favoriteEquipmentsJsonPath, updatedParsedData);
         })
         .then(() => resolve(localizations.equipment.favorite.addedToDB));
+    } catch (e) {
+      reject(e);
+    }
+  });
+}
+
+export async function getSearchHistoryFromDB(login) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      await readJsonFile(searchHistoryJsonPath).then((parsedData) => {
+        if (
+          !parsedData[login] ||
+          !parsedData[login].length === 0
+        ) {
+          resolve([]);
+          return;
+        }
+        resolve(parsedData[login]);
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+}
+
+export function addSearchTermToDB(login, term) {
+
+  return new Promise(async (resolve, reject) => {
+    try {
+      await readJsonFile(searchHistoryJsonPath)
+        .then(async (parsedData) => {
+
+          if (!parsedData[login]) parsedData[login] = [];
+          else if (parsedData[login].length !== 0) {
+            const searchTerm = parsedData[login].find(el => el === term)
+            if (searchTerm) {
+              reject(localizations.equipment.searchHistory.errors.notUnique);
+              return;
+            }
+          }
+          parsedData[login].push(term);
+          return parsedData;
+        })
+        .then((updatedParsedData) => {
+          writeJsonFile(searchHistoryJsonPath, updatedParsedData);
+        })
+        .then(() => resolve(localizations.equipment.searchHistory.addedToDB));
+    } catch (e) {
+      reject(e);
+    }
+  });
+}
+
+export async function removeSearchTermFromDB(login, term) {
+  console.log("Событие: Удаление поискового запроса", login, term)
+  return new Promise(async (resolve, reject) => {
+    try {
+      await readJsonFile(searchHistoryJsonPath)
+        .then((parsedData) => {
+          if (
+            !parsedData[login] ||
+            !parsedData[login].find((el) => el === term)
+          ) {
+            reject(localizations.equipment.searchHistory.errors.notExist);
+            return;
+          }
+          parsedData[login] = parsedData[login].filter(
+            (el) => el !== term
+          );
+          if (parsedData[login].length === 0) delete parsedData[login];
+          return parsedData;
+        })
+        .then((updatedParsedData) =>
+          writeJsonFile(searchHistoryJsonPath, updatedParsedData)
+        )
+        .then(() => resolve(localizations.equipment.searchHistory.deletedFromDB));
     } catch (e) {
       reject(e);
     }
