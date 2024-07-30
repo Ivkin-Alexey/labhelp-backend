@@ -150,7 +150,6 @@ async function fetchEquipmentListFromGSheet() {
         const id = rows[i].get("Заводской номер");
         if (checkEquipmentID(id)) newEquipmentItem.id = id;
         else continue;
-
         equipment.push(newEquipmentItem);
       }
       resolve(equipment);
@@ -228,12 +227,41 @@ async function getEquipmentListByCategory(category) {
 }
 
 async function getEquipmentListBySearch(search) {
-  try {
-    const list = await getEquipmentList();
-    return list[search] || [];
-  } catch (e) {
-    return e;
-  }
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (search === "") {
+        reject("Некорректный поисковый запрос")
+      }
+      const term = search.toLowerCase();
+      const list = await getEquipmentList();
+      const searchResultList = [];
+      for (let category in list) {
+        // Сначала ищем совпадения в категориях. Если ни одной не найти, то переходим к поиску по определенным полям каждого оборудования
+        if (category.toLowerCase().includes(term)) {
+          searchResultList.push(...list[category]);
+        }
+      }
+      if (searchResultList.length > 0) {
+        resolve(searchResultList);
+      } else {
+        const searchFields = ["category", "name", "brand", "model"];
+        for (let category in list) {
+          const arr = list[category];
+          arr.forEach((el) => {
+            searchFields.forEach((item) => {
+              const value = el[item];
+              if (value.toLowerCase().includes(term)) {
+                searchResultList.push(el);
+              }
+            });
+          });
+        }
+        resolve(searchResultList);
+      }
+    } catch (e) {
+      reject(e);
+    }
+  });
 }
 
 async function getEquipment(equipmentID) {
