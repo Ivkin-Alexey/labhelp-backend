@@ -1,6 +1,11 @@
-import {createDate, createReagentID, createFullName, createNameWithInitials} from "../../methods/helpers.js";
+import {
+  createDate,
+  createReagentID,
+  createFullName,
+  createNameWithInitials,
+} from '../../methods/helpers.js'
 
-const reagentStatuses = {inProcess: "inProcess", completed: "completed", rejected: "rejected"};
+const reagentStatuses = { inProcess: 'inProcess', completed: 'completed', rejected: 'rejected' }
 
 // interface INewReagentApplication {
 //     id: string;
@@ -12,14 +17,13 @@ const reagentStatuses = {inProcess: "inProcess", completed: "completed", rejecte
 // }
 
 function NewReagentApplication(userData) {
-    this.id = createReagentID();
-    this.chatID = userData.chatID;
-    this.fullName = createNameWithInitials(userData);
-    this.reagentName = "";
-    this.reagentAmount = "";
-    this.date = createDate();
-    this.status = reagentStatuses.inProcess;
+  this.id = createReagentID()
+  this.chatID = userData.chatID
+  this.fullName = createNameWithInitials(userData)
+  this.reagentName = ''
+  this.reagentAmount = ''
+  this.date = createDate()
+  this.status = reagentStatuses.inProcess
 }
 
-export  {NewReagentApplication}
-
+export { NewReagentApplication }

@@ -1,11 +1,11 @@
-import {researchTopics} from "../assets/constants/researches.js";
+import { researchTopics } from '../assets/constants/researches.js'
 
 function checkTextIsResearch(text) {
-    let research = null;
-    researchTopics.forEach(el => {
-        if(text.includes(el)) research = el;
-    })
-    return research;
+  let research = null
+  researchTopics.forEach(el => {
+    if (text.includes(el)) research = el
+  })
+  return research
 }
 
-export {checkTextIsResearch};
+export { checkTextIsResearch }
