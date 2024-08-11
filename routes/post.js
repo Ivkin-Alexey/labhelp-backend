@@ -2,112 +2,91 @@ import {
   updateUserDataPost,
   deletePersonPost,
   equipmentStartPost,
-  equipmentEndPost,
   updateReagentApplicationPost,
   deleteReagentApplicationPost,
   addNewReagentAppToDBPost,
   createNewPersonPost,
   loginPersonPost,
-} from "../methods/appPostsProcessing.js";
-import { getUserList } from "../methods/users.js";
+} from '../methods/appPostsProcessing.js'
 
-import { bot } from "../index.js";
+import { bot } from '../index.js'
 
-import { generateAccessToken, authenticateToken } from "../methods/jwt.js";
+import { generateAccessToken, authenticateToken } from '../methods/jwt.js'
 import {
   addFavoriteEquipmentToDB,
   removeFavoriteEquipmentFromDB,
   addSearchTermToDB,
   removeSearchTermFromDB,
-} from "../methods/db/equipment.js";
+} from '../methods/db/equipment.js'
 
 export default function post(app) {
   app.post(
-    "/updatePersonData",
+    '/updatePersonData',
     authenticateToken,
-    async (req, res) => await updateUserDataPost(req, res, bot)
-  );
+    async (req, res) => await updateUserDataPost(req, res, bot),
+  )
 
   app.post(
-    "/deletePerson",
+    '/deletePerson',
     authenticateToken,
-    async (req, res) => await deletePersonPost(req, res, bot)
-  );
+    async (req, res) => await deletePersonPost(req, res, bot),
+  )
+  app.post('/operateEquipment', async (req, res) => await equipmentStartPost(req, res, bot))
+  app.post(
+    '/deleteReagentApplication',
+    authenticateToken,
+    async (req, res) => await deleteReagentApplicationPost(req, res, bot),
+  )
 
   app.post(
-    "/equipmentStart",
+    '/updateReagentApplications',
     authenticateToken,
-    async (req, res) => await equipmentStartPost(req, res, bot)
-  );
+    async (req, res) => await updateReagentApplicationPost(req, res, bot),
+  )
 
   app.post(
-    "/equipmentEnd",
+    '/addNewReagentAppToDB',
     authenticateToken,
-    async (req, res) => await equipmentEndPost(req, res, bot)
-  );
+    async (req, res) => await addNewReagentAppToDBPost(req, res, bot),
+  )
 
-  app.post(
-    "/deleteReagentApplication",
-    authenticateToken,
-    async (req, res) => await deleteReagentApplicationPost(req, res, bot)
-  );
+  app.post('/createNewPerson', async (req, res) => await createNewPersonPost(req, res, bot))
 
-  app.post(
-    "/updateReagentApplications",
-    authenticateToken,
-    async (req, res) => await updateReagentApplicationPost(req, res, bot)
-  );
+  app.post('/login', async (req, res) => await loginPersonPost(req, res, bot))
 
-  app.post(
-    "/addNewReagentAppToDB",
-    authenticateToken,
-    async (req, res) => await addNewReagentAppToDBPost(req, res, bot)
-  );
-
-  app.post(
-    "/createNewPerson",
-    async (req, res) => await createNewPersonPost(req, res, bot)
-  );
-
-  app.post("/login", async (req, res) => await loginPersonPost(req, res, bot));
-
-  app.post("/favoriteEquipment", async (req, res) => {
-    const { add, remove } = req.query;
-    const { login, equipmentID } = req.body;
+  app.post('/favoriteEquipment', async (req, res) => {
+    const { add, remove } = req.query
+    const { login, equipmentID } = req.body
     try {
       if (add) {
-        return await addFavoriteEquipmentToDB(login, equipmentID).then((msg) =>
-          res.status(200).json(msg)
-        );
+        return await addFavoriteEquipmentToDB(login, equipmentID).then(msg =>
+          res.status(200).json(msg),
+        )
       }
       if (remove) {
-        return await removeFavoriteEquipmentFromDB(login, equipmentID).then(
-          (msg) => res.status(200).json(msg)
-        );
+        return await removeFavoriteEquipmentFromDB(login, equipmentID).then(msg =>
+          res.status(200).json(msg),
+        )
       }
     } catch (e) {
-      console.log(e);
-      return res.status(500).json(e);
+      console.log(e)
+      return res.status(500).json(e)
     }
-  });
+  })
 
-  app.post("/equipmentSearchHistory", async (req, res) => {
-    const { add, remove } = req.query;
-    const { login, term } = req.body;
+  app.post('/equipmentSearchHistory', async (req, res) => {
+    const { add, remove } = req.query
+    const { login, term } = req.body
     try {
       if (add) {
-        return await addSearchTermToDB(login, term).then((msg) =>
-          res.status(200).json(msg)
-        );
+        return await addSearchTermToDB(login, term).then(msg => res.status(200).json(msg))
       }
       if (remove) {
-        return await removeSearchTermFromDB(login, term).then((msg) =>
-          res.status(200).json(msg)
-        );
+        return await removeSearchTermFromDB(login, term).then(msg => res.status(200).json(msg))
       }
     } catch (e) {
-      console.log(e);
-      return res.status(500).json(e);
+      console.log(e)
+      return res.status(500).json(e)
     }
-  });
+  })
 }

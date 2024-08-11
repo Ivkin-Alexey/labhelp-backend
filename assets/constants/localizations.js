@@ -17,8 +17,13 @@ const localizations = {
       },
     },
     operating: {
+      add: 'Начата работа на оборудовании',
       delete: 'Работа на оборудовании завершена',
       empty: 'Такого оборудования нет в списке работающего',
+      errors: {
+        occupied: 'Оборудование уже используется',
+        wrongUserID: 'Пользователь не работает на данном оборудовании'
+      }
     },
     searchHistory: {
       addedToDB: 'Поисковый запрос сохранен',
@@ -57,7 +62,7 @@ const localizations = {
   users: {
     errors: {
       userAccessError: 'Данное действие доступно только для суперадминистраторов',
-      unregisteredUserError: 'Пользователь с таким chat ID не зарегистрирован',
+      unregisteredUserError: 'Такой пользователь не зарегистрирован',
     },
   },
 }

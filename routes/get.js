@@ -1,12 +1,11 @@
 import {
-  getEquipmentList,
-  getEquipment,
   getEquipmentListByCategory,
   getEquipmentListBySearch,
 } from '../methods/equipments.js'
+import {  getEquipmentByID} from '../methods/db/equipment.js'
 import { getUserData, getUserList } from '../methods/users.js'
 import { researchesSelectOptions } from '../assets/constants/researches.js'
-import { getReagentApplications, addNewReagentAppToDB } from '../methods/reagents.js'
+import { getReagentApplications} from '../methods/reagents.js'
 import {
   getWorkingEquipmentListFromDB,
   getFavoriteEquipmentsFromDB,
@@ -35,7 +34,7 @@ export default function get(app) {
       const { category, equipmentID, search } = req.query
 
       if (equipmentID) {
-        return await getEquipment(equipmentID)
+        return await getEquipmentByID(equipmentID)
           .then(equipmentData => res.status(200).json(equipmentData))
           .catch(error => res.status(404).json(error))
       }

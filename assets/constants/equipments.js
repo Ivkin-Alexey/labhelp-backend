@@ -13,16 +13,15 @@ function EquipmentItem() {
   this.filesUrl = ''
 }
 
-function WorkingEquipmentItem(chatID, login, longUse = false) {
-  this.id = ''
+function WorkingEquipmentItem(equipmentID, userID, longUse = false) {
+  this.id = equipmentID
   this.category = ''
   this.name = ''
   this.brand = ''
   this.model = ''
   this.imgUrl = ''
   this.filesUrl = ''
-  this.chatID = chatID
-  this.login = login
+  this.userID = userID
   this.longUse = longUse
 }
 
@@ -33,7 +32,7 @@ function StartData(chatID, login, accountData, equipment) {
   this.fullName = createFullName(accountData)
   this.chatID = chatID
   this.login = login
-  this.position = accountData.position
+  this.position = accountData?.position
   this.name = equipment.name + ' ' + equipment.model
 }
 

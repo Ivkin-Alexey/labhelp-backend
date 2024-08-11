@@ -2,7 +2,7 @@ import { readJsonFile, writeJsonFile } from '../fs.js'
 import path from 'path'
 import __dirname from '../../utils/__dirname.js'
 import localizations from '../../assets/constants/localizations.js'
-import { getEquipment } from '../equipments.js'
+import { WorkingEquipmentItem } from '../../assets/constants/equipments.js'
 const workingEquipmentJsonPath = path.join(__dirname, '..', 'assets', 'db', 'workingEquipment.json')
 const favoriteEquipmentsJsonPath = path.join(
   __dirname,
@@ -12,6 +12,7 @@ const favoriteEquipmentsJsonPath = path.join(
   'favoriteEquipments.json',
 )
 const searchHistoryJsonPath = path.join(__dirname, '..', 'assets', 'db', 'searchHistory.json')
+const equipmentJsonPath = path.join(__dirname, '..', 'assets', 'db', 'equipment.json')
 
 export async function updateWorkingEquipmentListInDB(
   equipmentCategory,
@@ -24,14 +25,15 @@ export async function updateWorkingEquipmentListInDB(
     try {
       await readJsonFile(workingEquipmentJsonPath).then(parsedData => {
         if (!parsedData[equipmentCategory] && action === 'start') parsedData[equipmentCategory] = []
+        console.log(equipmentCategory)
         const workingEquipmentItem = parsedData[equipmentCategory]?.find(
-          el => el.equipmentID === equipmentID,
+          el => el.id === equipmentID,
         )
         if (!workingEquipmentItem && action === 'start') {
           parsedData[equipmentCategory].push(new WorkingEquipmentItem(equipmentID, chatID, longUse))
         } else if (workingEquipmentItem && action === 'end') {
           parsedData[equipmentCategory] = parsedData[equipmentCategory].filter(
-            el => el.equipmentID !== equipmentID,
+            el => el.id !== equipmentID,
           )
           if (parsedData[equipmentCategory].length === 0) delete parsedData[equipmentCategory]
         } else {
@@ -188,4 +190,28 @@ export async function removeSearchTermFromDB(login, term) {
       reject(e)
     }
   })
+}
+
+export async function getEquipmentByID(equipmentID) {
+  return new Promise((resolve, reject) => {
+    try {
+      readJsonFile(equipmentJsonPath).then(parsedData => {
+        const equipmentData = findEquipment(parsedData, equipmentID)
+        resolve(equipmentData)
+      })
+    } catch (e) {
+      reject(e)
+    }
+  })
+}
+
+export function findEquipment(object, equipmentID) {
+  let equipmentData
+  for (const key in object) {
+    const arr = object[key]
+    equipmentData = arr.find(el => el.id === equipmentID)
+    if (equipmentData) {
+      return equipmentData
+    }
+  }
 }

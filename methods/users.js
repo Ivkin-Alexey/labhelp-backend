@@ -15,6 +15,7 @@ import { createDate } from './helpers.js'
 import { equipmentOperations, confirmedUsers } from '../assets/constants/gSpreadSheets.js'
 import { StartData } from '../assets/constants/equipments.js'
 import { getConstantFromDB } from './updateConstants.js'
+import { readJsonFile } from './fs.js'
 
 let md5Previous = null
 let fsWait = false
@@ -183,18 +184,16 @@ async function updateUserData(chatID, userData) {
   })
 }
 
-async function getUserData(chatID) {
+async function getUserData(id) {  // chatID or login
   return new Promise((resolve, reject) => {
-    readFile(jsonPath, 'utf8', (error, data) => {
-      if (error) {
-        reject(`Ошибка чтения данных на сервере: ${error}. Сообщите о ней администратору`)
-        return
-      }
-      const parsedData = JSON.parse(Buffer.from(data))
-      const user = parsedData.find(el => el.chatID === +chatID)
-      if (!user) reject(users.errors.unregisteredUserError)
-      resolve(user)
-    })
+    try {
+      readJsonFile(jsonPath).then(parsedData => {
+        const user = parsedData.find(el => el.chatID === +id || el.login === id)
+        resolve(user)
+      })
+    } catch (e) {
+      reject(e)
+    }
   })
 }
 

@@ -23,6 +23,7 @@ function createTime() {
 }
 
 function createFullName(userData) {
+  if (!userData) return
   const { firstName, lastName, patronymic } = userData
   return lastName + ' ' + firstName + ' ' + patronymic
 }
