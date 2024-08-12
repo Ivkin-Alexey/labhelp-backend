@@ -1,18 +1,15 @@
-import {
-  getEquipmentListByCategory,
-  getEquipmentListBySearch,
-} from '../methods/equipments.js'
-import {  getEquipmentByID} from '../methods/db/equipment.js'
+import { getEquipmentListByCategory, getEquipmentListBySearch } from '../methods/equipments.js'
+import { getEquipmentByID } from '../methods/db/equipment.js'
 import { getUserData, getUserList } from '../methods/users.js'
 import { researchesSelectOptions } from '../assets/constants/researches.js'
-import { getReagentApplications} from '../methods/reagents.js'
+import { getReagentApplications } from '../methods/reagents.js'
 import {
   getWorkingEquipmentListFromDB,
   getFavoriteEquipmentsFromDB,
   getSearchHistoryFromDB,
 } from '../methods/db/equipment.js'
 import { generateAccessToken, authenticateToken } from '../methods/jwt.js'
-import {transformEquipmentList} from '../methods/db/equipment.js'
+import { transformListByFavoriteEquipment, transformListByOperateEquipment } from '../methods/db/equipment.js'
 
 export default function get(app) {
   // app.use((req, res, next) => {
@@ -36,7 +33,9 @@ export default function get(app) {
       if (equipmentID) {
         return await getEquipmentByID(equipmentID)
           .then(async equipmentData => {
-            const list = await transformEquipmentList([equipmentData])
+            const list = await transformListByOperateEquipment([equipmentData]).then(async list => {
+              return await transformListByFavoriteEquipment(list)
+            })
             res.status(200).json(list[0])
           })
           .catch(error => res.status(404).json(error))
@@ -44,16 +43,20 @@ export default function get(app) {
       if (search) {
         return await getEquipmentListBySearch(search)
           .then(async equipmentList => {
-            const list = await transformEquipmentList(equipmentList)
+            const list = await transformListByOperateEquipment(equipmentList).then(async list => {
+              return await transformListByFavoriteEquipment(list)
+            })
             res.status(200).json(list)
           })
           .catch(error => res.status(404).json(error))
       }
       if (category) {
         return await getEquipmentListByCategory(category).then(async equipmentList => {
-          const list = await transformEquipmentList(equipmentList)
+          const list = await transformListByOperateEquipment(equipmentList).then(async list => {
+            return await transformListByFavoriteEquipment(list)
+          })
           res.status(200).json(list)
-      })
+        })
       }
     } catch (e) {
       return res.status(500).json(e)
@@ -62,7 +65,12 @@ export default function get(app) {
 
   app.get('/workingEquipmentList', async (req, res) => {
     try {
-      return await getWorkingEquipmentListFromDB().then(list => res.status(200).json(list))
+      return await getWorkingEquipmentListFromDB()
+        .then(async list => {
+          const transformedList = await transformListByFavoriteEquipment(list)
+          return transformedList.map(el => ({ ...el, isOperate: true }))
+        })
+        .then(list => res.status(200).json(list))
     } catch (e) {
       return res.status(500).json(e)
     }
@@ -72,7 +80,11 @@ export default function get(app) {
     const { login } = req.query
     console.log(req.query)
     try {
-      return await getFavoriteEquipmentsFromDB(login).then(list => res.status(200).json(list))
+      return await getFavoriteEquipmentsFromDB(login).then(async list => {
+        const transformedList = await transformListByOperateEquipment(list)
+        return transformedList.map(el => ({ ...el, isFavorite: true }))
+      })
+      .then(list => res.status(200).json(list))
     } catch (e) {
       console.log(e)
       return res.status(500).json(e)
