@@ -219,26 +219,20 @@ export function findEquipment(object, equipmentID) {
 export async function transformListByOperateEquipment(list) {
   const operateList = await getWorkingEquipmentListFromDB()
   return list.map(el => {
-    const copy = {...el}
+    const copy = { ...el }
     if (operateList[el.category]) {
       const isOperate = operateList[el.category].find(item => el.id === item.id)
-      if(isOperate) copy.isOperate = true
+      if (isOperate) copy.isOperate = true
     }
     return copy
   })
 }
 
-export async function transformListByFavoriteEquipment(list) {
-  const favoriteList = await getFavoriteEquipmentsFromDB()
-
+export async function transformListByFavoriteEquipment(list, login) {
+  const favoriteList = await getFavoriteEquipmentsFromDB(login)
   return list.map(el => {
-    const copy = {...el}
-    if (favoriteList[el.category]) {
-      const isFavorite = favoriteList[el.category].find(item => el.id === item.id)
-      if(isFavorite) copy.isFavorite = true
-    }
-    return copy
+    const isFavorite = favoriteList.find(item => el.id === item.id)
+    if (isFavorite) return { ...el, isFavorite: true }
+    return el
   })
 }
-  
-
