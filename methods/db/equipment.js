@@ -215,3 +215,23 @@ export function findEquipment(object, equipmentID) {
     }
   }
 }
+
+export async function transformEquipmentList(list) {
+
+  const operateList = await getWorkingEquipmentListFromDB()
+  const favoriteList = await getFavoriteEquipmentsFromDB()
+
+  return list.map(el => {
+    const copy = {...el}
+    if (operateList[el.category]) {
+      const isOperate = operateList[el.category].find(item => el.id === item.id)
+      if(isOperate) copy.isOperate = true
+    }
+    if (favoriteList[el.category]) {
+      const isFavorite = favoriteList[el.category].find(item => el.id === item.id)
+      if(isFavorite) copy.isFavorite = true
+    }
+    return copy
+  })
+
+  }

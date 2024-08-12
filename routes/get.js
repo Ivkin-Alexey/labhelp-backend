@@ -12,6 +12,7 @@ import {
   getSearchHistoryFromDB,
 } from '../methods/db/equipment.js'
 import { generateAccessToken, authenticateToken } from '../methods/jwt.js'
+import {transformEquipmentList} from '../methods/db/equipment.js'
 
 export default function get(app) {
   // app.use((req, res, next) => {
@@ -32,23 +33,27 @@ export default function get(app) {
   app.get('/equipmentList', async (req, res) => {
     try {
       const { category, equipmentID, search } = req.query
-
       if (equipmentID) {
         return await getEquipmentByID(equipmentID)
-          .then(equipmentData => res.status(200).json(equipmentData))
+          .then(async equipmentData => {
+            const list = await transformEquipmentList([equipmentData])
+            res.status(200).json(list[0])
+          })
           .catch(error => res.status(404).json(error))
       }
-
       if (search) {
         return await getEquipmentListBySearch(search)
-          .then(equipmentList => res.status(200).json(equipmentList))
+          .then(async equipmentList => {
+            const list = await transformEquipmentList(equipmentList)
+            res.status(200).json(list)
+          })
           .catch(error => res.status(404).json(error))
       }
-
       if (category) {
-        return await getEquipmentListByCategory(category).then(equipmentList =>
-          res.status(200).json(equipmentList),
-        )
+        return await getEquipmentListByCategory(category).then(async equipmentList => {
+          const list = await transformEquipmentList(equipmentList)
+          res.status(200).json(list)
+      })
       }
     } catch (e) {
       return res.status(500).json(e)
