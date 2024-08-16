@@ -221,8 +221,11 @@ export async function transformListByOperateEquipment(list) {
   return list.map(el => {
     const copy = { ...el }
     if (operateList[el.category]) {
-      const isOperate = operateList[el.category].find(item => el.id === item.id)
-      if (isOperate) copy.isOperate = true
+      const operateEquipment = operateList[el.category].find(item => el.id === item.id)
+      if (operateEquipment) {
+        copy.isOperate = true
+        copy.userID = operateEquipment.userID
+      }
     }
     return copy
   })

@@ -64,6 +64,7 @@ export default function get(app) {
           return res.status(200).json(list)
         })
       }
+      
     } catch (e) {
       return res.status(500).json(e)
     }
