@@ -28,7 +28,6 @@ async function updateDataInGSheetCell(table, sheetIndex, dataForSearching, colum
         const cellValue = rows[i].get(columnName)
         if (cellValue === '') {
           const rowData = rows[i]._rawData.join('')
-          console.log(rowData)
           if (rowData.includes(dataForSearching.equipmentID) && rowData.includes(createDate())) {
             ended = true
             rows[i].set(columnName, value)

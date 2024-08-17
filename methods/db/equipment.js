@@ -2,7 +2,6 @@ import { readJsonFile, writeJsonFile } from '../fs.js'
 import path from 'path'
 import __dirname from '../../utils/__dirname.js'
 import localizations from '../../assets/constants/localizations.js'
-import { WorkingEquipmentItem } from '../../assets/constants/equipments.js'
 const workingEquipmentJsonPath = path.join(__dirname, '..', 'assets', 'db', 'workingEquipment.json')
 const favoriteEquipmentsJsonPath = path.join(
   __dirname,
@@ -14,38 +13,40 @@ const favoriteEquipmentsJsonPath = path.join(
 const searchHistoryJsonPath = path.join(__dirname, '..', 'assets', 'db', 'searchHistory.json')
 const equipmentJsonPath = path.join(__dirname, '..', 'assets', 'db', 'equipment.json')
 
-export async function updateWorkingEquipmentListInDB(
-  equipmentCategory,
-  equipmentID,
-  chatID,
-  action,
-  longUse = false,
-) {
+export async function addWorkingEquipmentToDB(equipment) {
   return new Promise(async (resolve, reject) => {
     try {
       await readJsonFile(workingEquipmentJsonPath).then(parsedData => {
-        if (!parsedData[equipmentCategory] && action === 'start') parsedData[equipmentCategory] = []
-        console.log(equipmentCategory)
-        const workingEquipmentItem = parsedData[equipmentCategory]?.find(
-          el => el.id === equipmentID,
+        if (!parsedData[equipment.category]) {
+          parsedData[equipment.category] = []
+        }
+        parsedData[equipment.category].push(equipment)
+        writeJsonFile(workingEquipmentJsonPath, parsedData)
+        resolve()
+      })
+    } catch (e) {
+      reject(e)
+    }
+  })
+}
+
+export async function deleteWorkingEquipmentFromDB(equipment) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      await readJsonFile(workingEquipmentJsonPath).then(parsedData => {
+        const workingEquipmentItem = parsedData[equipment.category]?.find(
+          el => el.id === equipment.id,
         )
-        if (!workingEquipmentItem && action === 'start') {
-          parsedData[equipmentCategory].push(new WorkingEquipmentItem(equipmentID, chatID, longUse))
-        } else if (workingEquipmentItem && action === 'end') {
-          parsedData[equipmentCategory] = parsedData[equipmentCategory].filter(
-            el => el.id !== equipmentID,
-          )
-          if (parsedData[equipmentCategory].length === 0) delete parsedData[equipmentCategory]
+        if (!workingEquipmentItem) {
+          reject({ error: localizations.equipment.operating.empty, status: 404 })
         } else {
-          reject(
-            'Ошибка: action = ' +
-              action +
-              ', workingEquipmentItem = ' +
-              JSON.stringify(workingEquipmentItem),
+          parsedData[equipment.category] = parsedData[equipment.category].filter(
+            el => el.id !== equipment.id,
           )
+          if (parsedData[equipment.category].length === 0) delete parsedData[equipment.category]
         }
         writeJsonFile(workingEquipmentJsonPath, parsedData)
-        resolve(parsedData)
+        resolve()
       })
     } catch (e) {
       reject(e)

@@ -1,8 +1,9 @@
 import {
   getWorkingEquipmentListFromDB,
   getEquipmentByID,
-  updateWorkingEquipmentListInDB,
-  findEquipment
+  findEquipment,
+  deleteWorkingEquipmentFromDB,
+  addWorkingEquipmentToDB
 } from './db/equipment.js'
 import {equipmentOperations, equipmentOperationsSheetIndex} from '../assets/constants/gSpreadSheets.js' 
 import { addNewRowInGSheet, updateDataInGSheetCell } from './gSheets.js'
@@ -28,8 +29,7 @@ export async function startWorkWithEquipment(userID, equipmentID) { // userID = 
         reject({ error: localizations.equipment.operating.errors.occupied, status: 409 })
         break label
       }
-      const { category } = equipment
-      await updateWorkingEquipmentListInDB(category, equipmentID, userID, 'start')
+      await addWorkingEquipmentToDB({ ...equipment, userID })
       const data = new StartData(userID, userID, accountData, equipment)
       await addNewRowInGSheet(equipmentOperations, equipmentOperationsSheetIndex, data)
       resolve({ message: localizations.equipment.operating.add, data: { equipmentID } })
@@ -43,14 +43,13 @@ export async function endWorkWithEquipment(userID, equipmentID) {
   return new Promise(async (resolve, reject) => {
     label: try {
       const equipment = await getWorkingEquipmentListFromDB().then(obj => findEquipment(obj, equipmentID))
-      
-      const { category, id, userID: UID, login } = equipment
       if (equipment) {
+        const { userID: UID} = equipment
         if (userID !== UID) {
           reject({ error: localizations.equipment.operating.errors.wrongUserID, status: 409 })
           break label
         }
-        await updateWorkingEquipmentListInDB(category, id, userID, 'end')
+        await deleteWorkingEquipmentFromDB(equipment)
         const data = new EndData()
         await updateDataInGSheetCell(
           equipmentOperations,

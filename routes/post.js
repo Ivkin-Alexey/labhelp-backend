@@ -32,6 +32,7 @@ export default function post(app) {
     async (req, res) => await deletePersonPost(req, res, bot),
   )
   app.post('/operateEquipment', async (req, res) => await equipmentStartPost(req, res, bot))
+  
   app.post(
     '/deleteReagentApplication',
     authenticateToken,

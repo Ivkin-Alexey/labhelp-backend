@@ -1,11 +1,8 @@
-import { EquipmentItem, EndData } from '../assets/constants/equipments.js'
+import { EquipmentItem } from '../assets/constants/equipments.js'
 import {
-  equipmentOperations,
   equipmentList,
   equipmentListSheetID,
-  equipmentOperationsSheetIndex,
 } from '../assets/constants/gSpreadSheets.js'
-import { StartData } from '../assets/constants/equipments.js'
 import { readFile, writeFileSync } from 'fs'
 import path from 'path'
 import { getUserData } from './users.js'
@@ -13,15 +10,8 @@ import { checkEquipmentID } from './helpers.js'
 import { amountOfEquipment } from '../assets/constants/equipments.js'
 import { personRoles } from '../assets/constants/users.js'
 import localizations from '../assets/constants/localizations.js'
-import { updateDataInGSheetCell, addNewRowInGSheet } from './gSheets.js'
-import {
-  updateWorkingEquipmentListInDB,
-  getWorkingEquipmentListFromDB,
-  getEquipmentByID,
-} from './db/equipment.js'
 import __dirname from '../utils/__dirname.js'
 const equipmentJsonPath = path.join(__dirname, '..', 'assets', 'db', 'equipment.json')
-const imagesPath = path.join(__dirname, '..', 'assets', 'images', 'equipments')
 
 async function reloadEquipmentDB(bot, chatID) {
   const userData = await getUserData(chatID)
