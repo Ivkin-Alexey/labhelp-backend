@@ -115,7 +115,7 @@ export function addFavoriteEquipmentToDB(login, equipmentID) {
               return
             }
           }
-          const equipment = await getEquipment(equipmentID)
+          const equipment = await getEquipmentByID(equipmentID)
           parsedData[login].push(equipment)
           return parsedData
         })
