@@ -66,6 +66,7 @@ export default function get(app) {
       }
       
     } catch (e) {
+      console.log(e)
       return res.status(500).json(e)
     }
   })
@@ -79,6 +80,7 @@ export default function get(app) {
         })
         .then(list => res.status(200).json(list))
     } catch (e) {
+      console.log(e)
       return res.status(500).json(e)
     }
   })
@@ -115,6 +117,7 @@ export default function get(app) {
       const chatID = req.params.chatID
       return await getUserData(chatID).then(person => res.status(200).json(person))
     } catch (e) {
+      console.log(e)
       return res.status(500).json(e)
     }
   })
@@ -123,6 +126,7 @@ export default function get(app) {
     try {
       return await getUserList().then(personList => res.status(200).json(personList))
     } catch (e) {
+      console.log(e)
       return res.status(500).json(e)
     }
   })
@@ -131,6 +135,7 @@ export default function get(app) {
     try {
       return res.status(200).json(researchesSelectOptions)
     } catch (e) {
+      console.log(e)
       return res.status(500).json(e)
     }
   })
@@ -139,6 +144,7 @@ export default function get(app) {
     try {
       return await getReagentApplications().then(list => res.status(200).json(list))
     } catch (e) {
+      console.log(e)
       return res.status(500).json(e)
     }
   })
