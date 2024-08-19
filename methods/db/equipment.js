@@ -232,8 +232,12 @@ export async function transformListByOperateEquipment(list) {
   })
 }
 
-export async function transformListByFavoriteEquipment(list, login) {
+export async function transformListByFavoriteEquipment(obj, login) {
   const favoriteList = await getFavoriteEquipmentsFromDB(login)
+  const list = []
+  for (let category in obj) {
+    list = [...list, obg[category]]
+  }
   return list.map(el => {
     const isFavorite = favoriteList.find(item => el.id === item.id)
     if (isFavorite) return { ...el, isFavorite: true }

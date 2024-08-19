@@ -75,8 +75,8 @@ export default function get(app) {
     const { login } = req.query
     try {
       return await getWorkingEquipmentListFromDB()
-        .then(async list => {
-          const transformedList = await transformListByFavoriteEquipment(list, login)
+        .then(async obj => {
+          const transformedList = await transformListByFavoriteEquipment(obj, login)
           return transformedList.map(el => ({ ...el, isOperate: true }))
         })
         .then(list => res.status(200).json(list))
