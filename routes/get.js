@@ -13,6 +13,7 @@ import {
   transformListByFavoriteEquipment,
   transformListByOperateEquipment,
 } from '../methods/db/equipment.js'
+import localizations from '../assets/constants/localizations.js'
 
 export default function get(app) {
   // app.use((req, res, next) => {
@@ -74,6 +75,8 @@ export default function get(app) {
   app.get('/workingEquipmentList', async (req, res) => {
     const { login } = req.query
     try {
+      const isUserExist = await getUserData(login)
+      if(!isUserExist) return res.status(404).json(localizations.users.errors.unregisteredUserError)
       return await getWorkingEquipmentListFromDB()
         .then(async obj => {
           const transformedList = await transformListByFavoriteEquipment(obj, login)
