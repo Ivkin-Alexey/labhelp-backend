@@ -79,6 +79,7 @@ export default function get(app) {
       if(!isUserExist) return res.status(404).json(localizations.users.errors.unregisteredUserError)
       return await getWorkingEquipmentListFromDB()
         .then(async obj => {
+          if(Object.keys(obj).length === 0) return []
           const transformedList = await transformListByFavoriteEquipment(obj, login)
           return transformedList.map(el => ({ ...el, isOperate: true }))
         })
