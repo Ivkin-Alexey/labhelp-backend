@@ -42,12 +42,11 @@ export default function get(app) {
             })
             return res.status(200).json(list[0])
           })
-          .catch(error => res.status(404).json(error))
       }
       if (search) {
         return await getEquipmentListBySearch(search)
           .then(async equipmentList => {
-            if (!login) res.status(200).json(equipmentList)
+            if (!login) return res.status(200).json(equipmentList)
             else {
               const list = await transformListByOperateEquipment(equipmentList).then(async list => {
                 return await transformListByFavoriteEquipment(list, login)
@@ -55,7 +54,6 @@ export default function get(app) {
               return res.status(200).json(list)
             }
           })
-          .catch(error => res.status(404).json(error))
       }
       if (category) {
         return await getEquipmentListByCategory(category).then(async equipmentList => {
