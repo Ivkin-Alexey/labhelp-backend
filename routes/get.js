@@ -65,7 +65,6 @@ export default function get(app) {
           return res.status(200).json(list)
         })
       }
-      
     } catch (e) {
       console.log(e)
       return res.status(500).json(e)
@@ -76,17 +75,20 @@ export default function get(app) {
     const { login } = req.query
     try {
       const isUserExist = await getUserData(login)
-      if(!isUserExist) return res.status(404).json(localizations.users.errors.unregisteredUserError)
-      return await getWorkingEquipmentListFromDB()
-        .then(async obj => {
-          if(Object.keys(obj).length === 0) return []
-          const transformedList = await transformListByFavoriteEquipment(obj, login)
-          return transformedList.map(el => ({ ...el, isOperate: true }))
-        })
-        .then(list => res.status(200).json(list))
+      if (!isUserExist)
+        throw { error: localizations.users.errors.unregisteredUserError, status: 404 }
+      const workingEquipments = await getWorkingEquipmentListFromDB()
+      if (Object.keys(workingEquipments).length === 0) return res.status(200).json([])
+      const transformedList = transformListByFavoriteEquipment(workingEquipments, login).then(
+        list => {
+          return list.map(el => ({ ...el, isOperate: true }))
+        },
+      )
+      return res.status(200).json(transformedList)
     } catch (e) {
       console.log(e)
-      return res.status(500).json(e)
+      if (e.error) res.status(e.status).json(e.error)
+      else return res.status(500).json(e)
     }
   })
 
