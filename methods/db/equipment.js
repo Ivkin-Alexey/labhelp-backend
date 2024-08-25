@@ -222,9 +222,7 @@ export async function transformListByOperateEquipment(list) {
   return list.map(el => {
     const copy = { ...el }
     if (operateList[el.category]) {
-      const operateEquipment = operateList[el.category].find(
-        (item) => el.id === item.id,
-      )
+      const operateEquipment = operateList[el.category].find(item => el.id === item.id)
       if (operateEquipment) {
         copy.isOperate = true
         copy.userID = operateEquipment.userID
@@ -236,9 +234,19 @@ export async function transformListByOperateEquipment(list) {
 
 export async function transformListByFavoriteEquipment(list, login) {
   const favoriteList = await getFavoriteEquipmentsFromDB(login)
-  return list.map(el => {
+
+  function callback(el) {
     const isFavorite = favoriteList.find(item => el.id === item.id)
     if (isFavorite) return { ...el, isFavorite: true }
     return el
-  })
+  }
+
+  if (Array.isArray(list)) {
+    return list.map(callback)
+  } else if (typeof list === 'object' && list !== null) {
+    for (let key in list) {
+      list[key] = list[key].map(callback)
+    }
+  }
+  else throw {status: 500, error: "Неправильный тип данных"}
 }
