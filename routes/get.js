@@ -78,7 +78,7 @@ export default function get(app) {
         throw { error: localizations.users.errors.unregisteredUserError, status: 404 }
       const workingEquipments = await getWorkingEquipmentListFromDB()
       if (Object.keys(workingEquipments).length === 0) return res.status(200).json([])
-      const transformedList = transformListByFavoriteEquipment(workingEquipments, login).then(
+      const transformedList = await transformListByFavoriteEquipment(workingEquipments, login).then(
         list => {
           return list.map(el => ({ ...el, isOperate: true }))
         },
