@@ -244,7 +244,7 @@ export async function transformListByFavoriteEquipment(list, login) {
   if (Array.isArray(list)) {
     return list.map(callback)
   } else if (typeof list === 'object' && list !== null) {
-    const arr = []
+    let arr = []
     for (let key in list) {
       arr = [...arr, ...list[key].map(callback)]
     }
