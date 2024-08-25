@@ -248,7 +248,7 @@ export async function transformListByFavoriteEquipment(list, login) {
     for (let key in list) {
       arr = [...arr, ...list[key].map(callback)]
     }
-    return list
+    return arr
   }
   else throw {status: 500, error: "Неправильный тип данных"}
 }
