@@ -1,9 +1,17 @@
 {
   "compilerOptions": {
-    "composite": true,
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "allowSyntheticDefaultImports": true
+    "target": "ESNext",
+    "module": "CommonJS",
+    "strict": true,
+    "esModuleInterop": true
   },
-  "include": ["vite.config.ts"]
+  "include": [
+    "*.ts",
+    "methods/**/*.ts",
+    "index.js",
+    "index.js",
+    "methods/db/equipment.js",
+    "methods/db/equipment.js"
+  ],
+  "exclude": ["node_modules"]
 }

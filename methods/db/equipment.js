@@ -68,7 +68,7 @@ export async function getFavoriteEquipmentsFromDB(login) {
   return new Promise(async (resolve, reject) => {
     try {
       await readJsonFile(favoriteEquipmentsJsonPath).then(parsedData => {
-        if (!parsedData[login] || !parsedData[login].length === 0) {
+        if (!parsedData[login] || parsedData[login].length === 0) {
           resolve([])
           return
         }
@@ -133,7 +133,7 @@ export async function getSearchHistoryFromDB(login) {
   return new Promise(async (resolve, reject) => {
     try {
       await readJsonFile(searchHistoryJsonPath).then(parsedData => {
-        if (!parsedData[login] || !parsedData[login].length === 0) {
+        if (!parsedData[login] || parsedData[login].length === 0) {
           resolve([])
           return
         }
@@ -222,7 +222,9 @@ export async function transformListByOperateEquipment(list) {
   return list.map(el => {
     const copy = { ...el }
     if (operateList[el.category]) {
-      const operateEquipment = operateList[el.category].find(item => el.id === item.id)
+      const operateEquipment = operateList[el.category].find(
+        (item) => el.id === item.id,
+      )
       if (operateEquipment) {
         copy.isOperate = true
         copy.userID = operateEquipment.userID
@@ -232,12 +234,8 @@ export async function transformListByOperateEquipment(list) {
   })
 }
 
-export async function transformListByFavoriteEquipment(obj, login) {
+export async function transformListByFavoriteEquipment(list, login) {
   const favoriteList = await getFavoriteEquipmentsFromDB(login)
-  const list = []
-  for (let category in obj) {
-    list = [...list, obg[category]]
-  }
   return list.map(el => {
     const isFavorite = favoriteList.find(item => el.id === item.id)
     if (isFavorite) return { ...el, isFavorite: true }

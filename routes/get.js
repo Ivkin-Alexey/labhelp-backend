@@ -49,6 +49,7 @@ export default function get(app) {
             if (!login) return res.status(200).json(equipmentList)
             else {
               const list = await transformListByOperateEquipment(equipmentList).then(async list => {
+
                 return await transformListByFavoriteEquipment(list, login)
               })
               return res.status(200).json(list)
