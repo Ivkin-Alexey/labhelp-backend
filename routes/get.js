@@ -118,7 +118,7 @@ export default function get(app) {
     }
   })
 
-  app.get('/person/:chatID', authenticateToken, async (req, res) => {
+  app.get('/person/:chatID', async (req, res) => {
     try {
       const chatID = req.params.chatID
       return await getUserData(chatID).then(person => res.status(200).json(person))
