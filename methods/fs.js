@@ -1,6 +1,7 @@
 import { readFile, writeFile } from 'fs'
 
 async function readJsonFile(path) {
+  console.log('Событие: Чтение файла: ', path)
   return new Promise((resolve, reject) => {
     readFile(path, 'utf8', (error, data) => {
       if (error) {
@@ -14,6 +15,7 @@ async function readJsonFile(path) {
 }
 
 async function writeJsonFile(path, parsedData) {
+  console.log('Событие: Запись файла: ', path)
   return new Promise((resolve, reject) => {
     writeFile(path, JSON.stringify(parsedData, null, 2), error => {
       if (error) {

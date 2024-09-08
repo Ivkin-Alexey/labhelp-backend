@@ -32,6 +32,7 @@ export default function get(app) {
   })
 
   app.get('/equipmentList', async (req, res) => {
+    console.log('Событие: GET-запрос по адресу: /equipmentList')
     try {
       const { category, equipmentID, search, login } = req.query
       if (equipmentID) {
@@ -44,6 +45,7 @@ export default function get(app) {
           })
       }
       if (search) {
+        console.log('Событие: query-параметр search: ', search)
         return await getEquipmentListBySearch(search)
           .then(async equipmentList => {
             if (!login) return res.status(200).json(equipmentList)
