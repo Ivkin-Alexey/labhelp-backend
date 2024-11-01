@@ -4,7 +4,8 @@
 /node_modules
 /.pnp
 .pnp.js
-/ssl
+src/ssl
+src/assets/db
 
 # testing
 /coverage
@@ -25,3 +26,4 @@ yarn-debug.log*
 yarn-error.log*
 .idea
 todo.md
+index.js
