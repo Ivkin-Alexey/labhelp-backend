@@ -3,15 +3,19 @@ import {
   getEquipmentByID,
   findEquipment,
   deleteWorkingEquipmentFromDB,
-  addWorkingEquipmentToDB
+  addWorkingEquipmentToDB,
 } from './db/equipment.js'
-import {equipmentOperations, equipmentOperationsSheetIndex} from '../assets/constants/gSpreadSheets.js' 
+import {
+  equipmentOperations,
+  equipmentOperationsSheetIndex,
+} from '../assets/constants/gSpreadSheets.js'
 import { addNewRowInGSheet, updateDataInGSheetCell } from './gSheets.js'
 import { StartData, EndData } from '../assets/constants/equipments.js'
 import { getUserData } from './users.js'
 import localizations from '../assets/constants/localizations.js'
 
-export async function startWorkWithEquipment(userID, equipmentID) { // userID = chatID or login
+export async function startWorkWithEquipment(userID, equipmentID) {
+  // userID = chatID or login
   return new Promise(async (resolve, reject) => {
     label: try {
       const equipment = await getEquipmentByID(equipmentID)
@@ -24,7 +28,9 @@ export async function startWorkWithEquipment(userID, equipmentID) { // userID = 
         reject({ error: localizations.users.errors.unregisteredUserError, status: 404 })
         break label
       }
-      const isOperating = await getWorkingEquipmentListFromDB().then(obj => findEquipment(obj, equipmentID))
+      const isOperating = await getWorkingEquipmentListFromDB().then(obj =>
+        findEquipment(obj, equipmentID),
+      )
       if (isOperating) {
         reject({ error: localizations.equipment.operating.errors.occupied, status: 409 })
         break label
@@ -42,9 +48,11 @@ export async function startWorkWithEquipment(userID, equipmentID) { // userID = 
 export async function endWorkWithEquipment(userID, equipmentID) {
   return new Promise(async (resolve, reject) => {
     label: try {
-      const equipment = await getWorkingEquipmentListFromDB().then(obj => findEquipment(obj, equipmentID))
+      const equipment = await getWorkingEquipmentListFromDB().then(obj =>
+        findEquipment(obj, equipmentID),
+      )
       if (equipment) {
-        const { userID: UID} = equipment
+        const { userID: UID } = equipment
         if (userID !== UID) {
           reject({ error: localizations.equipment.operating.errors.wrongUserID, status: 409 })
           break label
@@ -60,7 +68,7 @@ export async function endWorkWithEquipment(userID, equipmentID) {
         )
         resolve({ message: localizations.equipment.operating.delete, data: { equipmentID } })
       } else {
-        reject({ error: localizations.equipment.operating.empty, status: 404})
+        reject({ error: localizations.equipment.operating.empty, status: 404 })
       }
     } catch (e) {
       reject(e)

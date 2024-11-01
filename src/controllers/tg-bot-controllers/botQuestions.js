@@ -1,6 +1,6 @@
-import { webAppUrl } from '../assets/constants/constants'
-import { updateUserData } from './users'
-import { updateConstantsDB } from './updateConstants'
+import { webAppUrl } from '../../assets/constants/constants'
+import { updateUserData } from '../users'
+import { updateConstantsDB } from '../updateConstants'
 
 async function askUserPosition(bot, chatID) {
   await bot.sendMessage(chatID, 'Выбери категорию обучающегося: ', {

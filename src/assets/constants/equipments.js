@@ -1,4 +1,4 @@
-import { createDate, createTime, createFullName } from '../../methods/helpers.js'
+import { createDate, createTime, createFullName } from '../../controllers/helpers.js'
 
 const amountOfEquipment = 600
 

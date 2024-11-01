@@ -1,5 +1,5 @@
 import { defaultResearchSelectOption } from './researches.js'
-import { createFullName } from '../../methods/helpers.js'
+import { createFullName } from '../../controllers/helpers.js'
 
 const personRoles = { admin: 'admin', superAdmin: 'superAdmin', user: 'user' }
 const personCategories = { student: 'student', employee: 'employee' }

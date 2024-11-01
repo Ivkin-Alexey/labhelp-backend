@@ -1,8 +1,5 @@
 import { EquipmentItem } from '../assets/constants/equipments.js'
-import {
-  equipmentList,
-  equipmentListSheetID,
-} from '../assets/constants/gSpreadSheets.js'
+import { equipmentList, equipmentListSheetID } from '../assets/constants/gSpreadSheets.js'
 import { readFile, writeFileSync } from 'fs'
 import path from 'path'
 import { getUserData } from './users.js'

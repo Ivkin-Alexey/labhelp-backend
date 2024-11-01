@@ -184,7 +184,8 @@ async function updateUserData(chatID, userData) {
   })
 }
 
-async function getUserData(id) {  // chatID or login
+async function getUserData(id) {
+  // chatID or login
   return new Promise((resolve, reject) => {
     try {
       readJsonFile(jsonPath).then(parsedData => {

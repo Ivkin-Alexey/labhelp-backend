@@ -1,7 +1,11 @@
 import { stickers } from '../assets/constants/constants.js'
 import localizations from '../assets/constants/localizations.js'
 import { updateUserData, checkIsUserReagentManager } from './users.js'
-import { sendResearches, sendWebAppButtonWithMessage, sendNotification } from './botAnswers.js'
+import {
+  sendResearches,
+  sendWebAppButtonWithMessage,
+  sendNotification,
+} from './tg-bot-controllers/botAnswers.js'
 import { getReagentApplication } from './reagents.js'
 import { updatePrompts, deletePrompt, getPrompt } from './prompts.js'
 import { notifyProgrammer } from './notifications.js'

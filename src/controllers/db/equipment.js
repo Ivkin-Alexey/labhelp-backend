@@ -81,7 +81,13 @@ export async function getFavoriteEquipmentsFromDB(login) {
 }
 
 export async function removeFavoriteEquipmentFromDB(login, equipmentID) {
-  console.log('Событие: Удаление оборудования из избранного. Данные: ', "login: ", login, "equipmentID: ", equipmentID)
+  console.log(
+    'Событие: Удаление оборудования из избранного. Данные: ',
+    'login: ',
+    login,
+    'equipmentID: ',
+    equipmentID,
+  )
   return new Promise(async (resolve, reject) => {
     try {
       await readJsonFile(favoriteEquipmentsJsonPath)
@@ -146,7 +152,7 @@ export async function getSearchHistoryFromDB(login) {
 }
 
 export function addSearchTermToDB(login, term) {
-  console.log('Событие: Добавление поискового запроса', "login: ", login, "term: ", term)
+  console.log('Событие: Добавление поискового запроса', 'login: ', login, 'term: ', term)
   return new Promise(async (resolve, reject) => {
     try {
       await readJsonFile(searchHistoryJsonPath)
@@ -173,7 +179,7 @@ export function addSearchTermToDB(login, term) {
 }
 
 export async function removeSearchTermFromDB(login, term) {
-  console.log('Событие: Удаление поискового запроса', "login: ", login, "term: ", term)
+  console.log('Событие: Удаление поискового запроса', 'login: ', login, 'term: ', term)
   return new Promise(async (resolve, reject) => {
     try {
       await readJsonFile(searchHistoryJsonPath)
@@ -250,6 +256,5 @@ export async function transformListByFavoriteEquipment(list, login) {
       arr = [...arr, ...list[key].map(callback)]
     }
     return arr
-  }
-  else throw {status: 500, error: "Неправильный тип данных"}
+  } else throw { status: 500, error: 'Неправильный тип данных' }
 }

@@ -7,11 +7,11 @@
   },
   "include": [
     "*.ts",
-    "methods/**/*.ts",
+    "src/controllers/**/*.ts",
     "index.js",
     "index.js",
-    "methods/db/equipment.js",
-    "methods/db/equipment.js"
+    "src/controllers/db/equipment.js",
+    "src/controllers/db/equipment.js"
   ],
   "exclude": ["node_modules"]
 }

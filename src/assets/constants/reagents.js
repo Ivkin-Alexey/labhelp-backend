@@ -3,7 +3,7 @@ import {
   createReagentID,
   createFullName,
   createNameWithInitials,
-} from '../../methods/helpers.js'
+} from '../../controllers/helpers.js'
 
 const reagentStatuses = { inProcess: 'inProcess', completed: 'completed', rejected: 'rejected' }
 

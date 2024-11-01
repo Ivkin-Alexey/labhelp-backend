@@ -7,24 +7,20 @@ import {
   addNewReagentAppToDBPost,
   createNewPersonPost,
   loginPersonPost,
-} from '../methods/appPostsProcessing.js'
+} from '../controllers/appPostsProcessing.js'
 
-import { bot } from '../index.js'
+import { bot } from '../../index.js'
 
-import { generateAccessToken, authenticateToken } from '../methods/jwt.js'
+import { generateAccessToken, authenticateToken } from '../controllers/jwt.js'
 import {
   addFavoriteEquipmentToDB,
   removeFavoriteEquipmentFromDB,
   addSearchTermToDB,
   removeSearchTermFromDB,
-} from '../methods/db/equipment.js'
+} from '../controllers/db/equipment.js'
 
 export default function post(app) {
-  app.post(
-    '/updatePersonData',
-    authenticateToken,
-    async (req, res) => await updateUserDataPost(req, res, bot),
-  )
+  app.post('/updatePersonData', async (req, res) => await updateUserDataPost(req, res, bot))
 
   app.post(
     '/deletePerson',
@@ -32,7 +28,7 @@ export default function post(app) {
     async (req, res) => await deletePersonPost(req, res, bot),
   )
   app.post('/operateEquipment', async (req, res) => await equipmentStartPost(req, res, bot))
-  
+
   app.post(
     '/deleteReagentApplication',
     authenticateToken,

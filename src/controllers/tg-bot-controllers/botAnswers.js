@@ -6,10 +6,10 @@ import {
   editProfileUrl,
   userCommands,
   superAdminCommands,
-} from '../assets/constants/constants.js'
-import localizations from '../assets/constants/localizations.js'
-import { personRoles } from '../assets/constants/users.js'
-import { getUserData } from './users.js'
+} from '../../assets/constants/constants.js'
+import localizations from '../../assets/constants/localizations.js'
+import { personRoles } from '../../assets/constants/users.js'
+import { getUserData } from '../users.js'
 
 async function sendStartMessage(bot, chatID, first_name, last_name) {
   await bot.sendSticker(chatID, stickers.hello)

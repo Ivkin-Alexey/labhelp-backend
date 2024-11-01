@@ -1,4 +1,4 @@
-import { checkTextIsResearch } from './validation.js'
+import { checkTextIsResearch } from '../validation.js'
 import {
   sendStartMessage,
   sendResearches,
@@ -12,11 +12,11 @@ import {
   updateUserData,
   checkIsUserSuperAdmin,
   getUserData,
-} from './users.js'
-import { reloadEquipmentDB } from './equipments.js'
-import { askReagentsManagerChatID } from './replyToMessage.js'
-import { personRoles } from '../assets/constants/users.js'
-import localizations from '../assets/constants/localizations.js'
+} from '../users.js'
+import { reloadEquipmentDB } from '../equipments.js'
+import { askReagentsManagerChatID } from '../replyToMessage.js'
+import { personRoles } from '../../assets/constants/users.js'
+import localizations from '../../assets/constants/localizations.js'
 
 async function processCommand(bot, command) {
   const chatID = command.chat.id

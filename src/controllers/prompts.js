@@ -3,7 +3,7 @@ import { getConstantFromDB } from './updateConstants.js'
 import path from 'path'
 import { Prompt } from '../assets/constants/prompt.js'
 import { readJsonFile, writeJsonFile } from './fs.js'
-import { sendNotification } from './botAnswers.js'
+import { sendNotification } from './tg-bot-controllers/botAnswers.js'
 import { localizations } from '../assets/constants/constants.js'
 import { fileURLToPath } from 'url'
 const __filename = fileURLToPath(import.meta.url)

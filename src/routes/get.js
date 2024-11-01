@@ -1,18 +1,18 @@
-import { getEquipmentListByCategory, getEquipmentListBySearch } from '../methods/equipments.js'
-import { getEquipmentByID } from '../methods/db/equipment.js'
-import { getUserData, getUserList } from '../methods/users.js'
+import { getEquipmentListByCategory, getEquipmentListBySearch } from '../controllers/equipments.js'
+import { getEquipmentByID } from '../controllers/db/equipment.js'
+import { getUserData, getUserList } from '../controllers/users.js'
 import { researchesSelectOptions } from '../assets/constants/researches.js'
-import { getReagentApplications } from '../methods/reagents.js'
+import { getReagentApplications } from '../controllers/reagents.js'
 import {
   getWorkingEquipmentListFromDB,
   getFavoriteEquipmentsFromDB,
   getSearchHistoryFromDB,
-} from '../methods/db/equipment.js'
-import { generateAccessToken, authenticateToken } from '../methods/jwt.js'
+} from '../controllers/db/equipment.js'
+import { generateAccessToken, authenticateToken } from '../controllers/jwt.js'
 import {
   transformListByFavoriteEquipment,
   transformListByOperateEquipment,
-} from '../methods/db/equipment.js'
+} from '../controllers/db/equipment.js'
 import localizations from '../assets/constants/localizations.js'
 
 export default function get(app) {
@@ -32,31 +32,28 @@ export default function get(app) {
   })
 
   app.get('/equipmentList', async (req, res) => {
-    console.log('Событие: GET-запрос по адресу: /equipmentList')
     try {
       const { category, equipmentID, search, login } = req.query
       if (equipmentID) {
-        return await getEquipmentByID(equipmentID)
-          .then(async equipmentData => {
-            const list = await transformListByOperateEquipment([equipmentData]).then(async list => {
-              return await transformListByFavoriteEquipment(list, login)
-            })
-            return res.status(200).json(list[0])
+        console.log('Событие: GET-запрос по адресу: /equipmentList, equipmentID: ', equipmentID)
+        return await getEquipmentByID(equipmentID).then(async equipmentData => {
+          const list = await transformListByOperateEquipment([equipmentData]).then(async list => {
+            return await transformListByFavoriteEquipment(list, login)
           })
+          return res.status(200).json(list[0])
+        })
       }
       if (search) {
         console.log('Событие: query-параметр search: ', search)
-        return await getEquipmentListBySearch(search)
-          .then(async equipmentList => {
-            if (!login) return res.status(200).json(equipmentList)
-            else {
-              const list = await transformListByOperateEquipment(equipmentList).then(async list => {
-
-                return await transformListByFavoriteEquipment(list, login)
-              })
-              return res.status(200).json(list)
-            }
-          })
+        return await getEquipmentListBySearch(search).then(async equipmentList => {
+          if (!login) return res.status(200).json(equipmentList)
+          else {
+            const list = await transformListByOperateEquipment(equipmentList).then(async list => {
+              return await transformListByFavoriteEquipment(list, login)
+            })
+            return res.status(200).json(list)
+          }
+        })
       }
       if (category) {
         return await getEquipmentListByCategory(category).then(async equipmentList => {
