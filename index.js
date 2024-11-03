@@ -36,8 +36,8 @@ httpDelete(app)
 const httpServer = http.createServer(app)
 
 const httpsServer = https.createServer({
-    key: fs.readFileSync(process.env.SSL_PATH + 'key.pem'),
-    cert: fs.readFileSync(process.env.SSL_PATH + 'cert.pem'),
+    key: fs.readFileSync(process.env.SSL_PATH + 'privkey.pem'),
+    cert: fs.readFileSync(process.env.SSL_PATH + 'fullchain.pem'),
 }, app);
 
 httpServer.listen(PORT, () => {
