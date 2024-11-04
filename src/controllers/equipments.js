@@ -125,43 +125,32 @@ async function clearTable(table) {
   }
 }
 
-async function getEquipmentListBySearch(search) {
-  return new Promise(async (resolve, reject) => {
+async function getEquipmentListBySearch(searchTerm) {
+
+    const fieldsToSearch = ['serialNumber', 'inventoryNumber', "name", "description", "brand", "model", "category"]
+  
+    const whereConditions = fieldsToSearch.map(field => ({
+      [field]: {
+        contains: searchTerm,
+        mode: 'insensitive',
+      }
+    }));
+  
     try {
-      if (search === '') {
-        reject('Некорректный поисковый запрос')
-      }
-      const term = search.toLowerCase()
-      const list = await getEquipmentList()
-      const searchResultList = []
-      for (let category in list) {
-        // Сначала ищем совпадения в категориях. Если ни одной не найти, то переходим к поиску по определенным полям каждого оборудования
-        if (category.toLowerCase().includes(term)) {
-          searchResultList.push(...list[category])
+      const results = await prisma.Equipments.findMany({
+        where: {
+          OR: whereConditions,
         }
-      }
-      if (searchResultList.length > 0) {
-        resolve(searchResultList)
-      } else {
-        const searchFields = ['category', 'name', 'brand', 'model']
-        for (let category in list) {
-          const arr = list[category]
-          arr.forEach(el => {
-            searchFields.forEach(item => {
-              const value = el[item]
-              if (value.toLowerCase().includes(term)) {
-                searchResultList.push(el)
-              }
-            })
-          })
-        }
-        resolve(searchResultList)
-      }
-    } catch (e) {
-      reject(e)
+      });
+  
+      return results;
+    } catch (error) {
+      console.error("Ошибка при поиске оборудования:", error);
+      throw error;
+    } finally {
+      await prisma.$disconnect();
     }
-  })
-}
+  }
 
 export {
   getEquipmentList,
