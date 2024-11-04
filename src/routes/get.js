@@ -58,10 +58,10 @@ export default function get(app) {
       }
       if (category) {
         return await getEquipmentListByCategory(category).then(async equipmentList => {
-          const list = await transformListByOperateEquipment(equipmentList).then(async list => {
-            return await transformListByFavoriteEquipment(list, login)
-          })
-          return res.status(200).json(list)
+          // const list = await transformListByOperateEquipment(equipmentList).then(async list => {
+          //   return await transformListByFavoriteEquipment(list, login)
+          // })
+          return res.status(200).json(equipmentList)
         })
       }
     } catch (e) {

@@ -3,7 +3,8 @@ import { createDate, createTime, createFullName } from '../../controllers/helper
 const amountOfEquipment = 600
 
 function EquipmentItem() {
-  this.id = ''
+  this.inventoryNumber = ''
+  this.serialNumber = ''
   this.category = ''
   this.name = ''
   this.description = ''

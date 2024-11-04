@@ -3,6 +3,7 @@ import { equipmentList, equipmentListSheetID } from '../assets/constants/gSpread
 import { readFile, writeFileSync } from 'fs'
 import path from 'path'
 import { getUserData } from './users.js'
+import { prisma } from '../../index.js'
 import { checkEquipmentID } from './helpers.js'
 import { amountOfEquipment } from '../assets/constants/equipments.js'
 import { personRoles } from '../assets/constants/users.js'
@@ -24,21 +25,26 @@ async function reloadEquipmentDB(bot, chatID) {
 }
 
 async function createEquipmentDbFromGSheet() {
+  async function transferEquipments(list) {
+    const BATCH_SIZE = 50
+    for (let i = 0; i < list.length; i += BATCH_SIZE) {
+      const batch = list.slice(i, i + BATCH_SIZE)
+      await prisma.$transaction(async prisma => {
+        await prisma.Equipments.createMany({
+          data: batch,
+        })
+      })
+    }
+  }
+
   return new Promise((resolve, reject) => {
+    clearTable(prisma.Equipments)
     fetchEquipmentListFromGSheet().then(async list => {
-      const listWithCategories = {}
-      list.forEach(el => {
-        if (listWithCategories[el.category]) listWithCategories[el.category].push(el)
-        else {
-          listWithCategories[el.category] = []
-          listWithCategories[el.category].push(el)
-        }
-      })
-      await writeFileSync(equipmentJsonPath, JSON.stringify(listWithCategories, null, 2), error => {
-        if (error) {
-          reject(`Ошибка записи данных на сервере: ${error}. Сообщите о ней администратору`)
-        }
-      })
+      transferEquipments(list)
+        .catch(e => console.error(e))
+        .finally(async () => {
+          await prisma.$disconnect()
+        })
       resolve(localizations.equipment.dbIsReloadedMsg)
     })
   })
@@ -66,10 +72,8 @@ async function fetchEquipmentListFromGSheet() {
               'Паспорт/руководство по эксплуатации',
           ) || ''
         newEquipmentItem.imgUrl = rows[i].get('Ссылки на фотографии') || ''
-
-        const id = rows[i].get('Заводской номер')
-        if (checkEquipmentID(id)) newEquipmentItem.id = id
-        else continue
+        newEquipmentItem.serialNumber = rows[i].get('Заводской номер')
+        newEquipmentItem.inventoryNumber = rows[i].get('Инвентарный №')
         equipment.push(newEquipmentItem)
       }
       resolve(equipment)
@@ -94,10 +98,30 @@ async function getEquipmentList() {
 
 async function getEquipmentListByCategory(category) {
   try {
-    const list = await getEquipmentList()
-    return list[category] || []
+    const list = await prisma.Equipments.findMany({
+      where: {
+        category: {
+          equals: category,
+        },
+      },
+    })
+    return list
   } catch (e) {
+    console.error(e)
     return e
+  } finally {
+    await prisma.$disconnect()
+  }
+}
+
+async function clearTable(table) {
+  try {
+    await table.deleteMany({});
+    console.log("Таблица успешно очищена.");
+  } catch (error) {
+    console.error("Ошибка при очистке таблицы:", error);
+  } finally {
+    await prisma.$disconnect();
   }
 }
 

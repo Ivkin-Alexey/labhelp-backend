@@ -11,3 +11,17 @@
      login     String      @id
      password  String
    }
+
+model Equipments {
+  id                 String @id @default(cuid())
+  serialNumber       String
+  inventoryNumber    String
+  name               String
+  description        String
+  brand              String
+  model              String
+  category           String
+  filesUrl           String
+  imgUrl             String
+}
+
