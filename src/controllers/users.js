@@ -17,24 +17,6 @@ import { StartData } from '../assets/constants/equipments.js'
 import { getConstantFromDB } from './updateConstants.js'
 import { readJsonFile } from './fs.js'
 
-let md5Previous = null
-let fsWait = false
-fs.watch(jsonPath, (event, filename) => {
-  if (filename) {
-    if (fsWait) return
-    fsWait = setTimeout(() => {
-      fsWait = false
-    }, 100)
-    const md5Current = md5(fs.readFileSync(jsonPath))
-    if (md5Current === md5Previous) {
-      return
-    }
-    md5Previous = md5Current
-
-    console.log(`${filename} file Changed`)
-  }
-})
-
 async function updateNewUserFields() {
   try {
     readFile(jsonPath, 'utf8', (error, data) => {
