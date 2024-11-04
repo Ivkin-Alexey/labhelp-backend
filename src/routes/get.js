@@ -14,6 +14,7 @@ import {
   transformListByOperateEquipment,
 } from '../controllers/db/equipment.js'
 import localizations from '../assets/constants/localizations.js'
+import {prisma} from "../../index.js"
 
 export default function get(app) {
   // app.use((req, res, next) => {
@@ -127,9 +128,10 @@ export default function get(app) {
     }
   })
 
-  app.get('/persons/:chatID', authenticateToken, async (req, res) => {
+  app.get('/persons', async (req, res) => {
     try {
-      return await getUserList().then(personList => res.status(200).json(personList))
+      const users = await prisma.users.findMany();
+      return res.status(200).json(users)
     } catch (e) {
       console.log(e)
       return res.status(500).json(e)

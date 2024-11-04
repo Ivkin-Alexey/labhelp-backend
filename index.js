@@ -2,6 +2,7 @@ import fs from 'fs'
 import * as dotenv from 'dotenv'
 dotenv.config()
 import TelegramBot from 'node-telegram-bot-api'
+import { PrismaClient } from '@prisma/client'
 import { processCallbackQuery } from './src/controllers/callbackQueriesProcessing.js'
 import { processCommand } from './src/controllers/tg-bot-controllers/commands.js'
 import get from './src/routes/get.js'
@@ -21,6 +22,7 @@ process.env.NTBA_FIX_350 = true
 const token = process.env.TELEGRAM_TOKEN
 export const jwtToken = process.env.JWT_TOKEN_SECRET
 export const bot = new TelegramBot(token, { polling: true })
+export const prisma = new PrismaClient();
 
 bot.on('message', async msg => await processCommand(bot, msg))
 bot.on('callback_query', async ctx => await processCallbackQuery(bot, ctx))
