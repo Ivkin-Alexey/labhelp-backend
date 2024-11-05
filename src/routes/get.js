@@ -47,13 +47,14 @@ export default function get(app) {
       if (search) {
         console.log('Событие: query-параметр search: ', search)
         return await getEquipmentListBySearch(search).then(async equipmentList => {
-          if (!login) return res.status(200).json(equipmentList)
-          else {
-            const list = await transformListByOperateEquipment(equipmentList).then(async list => {
-              return await transformListByFavoriteEquipment(list, login)
-            })
-            return res.status(200).json(list)
-          }
+          // if (!login) return res.status(200).json(equipmentList)
+          // else {
+          //   const list = await transformListByOperateEquipment(equipmentList).then(async list => {
+          //     return await transformListByFavoriteEquipment(list, login)
+          //   })
+          //   return res.status(200).json(list)
+          // }
+          return res.status(200).json(equipmentList)
         })
       }
       if (category) {
