@@ -1,19 +1,19 @@
-   datasource db {
-     provider = "postgresql"
-     url      = env("DATABASE_URL")
-   }
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
 
-   generator client {
-     provider = "prisma-client-js"
-   }
+generator client {
+  provider = "prisma-client-js"
+}
 
-   model Users {
-     login     String      @id
-     password  String
-   }
+model User {
+  login     String      @id
+  password  String
+}
 
-model Equipments {
-  id                 String @id @unique
+model Equipment {
+  id                 String @id
   serialNumber       String
   inventoryNumber    String
   name               String
@@ -24,4 +24,12 @@ model Equipments {
   filesUrl           String
   imgUrl             String
 }
+
+model OperatingEquipment {
+  id            String   @id
+  userId        String
+  isLongUse     Boolean
+  startDateTime DateTime @default(now())
+}
+
 

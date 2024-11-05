@@ -33,7 +33,7 @@ async function createEquipmentDbFromGSheet() {
       const batch = list.slice(i, i + BATCH_SIZE);
       
       try {
-        await prisma.Equipments.createMany({
+        await prisma.Equipment.createMany({
           data: batch,
         });
       } catch (error) {
@@ -59,7 +59,7 @@ async function createEquipmentDbFromGSheet() {
   }
 
   try {
-    await clearTable(prisma.Equipments)
+    await clearTable(prisma.Equipment)
     const list = await fetchEquipmentListFromGSheet()
     await transferEquipments(list)
   } catch (error) {
@@ -139,7 +139,7 @@ async function getEquipmentList() {
 
 async function getEquipmentListByCategory(category) {
   try {
-    const list = await prisma.Equipments.findMany({
+    const list = await prisma.Equipment.findMany({
       where: {
         category: {
           equals: category,
@@ -178,7 +178,7 @@ async function getEquipmentListBySearch(searchTerm) {
     }));
   
     try {
-      const results = await prisma.Equipments.findMany({
+      const results = await prisma.Equipment.findMany({
         where: {
           OR: whereConditions,
         }
