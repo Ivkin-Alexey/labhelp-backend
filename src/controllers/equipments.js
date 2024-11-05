@@ -10,12 +10,13 @@ import { personRoles } from '../assets/constants/users.js'
 import localizations from '../assets/constants/localizations.js'
 import __dirname from '../utils/__dirname.js'
 import { sendNotification } from './tg-bot-controllers/botAnswers.js'
+import { checkIsUserSuperAdmin } from "./users.js"
+
+
 const equipmentJsonPath = path.join(__dirname, '..', 'assets', 'db', 'equipment.json')
 
 async function reloadEquipmentDB(bot, chatID) {
-  const userData = await getUserData(chatID)
-
-  if (userData.role === personRoles.superAdmin) {
+  if (checkIsUserSuperAdmin(chatID)) {
     await bot.sendMessage(chatID, localizations.equipment.dbIsReloading)
     await createEquipmentDbFromGSheet()
       .then(r => bot.sendMessage(chatID, r))
@@ -40,22 +41,24 @@ async function createEquipmentDbFromGSheet() {
         });
       } catch (error) {
         if (error.code === 'P2002') {
-          nonUniqueRecords.push(...batch);
+          nonUniqueRecords.push(...batch)
         } else {
-          console.error('Ошибка при вставке данных:', error);
-          failedRecords.push(...batch);
+          console.error('Ошибка при вставке данных:', error)
+          failedRecords.push(...batch)
         }
       }
     }
 
     if (failedRecords.length > 0) {
       sendNotification(`Ошибка при вставке данных в БД: ${failedRecords.length} позиций(я)`)
-      console.log('Обработка записей с ошибками:', failedRecords);
+      console.log('Обработка записей с ошибками:', failedRecords)
+      failedRecords = []
     }
 
     if (nonUniqueRecords.length > 0) {
       sendNotification(`Обнаружено оборудование с неуникальным ID (при вставке в БД): ${nonUniqueRecords.length} позиций(я)`)
-      console.log('Обработка записей с неуникальным ID:', nonUniqueRecords);
+      console.log('Обработка записей с неуникальным ID:', nonUniqueRecords)
+      nonUniqueRecords = []
     }
   }
 

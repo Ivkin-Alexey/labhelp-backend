@@ -16,6 +16,7 @@ import { equipmentOperations, confirmedUsers } from '../assets/constants/gSpread
 import { StartData } from '../assets/constants/equipments.js'
 import { getConstantFromDB } from './updateConstants.js'
 import { readJsonFile } from './fs.js'
+import { programmerChatID } from '../assets/constants/constants.js'
 
 async function updateNewUserFields() {
   try {
@@ -261,14 +262,7 @@ async function checkIsUserReagentManager(chatID) {
 }
 
 async function checkIsUserSuperAdmin(chatID) {
-  return new Promise((resolve, reject) => {
-    getConstantFromDB('persons', 'superAdminChatID')
-      .then(value => {
-        if (value.some(chatID)) resolve()
-        else reject(localizations.users.errors.userAccessError)
-      })
-      .catch(e => reject(e))
-  })
+  return chatID === programmerChatID
 }
 
 // updateNewUserFields();
