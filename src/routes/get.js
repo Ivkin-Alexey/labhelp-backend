@@ -1,6 +1,6 @@
 import { getEquipmentListByCategory, getEquipmentListBySearch } from '../controllers/equipments.js'
 import { getEquipmentByID } from '../controllers/db/equipment.js'
-import { getUserData, getUserList } from '../controllers/users.js'
+import { getUserData } from '../controllers/users.js'
 import { researchesSelectOptions } from '../assets/constants/researches.js'
 import { getReagentApplications } from '../controllers/reagents.js'
 import {
@@ -8,7 +8,7 @@ import {
   getFavoriteEquipmentsFromDB,
   getSearchHistoryFromDB,
 } from '../controllers/db/equipment.js'
-import { generateAccessToken, authenticateToken } from '../controllers/jwt.js'
+import { authenticateToken } from '../controllers/jwt.js'
 import {
   transformListByFavoriteEquipment,
   transformListByOperateEquipment,

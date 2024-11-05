@@ -6,12 +6,11 @@ import {
   sendWebAppButtonWithMessage,
   sendNotification,
 } from './tg-bot-controllers/botAnswers.js'
-import { getReagentApplication } from './reagents.js'
-import { updatePrompts, deletePrompt, getPrompt } from './prompts.js'
+import { deletePrompt, getPrompt } from './prompts.js'
 import { notifyProgrammer } from './notifications.js'
 
 const { invitationToRegistration } = localizations.botAnswers
-const { appConfirmation, appRejection, appConfirmationForManager } =
+const { appConfirmation, appConfirmationForManager } =
   localizations.reagents.notifications
 
 async function processCallbackQuery(bot, ctx) {
@@ -44,18 +43,18 @@ async function processCallbackQuery(bot, ctx) {
         await updateUserData(chatID, messageData)
         await sendWebAppButtonWithMessage(bot, chatID, invitationToRegistration)
         break
-      case 'adminConfirmUser':
-        await bot.sendMessage(superAdminsChatID[0], 'Данные сохранены на сервере')
-        break
-      case 'adminDoesntConfirmUser':
-        await bot.sendMessage(superAdminsChatID[0], 'Заявка отменена')
-        break
+      // case 'adminConfirmUser':
+      //   await bot.sendMessage(superAdminsChatID[0], 'Данные сохранены на сервере')
+      //   break
+      // case 'adminDoesntConfirmUser':
+      //   await bot.sendMessage(superAdminsChatID[0], 'Заявка отменена')
+      //   break
       case 'confirm':
         await processReagentAppConfirmation(chatID, msgID, bot)
         break
-      case 'reject':
-        await bot.sendMessage(superAdminsChatID[0], 'Заявка отменена')
-        break
+      // case 'reject':
+      //   await bot.sendMessage(superAdminsChatID[0], 'Заявка отменена')
+      //   break
     }
   } catch (error) {
     console.log(error)
@@ -68,6 +67,7 @@ async function processReagentAppConfirmation(reagentManagerChatID, msgID, bot) {
       .then(() => getPrompt(bot, msgID, 'reagents'))
       .then(prompt => {
         console.log(prompt)
+        // eslint-disable-next-line no-undef
         updateReagentApplications(prompt.data.appID, {
           status: 'confirmed',
         }).then(() => sendNotification(bot, prompt.data.chatID, appConfirmation))

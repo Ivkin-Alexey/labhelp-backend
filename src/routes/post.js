@@ -11,7 +11,7 @@ import {
 
 import { bot } from '../../index.js'
 
-import { generateAccessToken, authenticateToken } from '../controllers/jwt.js'
+import { authenticateToken } from '../controllers/jwt.js'
 import {
   addFavoriteEquipmentToDB,
   removeFavoriteEquipmentFromDB,

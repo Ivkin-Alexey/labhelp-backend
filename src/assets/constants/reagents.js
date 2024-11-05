@@ -1,7 +1,6 @@
 import {
   createDate,
   createReagentID,
-  createFullName,
   createNameWithInitials,
 } from '../../controllers/helpers.js'
 

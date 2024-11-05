@@ -7,8 +7,7 @@ import { processCallbackQuery } from './src/controllers/callbackQueriesProcessin
 import { processCommand } from './src/controllers/tg-bot-controllers/commands.js'
 import get from './src/routes/get.js'
 import post from './src/routes/post.js'
-import httpDelete from './src/routes/delete.js'
-import express, { Router } from 'express'
+import express from 'express'
 import bodyParser from 'body-parser'
 import cors from 'cors'
 import http from 'http'
@@ -33,7 +32,6 @@ app.use(cors())
 app.use(bodyParser.urlencoded({ extended: true }))
 get(app)
 post(app)
-httpDelete(app)
 
 const httpServer = http.createServer(app)
 

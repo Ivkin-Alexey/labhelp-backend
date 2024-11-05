@@ -1,12 +1,9 @@
 import { EquipmentItem } from '../assets/constants/equipments.js'
 import { equipmentList, equipmentListSheetID } from '../assets/constants/gSpreadSheets.js'
-import { readFile, writeFileSync } from 'fs'
+import { readFile} from 'fs'
 import path from 'path'
-import { getUserData } from './users.js'
 import { prisma } from '../../index.js'
-import { checkEquipmentID } from './helpers.js'
 import { amountOfEquipment } from '../assets/constants/equipments.js'
-import { personRoles } from '../assets/constants/users.js'
 import localizations from '../assets/constants/localizations.js'
 import __dirname from '../utils/__dirname.js'
 import { sendNotification } from './tg-bot-controllers/botAnswers.js'
@@ -29,8 +26,8 @@ async function reloadEquipmentDB(bot, chatID) {
 async function createEquipmentDbFromGSheet() {
   async function transferEquipments(list) {
     const BATCH_SIZE = 1;
-    const nonUniqueRecords = [];
-    const failedRecords = [];
+    let nonUniqueRecords = [];
+    let failedRecords = [];
 
     for (let i = 0; i < list.length; i += BATCH_SIZE) {
       const batch = list.slice(i, i + BATCH_SIZE);
@@ -43,7 +40,6 @@ async function createEquipmentDbFromGSheet() {
         if (error.code === 'P2002') {
           nonUniqueRecords.push(...batch)
         } else {
-          console.error('Ошибка при вставке данных:', error)
           failedRecords.push(...batch)
         }
       }
@@ -94,7 +90,6 @@ function checkIsCorrect(equipment) {
 }
 
 async function fetchEquipmentListFromGSheet() {
-  return new Promise(async (resolve, reject) => {
     try {
       const equipment = []
       await equipmentList.loadInfo()
@@ -123,11 +118,10 @@ async function fetchEquipmentListFromGSheet() {
         }
         equipment.push(newEquipmentItem)
       }
-      resolve(equipment)
+      return equipment
     } catch (e) {
-      reject(e)
+      console.log(e)
     }
-  })
 }
 
 async function getEquipmentList() {

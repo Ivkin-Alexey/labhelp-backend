@@ -100,6 +100,7 @@ async function sendConfusedMessage(bot, chatID) {
   await bot.sendMessage(chatID, localizations.iDontUnderstand)
 }
 
+// eslint-disable-next-line no-unused-vars
 async function sendUserData(bot, chatID, userData) {
   const { first_name, last_name, phone, position, study, research } = userData
   await bot.sendMessage(

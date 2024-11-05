@@ -10,7 +10,6 @@ import {
   addRandomUser,
   deleteUsersWithEmptyChatID,
   updateUserData,
-  checkIsUserSuperAdmin,
   getUserData,
 } from '../users.js'
 import { reloadEquipmentDB } from '../equipments.js'

@@ -1,8 +1,8 @@
-const fs from 'fs').promises;
-const path from 'path');
-const process from 'process');
-import {authenticate} from '@google-cloud/local-auth');
-import {google} from 'googleapis');
+import fs from 'fs'
+import path from 'path'
+import process from 'process'
+import {authenticate} from '@google-cloud/local-auth'
+import {google} from 'googleapis'
 
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly'];
@@ -23,6 +23,7 @@ async function loadSavedCredentialsIfExist() {
         const credentials = JSON.parse(content);
         return google.auth.fromJSON(credentials);
     } catch (err) {
+        console.log(err)
         return null;
     }
 }

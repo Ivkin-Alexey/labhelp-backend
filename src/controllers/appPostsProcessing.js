@@ -6,7 +6,7 @@ import {
   createNewPerson,
   getUserList,
 } from './users.js'
-import { startWorkWithEquipment, endWorkWithEquipment } from './operateEquipments.js'
+import { startWorkWithEquipment } from './operateEquipments.js'
 import localizations from '../assets/constants/localizations.js'
 import { generateAccessToken } from './jwt.js'
 import {
@@ -34,7 +34,7 @@ async function updateUserDataPost(req, res, bot) {
 }
 
 async function deletePersonPost(req, res, bot) {
-  const { chatID, login, password, personData } = req.body
+  const { chatID } = req.body
   try {
     return await deleteUser(+chatID)
       .then(personList => {
@@ -47,7 +47,7 @@ async function deletePersonPost(req, res, bot) {
   }
 }
 
-async function createNewPersonPost(req, res, bot) {
+async function createNewPersonPost(req, res) {
   const { login, password } = req.body
   try {
     return await createNewPerson(login, password)
@@ -65,7 +65,7 @@ async function createNewPersonPost(req, res, bot) {
   }
 }
 
-async function loginPersonPost(req, res, bot) {
+async function loginPersonPost(req, res) {
   const { login, password } = req.body
 
   try {
@@ -126,6 +126,7 @@ async function updateReagentApplicationPost(req, res, bot) {
   const { body } = req
   const { userData, applicationData } = body
   return new Promise(() => {
+    // eslint-disable-next-line no-undef
     updateReagentApplications(userData, applicationData, bot)
       .then(applicationList => res.status(200).json(applicationList))
       .catch(error => res.status(500).json(error))

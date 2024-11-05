@@ -1,13 +1,12 @@
-import { equipmentOperations } from '../assets/constants/gSpreadSheets.js'
-import { createDate, createTime } from './helpers.js'
+import { createDate } from './helpers.js'
 
 async function addNewRowInGSheet(table, sheetIndex, data) {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     try {
-      await table.loadInfo()
+      table.loadInfo()
       let sheet = table.sheetsByIndex[sheetIndex]
-      await sheet.addRow(data)
-      await sheet.saveUpdatedCells()
+      sheet.addRow(data)
+      sheet.saveUpdatedCells()
       resolve()
     } catch (e) {
       reject(e)
@@ -16,11 +15,11 @@ async function addNewRowInGSheet(table, sheetIndex, data) {
 }
 
 async function updateDataInGSheetCell(table, sheetIndex, dataForSearching, columnName, value) {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     try {
-      await table.loadInfo()
+      table.loadInfo()
       let sheet = table.sheetsByIndex[sheetIndex]
-      const rows = await sheet.getRows()
+      const rows = sheet.getRows()
       let ended = false
 
       for (let i = 2; i < rows.length; i++) {
@@ -31,12 +30,12 @@ async function updateDataInGSheetCell(table, sheetIndex, dataForSearching, colum
           if (rowData.includes(dataForSearching.equipmentID) && rowData.includes(createDate())) {
             ended = true
             rows[i].set(columnName, value)
-            await rows[i].save()
+            rows[i].save()
           }
         }
       }
 
-      await sheet.saveUpdatedCells()
+      sheet.saveUpdatedCells()
       resolve()
     } catch (e) {
       reject(e)

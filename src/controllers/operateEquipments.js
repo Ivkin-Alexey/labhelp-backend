@@ -16,28 +16,28 @@ import localizations from '../assets/constants/localizations.js'
 
 export async function startWorkWithEquipment(userID, equipmentID) {
   // userID = chatID or login
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     label: try {
-      const equipment = await getEquipmentByID(equipmentID)
+      const equipment = getEquipmentByID(equipmentID)
       if (!equipment) {
         reject({ error: localizations.equipment.searchError, status: 404 })
         break label
       }
-      const accountData = await getUserData(userID)
+      const accountData = getUserData(userID)
       if (!accountData) {
         reject({ error: localizations.users.errors.unregisteredUserError, status: 404 })
         break label
       }
-      const isOperating = await getWorkingEquipmentListFromDB().then(obj =>
+      const isOperating = getWorkingEquipmentListFromDB().then(obj =>
         findEquipment(obj, equipmentID),
       )
       if (isOperating) {
         reject({ error: localizations.equipment.operating.errors.occupied, status: 409 })
         break label
       }
-      await addWorkingEquipmentToDB({ ...equipment, userID })
+      addWorkingEquipmentToDB({ ...equipment, userID })
       const data = new StartData(userID, userID, accountData, equipment)
-      await addNewRowInGSheet(equipmentOperations, equipmentOperationsSheetIndex, data)
+      addNewRowInGSheet(equipmentOperations, equipmentOperationsSheetIndex, data)
       resolve({ message: localizations.equipment.operating.add, data: { equipmentID } })
     } catch (e) {
       reject(e)
@@ -46,9 +46,9 @@ export async function startWorkWithEquipment(userID, equipmentID) {
 }
 
 export async function endWorkWithEquipment(userID, equipmentID) {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     label: try {
-      const equipment = await getWorkingEquipmentListFromDB().then(obj =>
+      const equipment = getWorkingEquipmentListFromDB().then(obj =>
         findEquipment(obj, equipmentID),
       )
       if (equipment) {
@@ -57,9 +57,9 @@ export async function endWorkWithEquipment(userID, equipmentID) {
           reject({ error: localizations.equipment.operating.errors.wrongUserID, status: 409 })
           break label
         }
-        await deleteWorkingEquipmentFromDB(equipment)
+        deleteWorkingEquipmentFromDB(equipment)
         const data = new EndData()
-        await updateDataInGSheetCell(
+        updateDataInGSheetCell(
           equipmentOperations,
           equipmentOperationsSheetIndex,
           equipment,

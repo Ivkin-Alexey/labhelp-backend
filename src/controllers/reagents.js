@@ -1,7 +1,6 @@
 import path from 'path'
 import { NewReagentApplication } from '../assets/constants/reagents.js'
 import { getConstantFromDB } from './updateConstants.js'
-import localizations from '../assets/constants/localizations.js'
 import { sendPrompt, addNewPromptToDB } from './prompts.js'
 import { readJsonFile, writeJsonFile } from './fs.js'
 import __dirname from '../utils/__dirname.js'
@@ -27,7 +26,7 @@ async function updateReagentApps(appID, updatedData) {
   })
 }
 
-async function addNewReagentAppToDB(userData, applicationData, bot) {
+async function addNewReagentAppToDB(userData, applicationData) {
   return new Promise((resolve, reject) => {
     readJsonFile(jsonPath)
       .then(async parsedData => {

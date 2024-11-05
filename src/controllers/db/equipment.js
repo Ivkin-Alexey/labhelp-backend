@@ -14,9 +14,9 @@ const searchHistoryJsonPath = path.join(__dirname, '..', 'assets', 'db', 'search
 const equipmentJsonPath = path.join(__dirname, '..', 'assets', 'db', 'equipment.json')
 
 export async function addWorkingEquipmentToDB(equipment) {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     try {
-      await readJsonFile(workingEquipmentJsonPath).then(parsedData => {
+      readJsonFile(workingEquipmentJsonPath).then(parsedData => {
         if (!parsedData[equipment.category]) {
           parsedData[equipment.category] = []
         }
@@ -31,9 +31,9 @@ export async function addWorkingEquipmentToDB(equipment) {
 }
 
 export async function deleteWorkingEquipmentFromDB(equipment) {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     try {
-      await readJsonFile(workingEquipmentJsonPath).then(parsedData => {
+      readJsonFile(workingEquipmentJsonPath).then(parsedData => {
         const workingEquipmentItem = parsedData[equipment.category]?.find(
           el => el.id === equipment.id,
         )
@@ -55,9 +55,9 @@ export async function deleteWorkingEquipmentFromDB(equipment) {
 }
 
 export async function getWorkingEquipmentListFromDB() {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     try {
-      await readJsonFile(workingEquipmentJsonPath).then(parsedData => resolve(parsedData))
+      readJsonFile(workingEquipmentJsonPath).then(parsedData => resolve(parsedData))
     } catch (e) {
       reject(e)
     }
@@ -65,9 +65,9 @@ export async function getWorkingEquipmentListFromDB() {
 }
 
 export async function getFavoriteEquipmentsFromDB(login) {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     try {
-      await readJsonFile(favoriteEquipmentsJsonPath).then(parsedData => {
+      readJsonFile(favoriteEquipmentsJsonPath).then(parsedData => {
         if (!parsedData[login] || parsedData[login].length === 0) {
           resolve([])
           return
@@ -88,9 +88,9 @@ export async function removeFavoriteEquipmentFromDB(login, equipmentID) {
     'equipmentID: ',
     equipmentID,
   )
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     try {
-      await readJsonFile(favoriteEquipmentsJsonPath)
+      readJsonFile(favoriteEquipmentsJsonPath)
         .then(parsedData => {
           if (!parsedData[login] || !parsedData[login].find(el => el.id === equipmentID)) {
             reject(localizations.equipment.favorite.errors.notExist)
@@ -109,9 +109,9 @@ export async function removeFavoriteEquipmentFromDB(login, equipmentID) {
 }
 
 export function addFavoriteEquipmentToDB(login, equipmentID) {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     try {
-      await readJsonFile(favoriteEquipmentsJsonPath)
+      readJsonFile(favoriteEquipmentsJsonPath)
         .then(async parsedData => {
           if (!parsedData[login]) parsedData[login] = []
           else if (parsedData[login].length !== 0) {
@@ -136,9 +136,9 @@ export function addFavoriteEquipmentToDB(login, equipmentID) {
 }
 
 export async function getSearchHistoryFromDB(login) {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     try {
-      await readJsonFile(searchHistoryJsonPath).then(parsedData => {
+      readJsonFile(searchHistoryJsonPath).then(parsedData => {
         if (!parsedData[login] || parsedData[login].length === 0) {
           resolve([])
           return
@@ -153,9 +153,9 @@ export async function getSearchHistoryFromDB(login) {
 
 export function addSearchTermToDB(login, term) {
   console.log('Событие: Добавление поискового запроса', 'login: ', login, 'term: ', term)
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     try {
-      await readJsonFile(searchHistoryJsonPath)
+      readJsonFile(searchHistoryJsonPath)
         .then(async parsedData => {
           if (!parsedData[login]) parsedData[login] = []
           else if (parsedData[login].length !== 0) {
@@ -180,9 +180,9 @@ export function addSearchTermToDB(login, term) {
 
 export async function removeSearchTermFromDB(login, term) {
   console.log('Событие: Удаление поискового запроса', 'login: ', login, 'term: ', term)
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     try {
-      await readJsonFile(searchHistoryJsonPath)
+      readJsonFile(searchHistoryJsonPath)
         .then(parsedData => {
           if (!parsedData[login] || !parsedData[login].find(el => el === term)) {
             reject(localizations.equipment.searchHistory.errors.notExist)

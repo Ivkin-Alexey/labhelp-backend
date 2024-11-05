@@ -1,47 +1,17 @@
-import { writeFile, readFile, readFileSync } from 'fs'
+import { writeFile, readFile } from 'fs'
 import path from 'path'
 import __dirname from '../utils/__dirname.js'
 const jsonPath = path.join(__dirname, '..', 'assets', 'db', 'db.json')
-import fs from 'fs'
-import md5 from 'md5'
 import {
   newPerson,
   newPersonCheckingRules,
   ConfirmedUserData,
-  personRoles,
 } from '../assets/constants/users.js'
-import localizations from '../assets/constants/localizations.js'
 import { createDate } from './helpers.js'
-import { equipmentOperations, confirmedUsers } from '../assets/constants/gSpreadSheets.js'
-import { StartData } from '../assets/constants/equipments.js'
+import { confirmedUsers } from '../assets/constants/gSpreadSheets.js'
 import { getConstantFromDB } from './updateConstants.js'
 import { readJsonFile } from './fs.js'
 import { programmerChatID } from '../assets/constants/constants.js'
-
-async function updateNewUserFields() {
-  try {
-    readFile(jsonPath, 'utf8', (error, data) => {
-      if (error) {
-        return
-      }
-      let parsedData = JSON.parse(Buffer.from(data))
-      parsedData = parsedData.map(el => {
-        for (const key in newPerson) {
-          if (!el[key] || el[key] === '') el[key] = newPerson[key]
-        }
-        for (const key in el) {
-          if (!Object.hasOwn(newPerson, key)) delete el[key]
-        }
-        return el
-      })
-      writeFile(jsonPath, JSON.stringify(parsedData, null, 2), error => {
-        if (error) console.log(error)
-      })
-    })
-  } catch (e) {
-    console.log(e)
-  }
-}
 
 async function deleteUsersWithEmptyChatID(chatID) {
   return new Promise((resolve, reject) => {
@@ -62,16 +32,6 @@ async function deleteUsersWithEmptyChatID(chatID) {
     } catch (e) {
       reject(e)
     }
-  })
-}
-
-async function confirmUser(chatID) {
-  await updateUserData(chatID, {
-    otherInfo: {
-      registrationDate: '',
-      isUserConfirmed: true,
-      isUserDataSent: false,
-    },
   })
 }
 
@@ -234,6 +194,7 @@ function checkIsAllFieldsComplete(object) {
 }
 
 async function processUserConfirmation(bot, accountData) {
+  // eslint-disable-next-line no-undef
   const { confirmStudentApplication } = superAdministratorActions
   await bot.sendMessage(accountData.chatID, confirmStudentApplication)
   try {
