@@ -47,13 +47,13 @@ async function createEquipmentDbFromGSheet() {
 
     if (failedRecords.length > 0) {
       sendNotification(`Ошибка при вставке данных в БД: ${failedRecords.length} позиций(я)`)
-      console.log('Обработка записей с ошибками:', failedRecords)
+      console.log('Обработка записей с ошибками. Будет показано не более 10 записей:', failedRecords.slice(0, 10))
       failedRecords = []
     }
 
     if (nonUniqueRecords.length > 0) {
       sendNotification(`Обнаружено оборудование с неуникальным ID (при вставке в БД): ${nonUniqueRecords.length} позиций(я)`)
-      console.log('Обработка записей с неуникальным ID:', nonUniqueRecords)
+      console.log('Обработка записей с неуникальным ID. Будет показано не более 10 записей:', nonUniqueRecords.slice(0, 10))
       nonUniqueRecords = []
     }
   }
