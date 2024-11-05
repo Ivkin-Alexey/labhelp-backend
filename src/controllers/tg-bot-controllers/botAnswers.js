@@ -10,6 +10,8 @@ import {
 import localizations from '../../assets/constants/localizations.js'
 import { personRoles } from '../../assets/constants/users.js'
 import { getUserData } from '../users.js'
+import { bot } from '../../../index.js'
+import { programmerChatID } from '../../assets/constants/constants.js'
 
 async function sendStartMessage(bot, chatID, first_name, last_name) {
   await bot.sendSticker(chatID, stickers.hello)
@@ -64,8 +66,8 @@ async function sendCommandList(bot, chatID) {
     .catch(err => bot.sendMessage(chatID, err))
 }
 
-async function sendNotification(bot, chatID, message) {
-  await bot.sendMessage(chatID, message)
+async function sendNotification(message) {
+  await bot.sendMessage(programmerChatID, message)
 }
 
 async function sendResearch(bot, chatID, researchTopic) {

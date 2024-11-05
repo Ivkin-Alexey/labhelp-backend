@@ -5,6 +5,7 @@ const amountOfEquipment = 600
 function EquipmentItem() {
   this.inventoryNumber = ''
   this.serialNumber = ''
+  this.id = ''
   this.category = ''
   this.name = ''
   this.description = ''

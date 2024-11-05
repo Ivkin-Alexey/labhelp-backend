@@ -3,7 +3,7 @@ import localizations from './localizations.js'
 
 const PORT = 8000
 const HTTPS_PORT = 443
-const defaultChatID = 392584400
+export const programmerChatID = 392584400
 const jwtLifeTime = 9000 // ms
 
 const timeZoneRelativeToUTC = 3
