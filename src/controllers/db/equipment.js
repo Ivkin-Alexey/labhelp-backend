@@ -2,6 +2,8 @@ import { readJsonFile, writeJsonFile } from '../fs.js'
 import path from 'path'
 import __dirname from '../../utils/__dirname.js'
 import localizations from '../../assets/constants/localizations.js'
+import { prisma } from '../../../index.js'
+import { sendError } from '../tg-bot-controllers/botAnswers.js'
 const workingEquipmentJsonPath = path.join(__dirname, '..', 'assets', 'db', 'workingEquipment.json')
 const favoriteEquipmentsJsonPath = path.join(
   __dirname,
@@ -11,7 +13,6 @@ const favoriteEquipmentsJsonPath = path.join(
   'favoriteEquipments.json',
 )
 const searchHistoryJsonPath = path.join(__dirname, '..', 'assets', 'db', 'searchHistory.json')
-const equipmentJsonPath = path.join(__dirname, '..', 'assets', 'db', 'equipment.json')
 
 export async function addWorkingEquipmentToDB(equipment) {
   return new Promise((resolve, reject) => {
@@ -201,16 +202,27 @@ export async function removeSearchTermFromDB(login, term) {
 }
 
 export async function getEquipmentByID(equipmentID) {
-  return new Promise((resolve, reject) => {
-    try {
-      readJsonFile(equipmentJsonPath).then(parsedData => {
-        const equipmentData = findEquipment(parsedData, equipmentID)
-        resolve(equipmentData)
-      })
-    } catch (e) {
-      reject(e)
+  try {
+    const equipment = await prisma.Equipment.findUnique({
+      where: {
+        id: equipmentID,
+      },
+    })
+
+    if (!equipment) {
+      const msg = `Оборудование с ID ${equipmentID} не найдено в БД (при клике на карточку)`
+      throw { message: msg, status: 404 }
+    } else {
+      return equipment
     }
-  })
+  } catch (error) {
+    const status = error.status || 500; 
+    const errorMsg = error.message || 'Внутренняя ошибка сервера (при клике на карточку)';
+    sendError(errorMsg);
+    throw { message: errorMsg, status }; 
+  } finally {
+    await prisma.$disconnect()
+  }
 }
 
 export function findEquipment(object, equipmentID) {

@@ -14,7 +14,7 @@ import {
   transformListByOperateEquipment,
 } from '../controllers/db/equipment.js'
 import localizations from '../assets/constants/localizations.js'
-import {prisma} from "../../index.js"
+import { prisma } from '../../index.js'
 
 export default function get(app) {
   // app.use((req, res, next) => {
@@ -34,15 +34,14 @@ export default function get(app) {
 
   app.get('/equipmentList', async (req, res) => {
     try {
-      const { category, equipmentID, search, login } = req.query
+      const { category, equipmentID, search } = req.query
       if (equipmentID) {
         console.log('Событие: GET-запрос по адресу: /equipmentList, equipmentID: ', equipmentID)
-        return await getEquipmentByID(equipmentID).then(async equipmentData => {
-          const list = await transformListByOperateEquipment([equipmentData]).then(async list => {
-            return await transformListByFavoriteEquipment(list, login)
-          })
-          return res.status(200).json(list[0])
-        })
+        const equipmentData = await getEquipmentByID(equipmentID)
+        // const list = await transformListByOperateEquipment([equipmentData]).then(async list => {
+        //   return await transformListByFavoriteEquipment(list, login)
+        // })
+        return res.status(200).json(equipmentData)
       }
       if (search) {
         console.log('Событие: query-параметр search: ', search)
@@ -66,7 +65,9 @@ export default function get(app) {
         })
       }
     } catch (e) {
-      console.log(e)
+      if (e.error) {
+        return res.status(e.status).json(e)
+      }
       return res.status(500).json(e)
     }
   })
@@ -131,7 +132,7 @@ export default function get(app) {
 
   app.get('/persons', async (req, res) => {
     try {
-      const users = await prisma.users.findMany();
+      const users = await prisma.users.findMany()
       return res.status(200).json(users)
     } catch (e) {
       console.log(e)
