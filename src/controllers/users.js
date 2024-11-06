@@ -1,17 +1,16 @@
 import { writeFile, readFile } from 'fs'
 import path from 'path'
 import __dirname from '../utils/__dirname.js'
+import { prisma } from '../../index.js'
 const jsonPath = path.join(__dirname, '..', 'assets', 'db', 'db.json')
-import {
-  newPerson,
-  newPersonCheckingRules,
-  ConfirmedUserData,
-} from '../assets/constants/users.js'
+import { newPerson, newPersonCheckingRules, ConfirmedUserData } from '../assets/constants/users.js'
 import { createDate } from './helpers.js'
+import { sendError } from './tg-bot-controllers/botAnswers.js'
 import { confirmedUsers } from '../assets/constants/gSpreadSheets.js'
 import { getConstantFromDB } from './updateConstants.js'
 import { readJsonFile } from './fs.js'
 import { programmerChatID } from '../assets/constants/constants.js'
+import bcrypt from 'bcrypt'
 
 async function deleteUsersWithEmptyChatID(chatID) {
   return new Promise((resolve, reject) => {
@@ -45,30 +44,26 @@ async function addRandomUser(type = 'user') {
   await updateUserData(user.chatID, user)
 }
 
-async function createNewPerson(login, password) {
-  return new Promise((resolve, reject) => {
-    readFile(jsonPath, 'utf8', (error, data) => {
-      if (error) {
-        reject(`Ошибка чтения данных на сервере: ${error}. Сообщите о ней администратору`)
-        return
-      }
-      let parsedData = JSON.parse(Buffer.from(data))
-
-      const user = parsedData.find(el => el.login === login)
-
-      if (!user) {
-        const newPerson = { login, password }
-        parsedData.push(newPerson)
-        writeFile(jsonPath, JSON.stringify(parsedData, null, 2), error => {
-          if (error) {
-            reject(`Ошибка записи данных на сервере: ${error}. Сообщите о ней администратору`)
-            return
-          }
-          resolve('Пользователь успешно создан')
-        })
-      } else reject(`Такой пользователь уже существует!`)
+async function createNewPerson(userData) {
+  const { login, password } = userData
+  try {
+    console.info(`POST-запрос на создание нового пользователя. Логин ${login}.`)
+    const hashedPassword = await bcrypt.hash(password, 10)
+    await prisma.User.create({
+      data: {
+        login: login,
+        password: hashedPassword,
+      },
     })
-  })
+    console.info(`Создан новый пользователь. Логин ${login}`)
+  } catch (error) {
+    const errorMsg = `Ошибка при создании нового пользователя. Логин ${login}. ` + "Подробности: " + error
+    console.error(errorMsg)
+    sendError(errorMsg)
+    throw { message: errorMsg, status: 500 }
+  } finally {
+    await prisma.$disconnect()
+  }
 }
 
 async function updateUserData(chatID, userData) {

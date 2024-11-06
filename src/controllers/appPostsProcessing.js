@@ -48,20 +48,20 @@ async function deletePersonPost(req, res, bot) {
 }
 
 async function createNewPersonPost(req, res) {
-  const { login, password } = req.body
+  const { userData } = req.body
   try {
-    return await createNewPerson(login, password)
-      .then(notification => {
-        const token = generateAccessToken({
-          login,
-          password,
-        })
-        res.status(200).json({ notification, token })
-      })
-      .catch(error => res.status(500).json(error))
+    await createNewPerson(userData)
+    // .then(notification => {
+    //   const token = generateAccessToken({
+    //     login,
+    //     password,
+    //   })
+    //   res.status(200).json({ notification, token })
+    // })
+    // .catch(error => res.status(500).json(error))
+    return res.status(200).json({ message: 'Пользователь успешно создан' })
   } catch (e) {
-    console.log(e)
-    return res.status(500).json(e)
+    return res.status(e.status).json(e.message)
   }
 }
 

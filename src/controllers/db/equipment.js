@@ -216,10 +216,11 @@ export async function getEquipmentByID(equipmentID) {
       return equipment
     }
   } catch (error) {
-    const status = error.status || 500; 
-    const errorMsg = error.message || 'Внутренняя ошибка сервера (при клике на карточку)';
-    sendError(errorMsg);
-    throw { message: errorMsg, status }; 
+    const status = error.status || 500
+    const errorMsg = error.message || 'Внутренняя ошибка сервера (при клике на карточку): ' + error
+    sendError(errorMsg)
+    console.error(errorMsg)
+    throw { message: errorMsg, status }
   } finally {
     await prisma.$disconnect()
   }

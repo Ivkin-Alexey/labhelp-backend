@@ -41,6 +41,7 @@ export default function get(app) {
         // const list = await transformListByOperateEquipment([equipmentData]).then(async list => {
         //   return await transformListByFavoriteEquipment(list, login)
         // })
+        console.info('Данные успешно отправлены')
         return res.status(200).json(equipmentData)
       }
       if (search) {
@@ -65,10 +66,7 @@ export default function get(app) {
         })
       }
     } catch (e) {
-      if (e.error) {
-        return res.status(e.status).json(e)
-      }
-      return res.status(500).json(e)
+      return res.status(e.status).json(e.message)
     }
   })
 
