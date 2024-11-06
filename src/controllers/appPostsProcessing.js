@@ -48,9 +48,8 @@ async function deletePersonPost(req, res, bot) {
 }
 
 async function createNewPersonPost(req, res) {
-  const { userData } = req.body
-  console.log(userData)
   try {
+    const { userData } = req.body
     await createNewPerson(userData)
     // .then(notification => {
     //   const token = generateAccessToken({
