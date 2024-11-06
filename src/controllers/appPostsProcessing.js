@@ -50,6 +50,7 @@ async function deletePersonPost(req, res, bot) {
 async function createNewPersonPost(req, res) {
   try {
     const { userData } = req.body
+    if(!userData) throw {message: "Отсутствуют данные пользователя", status: 400}
     await createNewPerson(userData)
     // .then(notification => {
     //   const token = generateAccessToken({
