@@ -49,6 +49,7 @@ async function deletePersonPost(req, res, bot) {
 
 async function createNewPersonPost(req, res) {
   const { userData } = req.body
+  console.log(userData)
   try {
     await createNewPerson(userData)
     // .then(notification => {

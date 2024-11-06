@@ -45,8 +45,8 @@ async function addRandomUser(type = 'user') {
 }
 
 async function createNewPerson(userData) {
+  const { login, password } = userData
   try {
-    const { login, password } = userData
     console.info(`POST-запрос на создание нового пользователя. Логин ${login}.`)
     const hashedPassword = await bcrypt.hash(password, 10)
     await prisma.User.create({
