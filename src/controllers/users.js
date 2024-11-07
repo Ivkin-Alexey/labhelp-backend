@@ -8,7 +8,6 @@ import { createDate } from './helpers.js'
 import { sendError } from './tg-bot-controllers/botAnswers.js'
 import { confirmedUsers } from '../assets/constants/gSpreadSheets.js'
 import { getConstantFromDB } from './updateConstants.js'
-import { readJsonFile } from './fs.js'
 import { programmerChatID } from '../assets/constants/constants.js'
 import bcrypt from 'bcrypt'
 
@@ -57,7 +56,8 @@ async function createNewPerson(userData) {
     })
     console.info(`Создан новый пользователь. Логин ${login}`)
   } catch (error) {
-    const errorMsg = `Ошибка при создании нового пользователя. Логин ${login}. ` + "Подробности: " + error
+    const errorMsg =
+      `Ошибка при создании нового пользователя. Логин ${login}. ` + 'Подробности: ' + error
     console.error(errorMsg)
     sendError(errorMsg)
     throw { message: errorMsg, status: 500 }
@@ -122,18 +122,37 @@ async function updateUserData(chatID, userData) {
   })
 }
 
-async function getUserData(id) {
-  // chatID or login
-  return new Promise((resolve, reject) => {
-    try {
-      readJsonFile(jsonPath).then(parsedData => {
-        const user = parsedData.find(el => el.chatID === +id || el.login === id)
-        resolve(user)
-      })
-    } catch (e) {
-      reject(e)
+async function getUser(login, password) {
+  try {
+    const user = await prisma.User.findUnique({
+      where: {
+        login: login,
+      },
+    })
+
+    if (!user) {
+      const msg = 'Неправильный логин или пароль'
+      throw { message: msg, status: 404 }
     }
-  })
+
+    const isPasswordValid = await bcrypt.compare(password, user.password)
+
+    if (!isPasswordValid) {
+      const msg = 'Неправильный логин или пароль'
+      throw { message: msg, status: 404 }
+    }
+    console.info(`Успешная авторизация пользователя с логином: ${login}`)
+    delete user.password
+    return user
+  } catch (error) {
+    const status = error.status || 500
+    const errorMsg = error.message || 'Внутренняя ошибка сервера: ' + error
+    sendError(errorMsg)
+    console.error(errorMsg)
+    throw { message: errorMsg, status }
+  } finally {
+    await prisma.$disconnect()
+  }
 }
 
 async function getUserList() {
@@ -225,7 +244,7 @@ async function checkIsUserSuperAdmin(chatID) {
 
 export {
   updateUserData,
-  getUserData,
+  getUser,
   getUserList,
   deleteUser,
   addRandomUser,

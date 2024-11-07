@@ -11,7 +11,7 @@ import {
 } from '../assets/constants/gSpreadSheets.js'
 import { addNewRowInGSheet, updateDataInGSheetCell } from './gSheets.js'
 import { StartData, EndData } from '../assets/constants/equipments.js'
-import { getUserData } from './users.js'
+import { getUser } from './users.js'
 import localizations from '../assets/constants/localizations.js'
 
 export async function startWorkWithEquipment(userID, equipmentID) {
@@ -23,7 +23,7 @@ export async function startWorkWithEquipment(userID, equipmentID) {
         reject({ error: localizations.equipment.searchError, status: 404 })
         break label
       }
-      const accountData = getUserData(userID)
+      const accountData = getUser(userID)
       if (!accountData) {
         reject({ error: localizations.users.errors.unregisteredUserError, status: 404 })
         break label
@@ -48,9 +48,7 @@ export async function startWorkWithEquipment(userID, equipmentID) {
 export async function endWorkWithEquipment(userID, equipmentID) {
   return new Promise((resolve, reject) => {
     label: try {
-      const equipment = getWorkingEquipmentListFromDB().then(obj =>
-        findEquipment(obj, equipmentID),
-      )
+      const equipment = getWorkingEquipmentListFromDB().then(obj => findEquipment(obj, equipmentID))
       if (equipment) {
         const { userID: UID } = equipment
         if (userID !== UID) {

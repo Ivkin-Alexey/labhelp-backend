@@ -9,7 +9,7 @@ import {
 } from '../../assets/constants/constants.js'
 import localizations from '../../assets/constants/localizations.js'
 import { personRoles } from '../../assets/constants/users.js'
-import { getUserData } from '../users.js'
+import { getUser } from '../users.js'
 import { bot } from '../../../index.js'
 import { programmerChatID } from '../../assets/constants/constants.js'
 
@@ -58,7 +58,7 @@ async function sendResearches(bot, chatID) {
 
 async function sendCommandList(bot, chatID) {
   const { user } = personRoles
-  await getUserData(chatID)
+  await getUser(chatID)
     .then(userData => {
       if (userData.role === user) bot.sendMessage(chatID, userCommands)
       else bot.sendMessage(chatID, superAdminCommands)

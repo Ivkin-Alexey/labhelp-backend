@@ -10,7 +10,7 @@ import {
   addRandomUser,
   deleteUsersWithEmptyChatID,
   updateUserData,
-  getUserData,
+  getUser,
 } from '../users.js'
 import { reloadEquipmentDB } from '../equipments.js'
 import { askReagentsManagerChatID } from '../replyToMessage.js'
@@ -61,7 +61,7 @@ async function processCommand(bot, command) {
         await reloadEquipmentDB(bot, chatID)
         break
       case '/setReagentsManagerChatID':
-        await getUserData(chatID)
+        await getUser(chatID)
           .then(userData => {
             if (userData.role === personRoles.superAdmin) askReagentsManagerChatID(bot, chatID)
             else bot.sendMessage(chatID, localizations.users.errors.userAccessError)
@@ -69,7 +69,7 @@ async function processCommand(bot, command) {
           .catch(e => bot.sendMessage(chatID, e))
         break
       case '/get_my_data':
-        await getUserData(chatID).then(res => bot.sendMessage(chatID, res))
+        await getUser(chatID).then(res => bot.sendMessage(chatID, res))
         break
       case isResearch:
         await sendResearch(bot, chatID, isResearch)

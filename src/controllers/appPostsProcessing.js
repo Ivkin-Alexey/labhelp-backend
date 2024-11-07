@@ -2,13 +2,12 @@ import {
   updateUserData,
   deleteUser,
   processUserConfirmation,
-  getUserData,
-  createNewPerson,
-  getUserList,
+  getUser,
+  createNewPerson
 } from './users.js'
 import { startWorkWithEquipment } from './operateEquipments.js'
 import localizations from '../assets/constants/localizations.js'
-import { generateAccessToken } from './jwt.js'
+// import { generateAccessToken } from './jwt.js'
 import {
   deleteReagentApplication,
   addNewReagentAppToDB,
@@ -50,7 +49,7 @@ async function deletePersonPost(req, res, bot) {
 async function createNewPersonPost(req, res) {
   try {
     const { userData } = req.body
-    if(!userData) throw {message: "Отсутствуют данные пользователя", status: 400}
+    if (!userData) throw { message: 'Отсутствуют данные пользователя', status: 400 }
     await createNewPerson(userData)
     // .then(notification => {
     //   const token = generateAccessToken({
@@ -73,24 +72,17 @@ async function loginPersonPost(req, res) {
     if (!login || !password) {
       return res.status(400).json('Логин или пароль отсутствуют')
     }
+    const user = await getUser(login, password)
 
-    const users = await getUserList()
+    return res.status(200).json(user)
 
-    const user = users.find(user => user.login === login && user.password === password)
+    // const token = generateAccessToken(login, password)
 
-    if (!user) {
-      console.log('Пользователь не найден')
-      return res.status(400).json('Пользователь не найден')
-    }
-
-    const token = generateAccessToken(login, password)
-
-    return res.status(200).json({
-      token: token,
-    })
+    // return res.status(200).json({
+    //   token: token,
+    // })
   } catch (e) {
-    console.log(e)
-    return res.status(500).json(e)
+    return res.status(e.status).json(e.message)
   }
 }
 
@@ -138,7 +130,7 @@ async function deleteReagentApplicationPost(req, res) {
   const { body } = req
   const { applicationID, chatID } = body
   return new Promise(() => {
-    getUserData(chatID)
+    getUser(chatID)
       .then(userData => {
         if (userData.role === personRoles.superAdmin) deleteReagentApplication(applicationID)
       })
