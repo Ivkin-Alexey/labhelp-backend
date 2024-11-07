@@ -67,8 +67,10 @@ async function createEquipmentDbFromGSheet() {
 
   try {
     await clearTable(prisma.Equipment)
+    console.info('База данных оборудования обновляется...')
     const list = await fetchEquipmentListFromGSheet()
     await transferEquipments(list)
+    console.info('База данных оборудования обновлена')
   } catch (error) {
     console.error('Ошибка при создании базы данных из GSheet:', error)
   } finally {
