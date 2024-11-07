@@ -2,18 +2,20 @@ import {
   updateUserData,
   deleteUser,
   processUserConfirmation,
-  getUser,
-  createNewPerson
+  getUserData,
+  createNewPerson,
+  authenticateUser,
 } from './users.js'
 import { startWorkWithEquipment } from './operateEquipments.js'
 import localizations from '../assets/constants/localizations.js'
-// import { generateAccessToken } from './jwt.js'
+import { generateAccessToken } from './jwt.js'
 import {
   deleteReagentApplication,
   addNewReagentAppToDB,
   sendReagentAppDataToManager,
 } from './reagents.js'
 import { personRoles } from '../assets/constants/users.js'
+import { processEndpointError } from '../utils/errorProcessing.js'
 const { denyApplication } = localizations.superAdministratorActions
 
 async function updateUserDataPost(req, res, bot) {
@@ -50,39 +52,25 @@ async function createNewPersonPost(req, res) {
   try {
     const { userData } = req.body
     if (!userData) throw { message: 'Отсутствуют данные пользователя', status: 400 }
+    const { login } = userData
     await createNewPerson(userData)
-    // .then(notification => {
-    //   const token = generateAccessToken({
-    //     login,
-    //     password,
-    //   })
-    //   res.status(200).json({ notification, token })
-    // })
-    // .catch(error => res.status(500).json(error))
-    return res.status(200).json({ message: 'Пользователь успешно создан' })
+    const token = generateAccessToken(login)
+    return res.status(200).json({ message: 'Пользователь успешно создан', token })
   } catch (e) {
-    return res.status(e.status).json(e.message)
+    processEndpointError(res, e)
   }
 }
 
 async function loginPersonPost(req, res) {
-  const { login, password } = req.body
-
   try {
+    const { login, password } = req.body
     if (!login || !password) {
       return res.status(400).json('Логин или пароль отсутствуют')
     }
-    const user = await getUser(login, password)
-
-    return res.status(200).json(user)
-
-    // const token = generateAccessToken(login, password)
-
-    // return res.status(200).json({
-    //   token: token,
-    // })
+    const token = await authenticateUser(login, password)
+    return res.status(200).json({ message: 'Успешная аутентификация', token })
   } catch (e) {
-    return res.status(e.status).json(e.message)
+    processEndpointError(res, e)
   }
 }
 
@@ -130,7 +118,7 @@ async function deleteReagentApplicationPost(req, res) {
   const { body } = req
   const { applicationID, chatID } = body
   return new Promise(() => {
-    getUser(chatID)
+    getUserData(chatID)
       .then(userData => {
         if (userData.role === personRoles.superAdmin) deleteReagentApplication(applicationID)
       })

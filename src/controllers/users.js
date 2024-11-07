@@ -9,6 +9,7 @@ import { sendError } from './tg-bot-controllers/botAnswers.js'
 import { confirmedUsers } from '../assets/constants/gSpreadSheets.js'
 import { getConstantFromDB } from './updateConstants.js'
 import { programmerChatID } from '../assets/constants/constants.js'
+import { generateAccessToken } from '../controllers/jwt.js'
 import bcrypt from 'bcrypt'
 
 async function deleteUsersWithEmptyChatID(chatID) {
@@ -60,9 +61,8 @@ async function createNewPerson(userData) {
       `Ошибка при создании нового пользователя. Логин ${login}. ` + 'Подробности: ' + error
     console.error(errorMsg)
     sendError(errorMsg)
-    throw { message: errorMsg, status: 500 }
-  } finally {
     await prisma.$disconnect()
+    throw { message: errorMsg, status: 500 }
   }
 }
 
@@ -122,7 +122,7 @@ async function updateUserData(chatID, userData) {
   })
 }
 
-async function getUser(login, password) {
+async function authenticateUser(login, password) {
   try {
     const user = await prisma.User.findUnique({
       where: {
@@ -141,9 +141,42 @@ async function getUser(login, password) {
       const msg = 'Неправильный логин или пароль'
       throw { message: msg, status: 404 }
     }
-    console.info(`Успешная авторизация пользователя с логином: ${login}`)
-    delete user.password
-    return user
+
+    const token = generateAccessToken(login, password)
+
+    console.info(`Успешная аутентификация пользователя с логином: ${login}`)
+
+    return token
+  } catch (error) {
+    const status = error.status || 500
+    const errorMsg = error.message || 'Внутренняя ошибка сервера: ' + error
+    sendError(errorMsg)
+    console.error(errorMsg)
+    await prisma.$disconnect()
+    throw { message: errorMsg, status }
+  }
+}
+
+async function getUserData(login) {
+  try {
+    if (!login) {
+      const msg = 'Логин отсутствует'
+      throw { message: msg, status: 400 }
+    }
+
+    const userData = await prisma.User.findUnique({
+      where: {
+        login: login,
+      },
+    })
+
+    if (!userData) {
+      const msg = 'Такого пользователя не существует'
+      throw { message: msg, status: 404 }
+    }
+
+    delete userData.password
+    return userData
   } catch (error) {
     const status = error.status || 500
     const errorMsg = error.message || 'Внутренняя ошибка сервера: ' + error
@@ -244,7 +277,8 @@ async function checkIsUserSuperAdmin(chatID) {
 
 export {
   updateUserData,
-  getUser,
+  getUserData,
+  authenticateUser,
   getUserList,
   deleteUser,
   addRandomUser,

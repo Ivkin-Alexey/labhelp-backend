@@ -11,7 +11,7 @@ import {
 } from '../assets/constants/gSpreadSheets.js'
 import { addNewRowInGSheet, updateDataInGSheetCell } from './gSheets.js'
 import { StartData, EndData } from '../assets/constants/equipments.js'
-import { getUser } from './users.js'
+import { getUserData } from './users.js'
 import localizations from '../assets/constants/localizations.js'
 
 export async function startWorkWithEquipment(userID, equipmentID) {
@@ -23,7 +23,7 @@ export async function startWorkWithEquipment(userID, equipmentID) {
         reject({ error: localizations.equipment.searchError, status: 404 })
         break label
       }
-      const accountData = getUser(userID)
+      const accountData = getUserData(userID)
       if (!accountData) {
         reject({ error: localizations.users.errors.unregisteredUserError, status: 404 })
         break label

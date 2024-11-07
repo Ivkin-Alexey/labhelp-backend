@@ -9,7 +9,6 @@ import {
 } from '../../assets/constants/constants.js'
 import localizations from '../../assets/constants/localizations.js'
 import { personRoles } from '../../assets/constants/users.js'
-import { getUser } from '../users.js'
 import { bot } from '../../../index.js'
 import { programmerChatID } from '../../assets/constants/constants.js'
 
@@ -58,7 +57,8 @@ async function sendResearches(bot, chatID) {
 
 async function sendCommandList(bot, chatID) {
   const { user } = personRoles
-  await getUser(chatID)
+  // eslint-disable-next-line no-undef
+  await getUserData(chatID)
     .then(userData => {
       if (userData.role === user) bot.sendMessage(chatID, userCommands)
       else bot.sendMessage(chatID, superAdminCommands)
@@ -70,7 +70,7 @@ async function sendNotification(message) {
   await bot.sendMessage(programmerChatID, message)
 }
 
-async function sendError(error) {
+export async function sendError(error) {
   await bot.sendMessage(programmerChatID, error)
 }
 
@@ -141,5 +141,4 @@ export {
   sendWebAppButtonWithMessage,
   sendCommandList,
   sendNotification,
-  sendError
 }

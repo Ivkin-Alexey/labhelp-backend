@@ -4,7 +4,7 @@ import localizations from './localizations.js'
 const PORT = 8000
 const HTTPS_PORT = 443
 export const programmerChatID = 392584400
-const jwtLifeTime = 9000 // ms
+const jwtLifeTime = 60000 // ms
 
 const timeZoneRelativeToUTC = 3
 const webAppUrl = 'https://ephemeral-kringle-2c94b2.netlify.app'

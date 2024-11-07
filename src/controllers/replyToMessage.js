@@ -1,5 +1,5 @@
 import { updateConstantsDB } from './updateConstants.js'
-import { getUser } from './users.js'
+import { getUserData } from './users.js'
 
 async function askReagentsManagerChatID(bot, chatID) {
   const prompt = await bot.sendMessage(chatID, 'Введите chatID менеджера по реактивам', {
@@ -9,7 +9,7 @@ async function askReagentsManagerChatID(bot, chatID) {
   })
 
   bot.onReplyToMessage(chatID, prompt.message_id, async function (answer) {
-    await getUser(+answer.text)
+    await getUserData(+answer.text)
       .then(() => {
         updateConstantsDB('reagents', { reagentsManagerChatID: answer.text })
           .then(

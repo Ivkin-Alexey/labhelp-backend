@@ -1,6 +1,6 @@
 import { getEquipmentListByCategory, getEquipmentListBySearch } from '../controllers/equipments.js'
 import { getEquipmentByID } from '../controllers/db/equipment.js'
-import { getUser } from '../controllers/users.js'
+import { getUserData } from '../controllers/users.js'
 import { researchesSelectOptions } from '../assets/constants/researches.js'
 import { getReagentApplications } from '../controllers/reagents.js'
 import {
@@ -73,7 +73,7 @@ export default function get(app) {
   app.get('/workingEquipmentList', async (req, res) => {
     const { login } = req.query
     try {
-      const isUserExist = await getUser(login)
+      const isUserExist = await getUserData(login)
       if (!isUserExist)
         throw { error: localizations.users.errors.unregisteredUserError, status: 404 }
       const workingEquipments = await getWorkingEquipmentListFromDB()
@@ -118,13 +118,13 @@ export default function get(app) {
     }
   })
 
-  app.get('/person/:chatID', async (req, res) => {
+  app.get('/person/:login', authenticateToken, async (req, res) => {
     try {
-      const chatID = req.params.chatID
-      return await getUser(chatID).then(person => res.status(200).json(person))
+      const { login } = req.params
+      const userData = await getUserData(login)
+      res.status(200).json(userData)
     } catch (e) {
-      console.log(e)
-      return res.status(500).json(e)
+      return res.status(e.status).json(e.message)
     }
   })
 

@@ -1,15 +1,14 @@
 import jwt from 'jsonwebtoken'
-import { jwtToken } from '../../index.js'
+import { jwtTokenSecret } from '../../index.js'
 import { jwtLifeTime } from '../assets/constants/constants.js'
 
-function generateAccessToken(login, password, role = 'user') {
+function generateAccessToken(login, role = 'user') {
   return jwt.sign(
     {
       login,
-      password,
       role,
     },
-    jwtToken,
+    jwtTokenSecret,
     {
       expiresIn: jwtLifeTime,
     },
@@ -22,7 +21,7 @@ function authenticateToken(req, res, next) {
 
   if (token == null) return res.sendStatus(401)
 
-  jwt.verify(token, jwtToken, (err, user) => {
+  jwt.verify(token, jwtTokenSecret, (err, user) => {
     if (err) return res.sendStatus(403)
     req.user = user
     next()

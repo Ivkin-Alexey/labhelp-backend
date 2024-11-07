@@ -6,12 +6,7 @@ import {
   sendConfusedMessage,
   sendCommandList,
 } from './botAnswers.js'
-import {
-  addRandomUser,
-  deleteUsersWithEmptyChatID,
-  updateUserData,
-  getUser,
-} from '../users.js'
+import { addRandomUser, deleteUsersWithEmptyChatID, updateUserData, getUserData } from '../users.js'
 import { reloadEquipmentDB } from '../equipments.js'
 import { askReagentsManagerChatID } from '../replyToMessage.js'
 import { personRoles } from '../../assets/constants/users.js'
@@ -61,7 +56,7 @@ async function processCommand(bot, command) {
         await reloadEquipmentDB(bot, chatID)
         break
       case '/setReagentsManagerChatID':
-        await getUser(chatID)
+        await getUserData(chatID)
           .then(userData => {
             if (userData.role === personRoles.superAdmin) askReagentsManagerChatID(bot, chatID)
             else bot.sendMessage(chatID, localizations.users.errors.userAccessError)
@@ -69,7 +64,7 @@ async function processCommand(bot, command) {
           .catch(e => bot.sendMessage(chatID, e))
         break
       case '/get_my_data':
-        await getUser(chatID).then(res => bot.sendMessage(chatID, res))
+        await getUserData(chatID).then(res => bot.sendMessage(chatID, res))
         break
       case isResearch:
         await sendResearch(bot, chatID, isResearch)

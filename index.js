@@ -19,9 +19,9 @@ process.on('uncaughtException', err => console.log(err))
 process.traceDeprecation = true
 process.env.NTBA_FIX_350 = true
 const token = process.env.TELEGRAM_TOKEN
-export const jwtToken = process.env.JWT_TOKEN_SECRET
+export const jwtTokenSecret = process.env.JWT_TOKEN_SECRET
 export const bot = new TelegramBot(token, { polling: true })
-export const prisma = new PrismaClient();
+export const prisma = new PrismaClient()
 
 bot.on('message', async msg => await processCommand(bot, msg))
 bot.on('callback_query', async ctx => await processCallbackQuery(bot, ctx))
@@ -35,15 +35,18 @@ post(app)
 
 const httpServer = http.createServer(app)
 
-const httpsServer = https.createServer({
+const httpsServer = https.createServer(
+  {
     key: fs.readFileSync(process.env.SSL_PATH + 'privkey.pem'),
     cert: fs.readFileSync(process.env.SSL_PATH + 'fullchain.pem'),
-}, app);
+  },
+  app,
+)
 
 httpServer.listen(PORT, () => {
   console.log(`HTTP Server running on port ${PORT}`)
 })
 
 httpsServer.listen(HTTPS_PORT, () => {
-    console.log(`HTTPS Server running on port ${HTTPS_PORT}`);
+  console.log(`HTTPS Server running on port ${HTTPS_PORT}`)
 })
