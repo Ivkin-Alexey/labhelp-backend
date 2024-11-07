@@ -142,7 +142,7 @@ async function authenticateUser(login, password) {
       throw { message: msg, status: 404 }
     }
 
-    const token = generateAccessToken(login, password)
+    const token = generateAccessToken(login)
 
     console.info(`Успешная аутентификация пользователя с логином: ${login}`)
 
