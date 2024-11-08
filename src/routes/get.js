@@ -15,6 +15,7 @@ import {
 } from '../controllers/db/equipment.js'
 import localizations from '../assets/constants/localizations.js'
 import { prisma } from '../../index.js'
+import { processEndpointError } from '../utils/errorProcessing.js'
 
 export default function get(app) {
   // app.use((req, res, next) => {
@@ -124,7 +125,7 @@ export default function get(app) {
       const userData = await getUserData(login)
       res.status(200).json(userData)
     } catch (e) {
-      return res.status(e.status).json(e.message)
+      processEndpointError(res, e)
     }
   })
 
