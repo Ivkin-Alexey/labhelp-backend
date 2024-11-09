@@ -51,7 +51,7 @@ async function deletePersonPost(req, res, bot) {
 async function createNewPersonPost(req, res) {
   try {
     const { userData } = req.body
-    if (!userData) throw { message: 'Отсутствуют данные пользователя', status: 400 }
+    if (!userData) throw { message: 'Отсутствуют данные пользователя при создании нового пользователя', status: 400 }
     const { login } = userData
     await createNewPerson(userData)
     const token = generateAccessToken(login)
