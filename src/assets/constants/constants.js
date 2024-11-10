@@ -4,7 +4,7 @@ import localizations from './localizations.js'
 const PORT = 8000
 const HTTPS_PORT = 443
 export const programmerChatID = 392584400
-const jwtLifeTime = 60000 // ms
+const jwtLifeTime = 3600 // seconds
 
 const timeZoneRelativeToUTC = 3
 const webAppUrl = 'https://ephemeral-kringle-2c94b2.netlify.app'
@@ -71,7 +71,7 @@ const commands = [
   },
   {
     command: '/setReagentsManagerChatID',
-    description: 'Установить чат ID менеджера по реактивам',
+    description: 'Установить чат Id менеджера по реактивам',
     access: 'superAdmin',
   },
 ]

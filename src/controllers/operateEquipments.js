@@ -14,11 +14,11 @@ import { StartData, EndData } from '../assets/constants/equipments.js'
 import { getUserData } from './users.js'
 import localizations from '../assets/constants/localizations.js'
 
-export async function startWorkWithEquipment(userID, equipmentID) {
+export async function startWorkWithEquipment(userID, equipmentId) {
   // userID = chatID or login
   return new Promise((resolve, reject) => {
     label: try {
-      const equipment = getEquipmentByID(equipmentID)
+      const equipment = getEquipmentByID(equipmentId)
       if (!equipment) {
         reject({ error: localizations.equipment.searchError, status: 404 })
         break label
@@ -29,7 +29,7 @@ export async function startWorkWithEquipment(userID, equipmentID) {
         break label
       }
       const isOperating = getWorkingEquipmentListFromDB().then(obj =>
-        findEquipment(obj, equipmentID),
+        findEquipment(obj, equipmentId),
       )
       if (isOperating) {
         reject({ error: localizations.equipment.operating.errors.occupied, status: 409 })
@@ -38,17 +38,17 @@ export async function startWorkWithEquipment(userID, equipmentID) {
       addWorkingEquipmentToDB({ ...equipment, userID })
       const data = new StartData(userID, userID, accountData, equipment)
       addNewRowInGSheet(equipmentOperations, equipmentOperationsSheetIndex, data)
-      resolve({ message: localizations.equipment.operating.add, data: { equipmentID } })
+      resolve({ message: localizations.equipment.operating.add, data: { equipmentId } })
     } catch (e) {
       reject(e)
     }
   })
 }
 
-export async function endWorkWithEquipment(userID, equipmentID) {
+export async function endWorkWithEquipment(userID, equipmentId) {
   return new Promise((resolve, reject) => {
     label: try {
-      const equipment = getWorkingEquipmentListFromDB().then(obj => findEquipment(obj, equipmentID))
+      const equipment = getWorkingEquipmentListFromDB().then(obj => findEquipment(obj, equipmentId))
       if (equipment) {
         const { userID: UID } = equipment
         if (userID !== UID) {
@@ -64,7 +64,7 @@ export async function endWorkWithEquipment(userID, equipmentID) {
           'endTime',
           data.endTime,
         )
-        resolve({ message: localizations.equipment.operating.delete, data: { equipmentID } })
+        resolve({ message: localizations.equipment.operating.delete, data: { equipmentId } })
       } else {
         reject({ error: localizations.equipment.operating.empty, status: 404 })
       }

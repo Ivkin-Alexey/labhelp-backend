@@ -12,12 +12,11 @@ import {
 import { bot } from '../../index.js'
 
 import { authenticateToken } from '../controllers/jwt.js'
+import { addSearchTermToDB, removeSearchTermFromDB } from '../controllers/db/equipment.js'
 import {
   addFavoriteEquipmentToDB,
   removeFavoriteEquipmentFromDB,
-  addSearchTermToDB,
-  removeSearchTermFromDB,
-} from '../controllers/db/equipment.js'
+} from '../data-access/data-access-equipments/favorite-equipments.js'
 
 export default function post(app) {
   app.post('/updatePersonData', async (req, res) => await updateUserDataPost(req, res, bot))
@@ -51,18 +50,18 @@ export default function post(app) {
 
   app.post('/login', async (req, res) => await loginPersonPost(req, res, bot))
 
-  app.post('/favoriteEquipment', async (req, res) => {
+  app.post('/favoriteEquipment', authenticateToken, async (req, res) => {
     const { add, remove } = req.query
-    const { login, equipmentID } = req.body
+    const { login, equipmentId } = req.body
     try {
       if (add) {
-        return await addFavoriteEquipmentToDB(login, equipmentID).then(msg =>
-          res.status(200).json(msg),
+        return await addFavoriteEquipmentToDB(login, equipmentId).then(msg =>
+          res.status(200).json({ message: msg, status: 200 }),
         )
       }
       if (remove) {
-        return await removeFavoriteEquipmentFromDB(login, equipmentID).then(msg =>
-          res.status(200).json(msg),
+        return await removeFavoriteEquipmentFromDB(login, equipmentId).then(msg =>
+          res.status(200).json({ message: msg, status: 200 }),
         )
       }
     } catch (e) {

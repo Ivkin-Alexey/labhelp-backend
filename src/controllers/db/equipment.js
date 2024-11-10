@@ -4,14 +4,8 @@ import __dirname from '../../utils/__dirname.js'
 import localizations from '../../assets/constants/localizations.js'
 import { prisma } from '../../../index.js'
 import { sendError } from '../tg-bot-controllers/botAnswers.js'
+import { getFavoriteEquipmentsFromDB } from '../../data-access/data-access-equipments/favorite-equipments.js'
 const workingEquipmentJsonPath = path.join(__dirname, '..', 'assets', 'db', 'workingEquipment.json')
-const favoriteEquipmentsJsonPath = path.join(
-  __dirname,
-  '..',
-  'assets',
-  'db',
-  'favoriteEquipments.json',
-)
 const searchHistoryJsonPath = path.join(__dirname, '..', 'assets', 'db', 'searchHistory.json')
 
 export async function addWorkingEquipmentToDB(equipment) {
@@ -59,77 +53,6 @@ export async function getWorkingEquipmentListFromDB() {
   return new Promise((resolve, reject) => {
     try {
       readJsonFile(workingEquipmentJsonPath).then(parsedData => resolve(parsedData))
-    } catch (e) {
-      reject(e)
-    }
-  })
-}
-
-export async function getFavoriteEquipmentsFromDB(login) {
-  return new Promise((resolve, reject) => {
-    try {
-      readJsonFile(favoriteEquipmentsJsonPath).then(parsedData => {
-        if (!parsedData[login] || parsedData[login].length === 0) {
-          resolve([])
-          return
-        }
-        resolve(parsedData[login])
-      })
-    } catch (e) {
-      reject(e)
-    }
-  })
-}
-
-export async function removeFavoriteEquipmentFromDB(login, equipmentID) {
-  console.log(
-    'Событие: Удаление оборудования из избранного. Данные: ',
-    'login: ',
-    login,
-    'equipmentID: ',
-    equipmentID,
-  )
-  return new Promise((resolve, reject) => {
-    try {
-      readJsonFile(favoriteEquipmentsJsonPath)
-        .then(parsedData => {
-          if (!parsedData[login] || !parsedData[login].find(el => el.id === equipmentID)) {
-            reject(localizations.equipment.favorite.errors.notExist)
-            return
-          }
-          parsedData[login] = parsedData[login].filter(el => el.id !== equipmentID)
-          if (parsedData[login].length === 0) delete parsedData[login]
-          return parsedData
-        })
-        .then(updatedParsedData => writeJsonFile(favoriteEquipmentsJsonPath, updatedParsedData))
-        .then(() => resolve(localizations.equipment.favorite.deletedFromDB))
-    } catch (e) {
-      reject(e)
-    }
-  })
-}
-
-export function addFavoriteEquipmentToDB(login, equipmentID) {
-  return new Promise((resolve, reject) => {
-    try {
-      readJsonFile(favoriteEquipmentsJsonPath)
-        .then(async parsedData => {
-          if (!parsedData[login]) parsedData[login] = []
-          else if (parsedData[login].length !== 0) {
-            const equipment = parsedData[login].find(el => el.id === equipmentID)
-            if (equipment) {
-              reject(localizations.equipment.favorite.errors.notUnique)
-              return
-            }
-          }
-          const equipment = await getEquipmentByID(equipmentID)
-          parsedData[login].push(equipment)
-          return parsedData
-        })
-        .then(updatedParsedData => {
-          writeJsonFile(favoriteEquipmentsJsonPath, updatedParsedData)
-        })
-        .then(() => resolve(localizations.equipment.favorite.addedToDB))
     } catch (e) {
       reject(e)
     }
@@ -201,16 +124,16 @@ export async function removeSearchTermFromDB(login, term) {
   })
 }
 
-export async function getEquipmentByID(equipmentID) {
+export async function getEquipmentByID(equipmentId) {
   try {
     const equipment = await prisma.Equipment.findUnique({
       where: {
-        id: equipmentID,
+        id: equipmentId,
       },
     })
 
     if (!equipment) {
-      const msg = `Оборудование с ID ${equipmentID} не найдено в БД (при клике на карточку)`
+      const msg = `Оборудование с Id ${equipmentId} не найдено в БД (при клике на карточку)`
       throw { message: msg, status: 404 }
     } else {
       return equipment
@@ -226,11 +149,11 @@ export async function getEquipmentByID(equipmentID) {
   }
 }
 
-export function findEquipment(object, equipmentID) {
+export function findEquipment(object, equipmentId) {
   let equipmentData
   for (const key in object) {
     const arr = object[key]
-    equipmentData = arr.find(el => el.id === equipmentID)
+    equipmentData = arr.find(el => el.id === equipmentId)
     if (equipmentData) {
       return equipmentData
     }

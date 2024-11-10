@@ -55,10 +55,10 @@ async function createEquipmentDbFromGSheet() {
 
     if (nonUniqueRecords.length > 0) {
       sendNotification(
-        `Обнаружено оборудование с неуникальным ID (при вставке в БД): ${nonUniqueRecords.length} позиций(я)`,
+        `Обнаружено оборудование с неуникальным Id (при вставке в БД): ${nonUniqueRecords.length} позиций(я)`,
       )
       console.log(
-        'Обработка записей с неуникальным ID. Будет показано не более 10 записей:',
+        'Обработка записей с неуникальным Id. Будет показано не более 10 записей:',
         nonUniqueRecords.slice(0, 10),
       )
       nonUniqueRecords = []

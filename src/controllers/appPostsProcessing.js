@@ -51,7 +51,11 @@ async function deletePersonPost(req, res, bot) {
 async function createNewPersonPost(req, res) {
   try {
     const { userData } = req.body
-    if (!userData) throw { message: 'Отсутствуют данные пользователя при создании нового пользователя', status: 400 }
+    if (!userData)
+      throw {
+        message: 'Отсутствуют данные пользователя при создании нового пользователя',
+        status: 400,
+      }
     const { login } = userData
     await createNewPerson(userData)
     const token = generateAccessToken(login)
@@ -76,9 +80,9 @@ async function loginPersonPost(req, res) {
 
 async function equipmentStartPost(req, res) {
   const { body } = req
-  const { chatID, login, equipmentID } = body
+  const { chatID, login, equipmentId } = body
   try {
-    return await startWorkWithEquipment(+chatID || login, equipmentID).then(data =>
+    return await startWorkWithEquipment(+chatID || login, equipmentId).then(data =>
       res.status(200).json(data),
     )
   } catch (e) {

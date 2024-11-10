@@ -5,17 +5,14 @@ import { researchesSelectOptions } from '../assets/constants/researches.js'
 import { getReagentApplications } from '../controllers/reagents.js'
 import {
   getWorkingEquipmentListFromDB,
-  getFavoriteEquipmentsFromDB,
   getSearchHistoryFromDB,
 } from '../controllers/db/equipment.js'
 import { authenticateToken } from '../controllers/jwt.js'
-import {
-  transformListByFavoriteEquipment,
-  transformListByOperateEquipment,
-} from '../controllers/db/equipment.js'
+import { transformListByFavoriteEquipment } from '../controllers/db/equipment.js'
 import localizations from '../assets/constants/localizations.js'
 import { prisma } from '../../index.js'
 import { processEndpointError } from '../utils/errorProcessing.js'
+import { getFavoriteEquipmentsFromDB } from '../data-access/data-access-equipments/favorite-equipments.js'
 
 export default function get(app) {
   // app.use((req, res, next) => {
@@ -35,10 +32,10 @@ export default function get(app) {
 
   app.get('/equipmentList', async (req, res) => {
     try {
-      const { category, equipmentID, search } = req.query
-      if (equipmentID) {
-        console.log('Событие: GET-запрос по адресу: /equipmentList, equipmentID: ', equipmentID)
-        const equipmentData = await getEquipmentByID(equipmentID)
+      const { category, equipmentId, search } = req.query
+      if (equipmentId) {
+        console.log('Событие: GET-запрос по адресу: /equipmentList, equipmentId: ', equipmentId)
+        const equipmentData = await getEquipmentByID(equipmentId)
         // const list = await transformListByOperateEquipment([equipmentData]).then(async list => {
         //   return await transformListByFavoriteEquipment(list, login)
         // })
@@ -92,19 +89,13 @@ export default function get(app) {
     }
   })
 
-  app.get('/favoriteEquipments', async (req, res) => {
-    const { login } = req.query
-    console.log(req.query)
+  app.get('/favoriteEquipments', authenticateToken, async (req, res) => {
     try {
-      return await getFavoriteEquipmentsFromDB(login)
-        .then(async list => {
-          const transformedList = await transformListByOperateEquipment(list)
-          return transformedList.map(el => ({ ...el, isFavorite: true }))
-        })
-        .then(list => res.status(200).json(list))
+      const { login } = req.query
+      const list = await getFavoriteEquipmentsFromDB(login)
+      return res.status(200).json(list)
     } catch (e) {
-      console.log(e)
-      return res.status(500).json(e)
+      processEndpointError(res, e)
     }
   })
 

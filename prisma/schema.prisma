@@ -8,28 +8,45 @@ generator client {
 }
 
 model User {
-  login     String      @id
-  password  String
+  login              String              @id
+  password           String
+  favoriteEquipments FavoriteEquipment[]
+  operatingEquipment OperatingEquipment[]
 }
 
 model Equipment {
-  id                 String @id
-  serialNumber       String
-  inventoryNumber    String
-  name               String
-  description        String
-  brand              String
-  model              String
-  category           String
-  filesUrl           String
-  imgUrl             String
+  id                String              @id
+  serialNumber      String
+  inventoryNumber   String
+  name              String
+  description       String
+  brand             String
+  model             String
+  category          String
+  filesUrl          String
+  imgUrl            String
+  favoriteEquipment FavoriteEquipment[]
+  operatingEquipment OperatingEquipment[]
+}
+
+model FavoriteEquipment {
+  login       String
+  equipmentId String
+
+  user      User      @relation(fields: [login], references: [login], onDelete: Cascade)
+  equipment Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+
+  @@unique([login, equipmentId])
 }
 
 model OperatingEquipment {
-  id            String   @id
-  userId        String
+  equipmentId   String   
+  login         String
   isLongUse     Boolean
   startDateTime DateTime @default(now())
+
+  user          User      @relation(fields: [login], references: [login], onDelete: Cascade)
+  equipment     Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+
+  @@unique([login, equipmentId])
 }
-
-

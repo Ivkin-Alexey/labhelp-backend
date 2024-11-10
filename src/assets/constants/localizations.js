@@ -6,7 +6,7 @@ const localizations = {
   equipment: {
     dbIsReloadedMsg: 'База данных обновлена',
     dbIsReloading: 'База данных обновляется...',
-    searchError: 'Оборудование с таким ID не найдено',
+    searchError: 'Оборудование с таким Id не найдено',
     favorite: {
       addedToDB: 'Оборудование добавлено в избранное',
       deletedFromDB: 'Оборудование удалено из избранного',
@@ -22,8 +22,8 @@ const localizations = {
       empty: 'Такого оборудования нет в списке работающего',
       errors: {
         occupied: 'Оборудование уже используется',
-        wrongUserID: 'Пользователь не работает на данном оборудовании'
-      }
+        wrongUserID: 'Пользователь не работает на данном оборудовании',
+      },
     },
     searchHistory: {
       addedToDB: 'Поисковый запрос сохранен',

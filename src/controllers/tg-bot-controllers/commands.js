@@ -50,7 +50,7 @@ async function processCommand(bot, command) {
         await sendResearches(bot, chatID)
         break
       case '/get_chat_id':
-        await bot.sendMessage(chatID, 'Чат ID: ' + chatID)
+        await bot.sendMessage(chatID, 'Чат Id: ' + chatID)
         break
       case '/reloadEquipmentDB':
         await reloadEquipmentDB(bot, chatID)

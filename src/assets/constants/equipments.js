@@ -15,8 +15,8 @@ function EquipmentItem() {
   this.filesUrl = ''
 }
 
-function WorkingEquipmentItem(equipmentID, userID, longUse = false) {
-  this.id = equipmentID
+function WorkingEquipmentItem(equipmentId, userID, longUse = false) {
+  this.id = equipmentId
   this.category = ''
   this.name = ''
   this.brand = ''
@@ -28,7 +28,7 @@ function WorkingEquipmentItem(equipmentID, userID, longUse = false) {
 }
 
 function StartData(chatID, login, accountData, equipment) {
-  this.equipmentID = equipment.id
+  this.equipmentId = equipment.id
   this.date = createDate()
   this.startTime = createTime()
   this.fullName = createFullName(accountData)

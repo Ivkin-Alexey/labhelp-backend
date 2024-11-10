@@ -2,9 +2,9 @@ import { endWorkWithEquipment } from './operateEquipments.js'
 
 export async function deleteOperateEquipment(req, res) {
   const { body } = req
-  const { chatID, login, equipmentID } = body
+  const { chatID, login, equipmentId } = body
   try {
-    await endWorkWithEquipment(+chatID || login, equipmentID).then(data => {
+    await endWorkWithEquipment(+chatID || login, equipmentId).then(data => {
       res.status(200).json(data)
     })
   } catch (e) {
