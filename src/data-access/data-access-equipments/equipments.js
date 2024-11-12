@@ -9,7 +9,7 @@ export async function getEquipmentByID(equipmentId, login, isAuthenticated) {
   try {
     let equipment
     if (login && isAuthenticated) {
-      let rowData = await prisma.Equipment.find({
+      let rowData = await prisma.Equipment.findUnique({
         where: {
           id: equipmentId,
         },
@@ -23,7 +23,7 @@ export async function getEquipmentByID(equipmentId, login, isAuthenticated) {
 
       equipment = rowData.map(transformEquipmentList)
     } else {
-      equipment = await prisma.Equipment.find({
+      equipment = await prisma.Equipment.findUnique({
         where: {
           id: equipmentId,
         },
