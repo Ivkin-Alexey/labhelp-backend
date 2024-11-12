@@ -7,10 +7,10 @@ import {
   sendCommandList,
 } from './botAnswers.js'
 import { addRandomUser, deleteUsersWithEmptyChatID, updateUserData, getUserData } from '../users.js'
-import { reloadEquipmentDB } from '../equipments.js'
 import { askReagentsManagerChatID } from '../replyToMessage.js'
 import { personRoles } from '../../assets/constants/users.js'
 import localizations from '../../assets/constants/localizations.js'
+import { reloadEquipmentDB } from '../equipment-controller/equipment.js'
 
 async function processCommand(bot, command) {
   const chatID = command.chat.id

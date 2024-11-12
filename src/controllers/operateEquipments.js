@@ -1,6 +1,5 @@
 import {
   getWorkingEquipmentListFromDB,
-  getEquipmentByID,
   findEquipment,
   deleteWorkingEquipmentFromDB,
   addWorkingEquipmentToDB,
@@ -13,6 +12,7 @@ import { addNewRowInGSheet, updateDataInGSheetCell } from './gSheets.js'
 import { StartData, EndData } from '../assets/constants/equipments.js'
 import { getUserData } from './users.js'
 import localizations from '../assets/constants/localizations.js'
+import { getEquipmentByID } from '../data-access/data-access-equipments/equipments.js'
 
 export async function startWorkWithEquipment(userID, equipmentId) {
   // userID = chatID or login

@@ -2,8 +2,6 @@ import { readJsonFile, writeJsonFile } from '../fs.js'
 import path from 'path'
 import __dirname from '../../utils/__dirname.js'
 import localizations from '../../assets/constants/localizations.js'
-import { prisma } from '../../../index.js'
-import { sendError } from '../tg-bot-controllers/botAnswers.js'
 import { getFavoriteEquipmentsFromDB } from '../../data-access/data-access-equipments/favorite-equipments.js'
 const workingEquipmentJsonPath = path.join(__dirname, '..', 'assets', 'db', 'workingEquipment.json')
 const searchHistoryJsonPath = path.join(__dirname, '..', 'assets', 'db', 'searchHistory.json')
@@ -122,31 +120,6 @@ export async function removeSearchTermFromDB(login, term) {
       reject(e)
     }
   })
-}
-
-export async function getEquipmentByID(equipmentId) {
-  try {
-    const equipment = await prisma.Equipment.findUnique({
-      where: {
-        id: equipmentId,
-      },
-    })
-
-    if (!equipment) {
-      const msg = `Оборудование с Id ${equipmentId} не найдено в БД (при клике на карточку)`
-      throw { message: msg, status: 404 }
-    } else {
-      return equipment
-    }
-  } catch (error) {
-    const status = error.status || 500
-    const errorMsg = error.message || 'Внутренняя ошибка сервера (при клике на карточку): ' + error
-    sendError(errorMsg)
-    console.error(errorMsg)
-    throw { message: errorMsg, status }
-  } finally {
-    await prisma.$disconnect()
-  }
 }
 
 export function findEquipment(object, equipmentId) {

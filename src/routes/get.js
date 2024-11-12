@@ -1,5 +1,3 @@
-import { getEquipmentListByCategory, getEquipmentListBySearch } from '../controllers/equipments.js'
-import { getEquipmentByID } from '../controllers/db/equipment.js'
 import { getUserData } from '../controllers/users.js'
 import { researchesSelectOptions } from '../assets/constants/researches.js'
 import { getReagentApplications } from '../controllers/reagents.js'
@@ -13,6 +11,11 @@ import localizations from '../assets/constants/localizations.js'
 import { prisma } from '../../index.js'
 import { processEndpointError } from '../utils/errorProcessing.js'
 import { getFavoriteEquipmentsFromDB } from '../data-access/data-access-equipments/favorite-equipments.js'
+import {
+  getEquipmentByID,
+  getEquipmentListByCategory,
+  getEquipmentListBySearch,
+} from '../data-access/data-access-equipments/equipments.js'
 
 export default function get(app) {
   // app.use((req, res, next) => {
@@ -30,41 +33,25 @@ export default function get(app) {
     return res.status(200).json('Привет')
   })
 
-  app.get('/equipmentList', async (req, res) => {
+  app.get('/equipmentList', authenticateToken, async (req, res) => {
+    let equipmentList
     try {
-      const { category, equipmentId, search } = req.query
+      const { category, equipmentId, search, login } = req.query
+      const { isAuthenticated, originalUrl } = req
+      console.info(`Событие: GET-запрос по адресу: ${originalUrl}`)
       if (equipmentId) {
-        console.log('Событие: GET-запрос по адресу: /equipmentList, equipmentId: ', equipmentId)
-        const equipmentData = await getEquipmentByID(equipmentId)
-        // const list = await transformListByOperateEquipment([equipmentData]).then(async list => {
-        //   return await transformListByFavoriteEquipment(list, login)
-        // })
-        console.info('Данные успешно отправлены')
-        return res.status(200).json(equipmentData)
+        equipmentList = await getEquipmentByID(equipmentId, login, isAuthenticated)
+      } else if (search) {
+        equipmentList = await getEquipmentListBySearch(search, login, isAuthenticated)
+      } else if (category) {
+        equipmentList = await getEquipmentListByCategory(category, login, isAuthenticated)
+      } else {
+        throw { message: 'Некорректный запрос: ' + originalUrl, status: 400 }
       }
-      if (search) {
-        console.log('Событие: query-параметр search: ', search)
-        return await getEquipmentListBySearch(search).then(async equipmentList => {
-          // if (!login) return res.status(200).json(equipmentList)
-          // else {
-          //   const list = await transformListByOperateEquipment(equipmentList).then(async list => {
-          //     return await transformListByFavoriteEquipment(list, login)
-          //   })
-          //   return res.status(200).json(list)
-          // }
-          return res.status(200).json(equipmentList)
-        })
-      }
-      if (category) {
-        return await getEquipmentListByCategory(category).then(async equipmentList => {
-          // const list = await transformListByOperateEquipment(equipmentList).then(async list => {
-          //   return await transformListByFavoriteEquipment(list, login)
-          // })
-          return res.status(200).json(equipmentList)
-        })
-      }
+      console.info('Данные успешно отправлены')
+      return res.status(200).json(equipmentList)
     } catch (e) {
-      return res.status(e.status).json(e.message)
+      processEndpointError(res, e)
     }
   })
 

@@ -6,6 +6,7 @@ export async function getFavoriteEquipmentsFromDB(login) {
     if (!login)
       throw { message: 'Отсутствует логин при запросе избранного оборудования', status: 500 }
     console.info(`GET-запрос избранного оборудования. Логин ${login}.`)
+
     const favoriteEquipments = await prisma.FavoriteEquipment.findMany({
       where: {
         login,
@@ -17,7 +18,7 @@ export async function getFavoriteEquipmentsFromDB(login) {
     const formattedEquipments = favoriteEquipments.map(item => item.equipment)
 
     console.info(`Данные отправлены. Логин ${login}.`)
-    return formattedEquipments 
+    return formattedEquipments
   } catch (error) {
     const errorMsg =
       error.message ||
