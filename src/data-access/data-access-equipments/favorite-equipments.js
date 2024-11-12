@@ -1,5 +1,6 @@
 import { prisma } from '../../../index.js'
 import { sendError } from '../../controllers/tg-bot-controllers/botAnswers.js'
+import { transformFavoriteEquipmentList } from './helpers.js'
 
 export async function getFavoriteEquipmentsFromDB(login) {
   try {
@@ -7,26 +8,26 @@ export async function getFavoriteEquipmentsFromDB(login) {
       throw { message: 'Отсутствует логин при запросе избранного оборудования', status: 500 }
     console.info(`GET-запрос избранного оборудования. Логин ${login}.`)
 
-    const favoriteEquipments = await prisma.FavoriteEquipment.findMany({
-      where: {
-        login,
-      },
+    const rawData = await prisma.FavoriteEquipment.findMany({
+      where: { login },
       include: {
-        equipment: true,
+        equipment: {
+          include: {
+            operatingEquipment: true,
+          },
+        },
       },
     })
-    const formattedEquipments = favoriteEquipments.map(item => item.equipment)
 
-    console.info(`Данные отправлены. Логин ${login}.`)
-    return formattedEquipments
+    const formattedData = rawData.map(transformFavoriteEquipmentList)
+    return formattedData
   } catch (error) {
     const errorMsg =
       error.message ||
       `Ошибка при отправке избранного оборудования. Логин ${login}. Подробности: ` + error
-    console.error(errorMsg)
-    sendError(errorMsg)
+    const errorStatus = error.status || 500
     await prisma.$disconnect()
-    throw { message: errorMsg, status: 500 }
+    throw { message: errorMsg, status: errorStatus }
   }
 }
 

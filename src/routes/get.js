@@ -78,8 +78,10 @@ export default function get(app) {
 
   app.get('/favoriteEquipments', authenticateToken, async (req, res) => {
     try {
-      const { login } = req.query
+      const { login, originalUrl} = req.query
+      console.info(`Событие: GET-запрос по адресу: ${originalUrl}`)
       const list = await getFavoriteEquipmentsFromDB(login)
+      console.info(`Данные отправлены. Логин ${login}.`)
       return res.status(200).json(list)
     } catch (e) {
       processEndpointError(res, e)
