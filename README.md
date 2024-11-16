@@ -30,7 +30,7 @@
 **Оборудование:**
 * /equipments/operate/{equipment ID} - добавить оборудование в список работающего в данный момент  
 * /equipments/favorite/{equipment ID} - добавить оборудование в список избранного для данного пользователя  
-* /equipments/search-history - добавить поисковый запрос в историю поиска оборудования  
+* /equipments/search-history/{user login} - добавить поисковый запрос в историю поиска оборудования  
 
 ### DELETE
 
