@@ -1,8 +1,4 @@
 import {
-  updateUserDataPost,
-  deletePersonPost,
-  updateReagentApplicationPost,
-  deleteReagentApplicationPost,
   addNewReagentAppToDBPost,
   createNewPersonPost,
   loginPersonPost,

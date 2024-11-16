@@ -15,7 +15,6 @@ import {
 } from './reagents.js'
 import { personRoles } from '../assets/constants/users.js'
 import { processEndpointError } from '../utils/errorProcessing.js'
-import { endWorkWithEquipment, startWorkWithEquipment } from '../data-access/data-access-equipments/operate-equipments.js'
 const { denyApplication } = localizations.superAdministratorActions
 
 async function updateUserDataPost(req, res, bot) {

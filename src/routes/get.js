@@ -8,6 +8,7 @@ import { processEndpointError } from '../utils/errorProcessing.js'
 import { getFavoriteEquipmentsFromDB } from '../data-access/data-access-equipments/favorite-equipments.js'
 import {
   getEquipmentByID,
+  getEquipmentList,
   getEquipmentListByCategory,
   getEquipmentListBySearch,
 } from '../data-access/data-access-equipments/equipments.js'

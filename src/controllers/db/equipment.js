@@ -3,6 +3,7 @@ import path from 'path'
 import __dirname from '../../utils/__dirname.js'
 import localizations from '../../assets/constants/localizations.js'
 import { getFavoriteEquipmentsFromDB } from '../../data-access/data-access-equipments/favorite-equipments.js'
+import { getWorkingEquipmentListFromDB } from '../../data-access/data-access-equipments/operate-equipments.js'
 const workingEquipmentJsonPath = path.join(__dirname, '..', 'assets', 'db', 'workingEquipment.json')
 const searchHistoryJsonPath = path.join(__dirname, '..', 'assets', 'db', 'searchHistory.json')
 

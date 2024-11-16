@@ -5,6 +5,36 @@ import { sendNotification } from '../../controllers/tg-bot-controllers/botAnswer
 import { clearTable } from '../common.js'
 import { transformEquipmentList } from './helpers.js'
 
+
+
+export async function getEquipmentList(login, isAuthenticated) {
+  try {
+    let results
+    if (login && isAuthenticated) {
+      let rowData = await prisma.Equipment.findMany({
+        include: {
+          favoriteEquipment: {
+            where: { login },
+          },
+          operatingEquipment: true,
+        },
+      })
+
+      results = rowData.map(transformEquipmentList)
+    } else {
+      results = await prisma.Equipment.findMany()
+    }
+
+    return results
+  } catch (error) {
+    const status = error.status || 500
+    const errorMsg = error.message || 'Внутренняя ошибка сервера (при поиске оборудования): ' + error
+    throw { message: errorMsg, status }
+  } finally {
+    await prisma.$disconnect()
+  }
+}
+
 export async function getEquipmentByID(equipmentId, login, isAuthenticated) {
   try {
     let equipment
