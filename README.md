@@ -38,7 +38,8 @@
 * /users/{user login} - удалить аккаунт пользователя  
 
 **Оборудование:**
-* /equipments/operate/{equipment ID} - удалить оборудование из списка работающего в данный момент  
+* /equipments/operate/{equipment ID} - удалить оборудование из списка работающего в данный момент
+* /equipment/search-history/{user login}?term={search term} - удалить оборудование из списка работающего в данный момент
 
 ### PATCH
 * /users/{user login} - обновить данные пользователя
