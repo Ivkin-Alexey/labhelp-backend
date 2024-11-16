@@ -1,9 +1,7 @@
 import { getUserData } from '../controllers/users.js'
 import { researchesSelectOptions } from '../assets/constants/researches.js'
 import { getReagentApplications } from '../controllers/reagents.js'
-import {
-  getSearchHistoryFromDB,
-} from '../controllers/db/equipment.js'
+import { getSearchHistoryFromDB } from '../controllers/db/equipment.js'
 import { authenticateToken } from '../controllers/jwt.js'
 import { prisma } from '../../index.js'
 import { processEndpointError } from '../utils/errorProcessing.js'
@@ -31,20 +29,18 @@ export default function get(app) {
     return res.status(200).json('Привет')
   })
 
-  app.get('/equipmentList', authenticateToken, async (req, res) => {
+  app.get('/equipments', authenticateToken, async (req, res) => {
     let equipmentList
     try {
-      const { category, equipmentId, search, login } = req.query
+      const { category, search, login } = req.query
       const { isAuthenticated, originalUrl } = req
       console.info(`Событие: GET-запрос по адресу: ${originalUrl}`)
-      if (equipmentId) {
-        equipmentList = await getEquipmentByID(equipmentId, login, isAuthenticated)
-      } else if (search) {
+      if (search) {
         equipmentList = await getEquipmentListBySearch(search, login, isAuthenticated)
       } else if (category) {
         equipmentList = await getEquipmentListByCategory(category, login, isAuthenticated)
       } else {
-        throw { message: 'Некорректный запрос: ' + originalUrl, status: 400 }
+        equipmentList = await getEquipmentList(login, isAuthenticated)
       }
       console.info('Данные успешно отправлены')
       return res.status(200).json(equipmentList)
@@ -53,9 +49,23 @@ export default function get(app) {
     }
   })
 
-  app.get('/equipment/operate', authenticateToken, async (req, res) => {
+  app.get('/equipments/:equipmentId', authenticateToken, async (req, res) => {
     try {
+      const { equipmentId } = req.params
       const { login } = req.query
+      const { isAuthenticated, originalUrl } = req
+      console.info(`Событие: GET-запрос по адресу: ${originalUrl}`)
+      const equipmentData = await getEquipmentByID(equipmentId, login, isAuthenticated)
+      console.info('Данные успешно отправлены')
+      return res.status(200).json(equipmentData)
+    } catch (e) {
+      processEndpointError(res, e)
+    }
+  })
+
+  app.get('/equipments/operate/:login', authenticateToken, async (req, res) => {
+    try {
+      const { login } = req.params
       const { originalUrl } = req
       console.info(`Событие: GET-запрос по адресу: ${originalUrl}`)
       const list = await getWorkingEquipmentListFromDB(login)
@@ -66,9 +76,10 @@ export default function get(app) {
     }
   })
 
-  app.get('/favoriteEquipments', authenticateToken, async (req, res) => {
+  app.get('/equipments/favorite:login', authenticateToken, async (req, res) => {
     try {
-      const { login, originalUrl} = req.query
+      const { originalUrl } = req.query
+      const { login } = req.params
       console.info(`Событие: GET-запрос по адресу: ${originalUrl}`)
       const list = await getFavoriteEquipmentsFromDB(login)
       console.info(`Данные отправлены. Логин ${login}.`)
@@ -78,9 +89,8 @@ export default function get(app) {
     }
   })
 
-  app.get('/equipmentSearchHistory', async (req, res) => {
-    const { login } = req.query
-    console.log(req.query)
+  app.get('/equipments/search-history/:login', async (req, res) => {
+    const { login } = req.params
     try {
       return await getSearchHistoryFromDB(login).then(list => res.status(200).json(list))
     } catch (e) {
@@ -89,7 +99,7 @@ export default function get(app) {
     }
   })
 
-  app.get('/person/:login', authenticateToken, async (req, res) => {
+  app.get('/users/:login', authenticateToken, async (req, res) => {
     try {
       const { login } = req.params
       const userData = await getUserData(login)
@@ -99,7 +109,7 @@ export default function get(app) {
     }
   })
 
-  app.get('/persons', async (req, res) => {
+  app.get('/users', authenticateToken, async (req, res) => {
     try {
       const users = await prisma.users.findMany()
       return res.status(200).json(users)

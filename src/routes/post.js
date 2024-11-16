@@ -11,7 +11,7 @@ import {
 import { bot } from '../../index.js'
 
 import { authenticateToken } from '../controllers/jwt.js'
-import { addSearchTermToDB, removeSearchTermFromDB } from '../controllers/db/equipment.js'
+import { addSearchTermToDB } from '../controllers/db/equipment.js'
 import {
   addFavoriteEquipmentToDB,
   removeFavoriteEquipmentFromDB,
@@ -19,38 +19,23 @@ import {
 import { changeOperateEquipmentStatus } from '../controllers/equipment-controller/operate-equipment.js'
 
 export default function post(app) {
-  app.post('/updatePersonData', async (req, res) => await updateUserDataPost(req, res, bot))
 
   app.post(
-    '/deletePerson',
-    authenticateToken,
-    async (req, res) => await deletePersonPost(req, res, bot),
-  )
-  app.post('/equipment/operate/:id', async (req, res) => await changeOperateEquipmentStatus(req, res))
-
-  app.post(
-    '/deleteReagentApplication',
-    authenticateToken,
-    async (req, res) => await deleteReagentApplicationPost(req, res, bot),
+    '/equipments/operate/:equipmentId',
+    async (req, res) => await changeOperateEquipmentStatus(req, res),
   )
 
   app.post(
-    '/updateReagentApplications',
-    authenticateToken,
-    async (req, res) => await updateReagentApplicationPost(req, res, bot),
-  )
-
-  app.post(
-    '/addNewReagentAppToDB',
+    '/reagents',
     authenticateToken,
     async (req, res) => await addNewReagentAppToDBPost(req, res, bot),
   )
 
-  app.post('/createNewPerson', async (req, res) => await createNewPersonPost(req, res, bot))
+  app.post('/auth/users', async (req, res) => await createNewPersonPost(req, res))
 
-  app.post('/login', async (req, res) => await loginPersonPost(req, res, bot))
+  app.post('/auth/login', async (req, res) => await loginPersonPost(req, res))
 
-  app.post('/favoriteEquipment', authenticateToken, async (req, res) => {
+  app.post('/equipments/favorite/:equipmentId', authenticateToken, async (req, res) => {
     const { add, remove } = req.query
     const { login, equipmentId } = req.body
     try {
@@ -70,16 +55,11 @@ export default function post(app) {
     }
   })
 
-  app.post('/equipmentSearchHistory', async (req, res) => {
-    const { add, remove } = req.query
-    const { login, term } = req.body
+  app.post('/equipments/search-history/:login', async (req, res) => {
+    const { login } = req.params
+    const { term } = req.body
     try {
-      if (add) {
-        return await addSearchTermToDB(login, term).then(msg => res.status(200).json(msg))
-      }
-      if (remove) {
-        return await removeSearchTermFromDB(login, term).then(msg => res.status(200).json(msg))
-      }
+      return await addSearchTermToDB(login, term).then(msg => res.status(200).json(msg))
     } catch (e) {
       console.log(e)
       return res.status(500).json(e)
