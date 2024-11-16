@@ -47,15 +47,6 @@ export async function deleteWorkingEquipmentFromDB(equipment) {
   })
 }
 
-export async function getWorkingEquipmentListFromDB() {
-  return new Promise((resolve, reject) => {
-    try {
-      readJsonFile(workingEquipmentJsonPath).then(parsedData => resolve(parsedData))
-    } catch (e) {
-      reject(e)
-    }
-  })
-}
 
 export async function getSearchHistoryFromDB(login) {
   return new Promise((resolve, reject) => {

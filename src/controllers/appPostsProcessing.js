@@ -6,7 +6,6 @@ import {
   createNewPerson,
   authenticateUser,
 } from './users.js'
-import { startWorkWithEquipment } from './operateEquipments.js'
 import localizations from '../assets/constants/localizations.js'
 import { generateAccessToken } from './jwt.js'
 import {
@@ -16,6 +15,7 @@ import {
 } from './reagents.js'
 import { personRoles } from '../assets/constants/users.js'
 import { processEndpointError } from '../utils/errorProcessing.js'
+import { endWorkWithEquipment, startWorkWithEquipment } from '../data-access/data-access-equipments/operate-equipments.js'
 const { denyApplication } = localizations.superAdministratorActions
 
 async function updateUserDataPost(req, res, bot) {
@@ -78,22 +78,6 @@ async function loginPersonPost(req, res) {
   }
 }
 
-async function equipmentStartPost(req, res) {
-  const { body } = req
-  const { chatID, login, equipmentId } = body
-  try {
-    return await startWorkWithEquipment(+chatID || login, equipmentId).then(data =>
-      res.status(200).json(data),
-    )
-  } catch (e) {
-    console.log(e)
-    if (e.status && e.error) {
-      return res.status(e.status).json(e.error)
-    }
-    return res.status(500).json(e)
-  }
-}
-
 async function addNewReagentAppToDBPost(req, res, bot) {
   const { body } = req
   const { userData, applicationData } = body
@@ -134,7 +118,6 @@ async function deleteReagentApplicationPost(req, res) {
 export {
   updateUserDataPost,
   deletePersonPost,
-  equipmentStartPost,
   updateReagentApplicationPost,
   deleteReagentApplicationPost,
   addNewReagentAppToDBPost,

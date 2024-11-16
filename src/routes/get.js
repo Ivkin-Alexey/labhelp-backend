@@ -2,12 +2,9 @@ import { getUserData } from '../controllers/users.js'
 import { researchesSelectOptions } from '../assets/constants/researches.js'
 import { getReagentApplications } from '../controllers/reagents.js'
 import {
-  getWorkingEquipmentListFromDB,
   getSearchHistoryFromDB,
 } from '../controllers/db/equipment.js'
 import { authenticateToken } from '../controllers/jwt.js'
-import { transformListByFavoriteEquipment } from '../controllers/db/equipment.js'
-import localizations from '../assets/constants/localizations.js'
 import { prisma } from '../../index.js'
 import { processEndpointError } from '../utils/errorProcessing.js'
 import { getFavoriteEquipmentsFromDB } from '../data-access/data-access-equipments/favorite-equipments.js'
@@ -16,6 +13,7 @@ import {
   getEquipmentListByCategory,
   getEquipmentListBySearch,
 } from '../data-access/data-access-equipments/equipments.js'
+import { getWorkingEquipmentListFromDB } from '../data-access/data-access-equipments/operate-equipments.js'
 
 export default function get(app) {
   // app.use((req, res, next) => {
@@ -55,24 +53,16 @@ export default function get(app) {
     }
   })
 
-  app.get('/workingEquipmentList', async (req, res) => {
-    const { login } = req.query
+  app.get('/equipment/operate', authenticateToken, async (req, res) => {
     try {
-      const isUserExist = await getUserData(login)
-      if (!isUserExist)
-        throw { error: localizations.users.errors.unregisteredUserError, status: 404 }
-      const workingEquipments = await getWorkingEquipmentListFromDB()
-      if (Object.keys(workingEquipments).length === 0) return res.status(200).json([])
-      const transformedList = await transformListByFavoriteEquipment(workingEquipments, login).then(
-        list => {
-          return list.map(el => ({ ...el, isOperate: true }))
-        },
-      )
-      return res.status(200).json(transformedList)
+      const { login } = req.query
+      const { originalUrl } = req
+      console.info(`Событие: GET-запрос по адресу: ${originalUrl}`)
+      const list = await getWorkingEquipmentListFromDB(login)
+      console.info(`Данные отправлены. Логин ${login}.`)
+      return res.status(200).json(list)
     } catch (e) {
-      console.log(e)
-      if (e.error) res.status(e.status).json(e.error)
-      else return res.status(500).json(e)
+      processEndpointError(res, e)
     }
   })
 

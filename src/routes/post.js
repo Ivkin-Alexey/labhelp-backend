@@ -1,7 +1,6 @@
 import {
   updateUserDataPost,
   deletePersonPost,
-  equipmentStartPost,
   updateReagentApplicationPost,
   deleteReagentApplicationPost,
   addNewReagentAppToDBPost,
@@ -17,6 +16,7 @@ import {
   addFavoriteEquipmentToDB,
   removeFavoriteEquipmentFromDB,
 } from '../data-access/data-access-equipments/favorite-equipments.js'
+import { changeOperateEquipmentStatus } from '../controllers/equipment-controller/operate-equipment.js'
 
 export default function post(app) {
   app.post('/updatePersonData', async (req, res) => await updateUserDataPost(req, res, bot))
@@ -26,7 +26,7 @@ export default function post(app) {
     authenticateToken,
     async (req, res) => await deletePersonPost(req, res, bot),
   )
-  app.post('/operateEquipment', async (req, res) => await equipmentStartPost(req, res, bot))
+  app.post('/equipment/operate/:id', async (req, res) => await changeOperateEquipmentStatus(req, res))
 
   app.post(
     '/deleteReagentApplication',
