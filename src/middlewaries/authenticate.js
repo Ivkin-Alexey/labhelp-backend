@@ -15,7 +15,7 @@ export function authenticateToken(req, res, next) {
   const token = authHeader && authHeader.split(' ')[1]
 
   const requestPath = req.path
-  const paths = ['/equipments/', '/auth/']
+  const paths = ['/equipments', '/auth/']
 
   const isTokenVerified = verifyToken(token)
 
