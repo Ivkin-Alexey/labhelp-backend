@@ -36,8 +36,9 @@ export async function processUserRequest(req, res) {
 
 export async function loginPersonPost(req, res) {
   try {
-    const { login, password } = req.body
-    if (!login || !password) {
+    const { password } = req.body
+    const { login } = req.params
+    if (!password) {
       return res.status(400).json('Логин или пароль отсутствуют')
     }
     const token = await authenticateUser(login, password)
