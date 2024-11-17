@@ -3,16 +3,21 @@ import * as dotenv from 'dotenv'
 dotenv.config()
 import TelegramBot from 'node-telegram-bot-api'
 import { PrismaClient } from '@prisma/client'
-import { processCallbackQuery } from './src/controllers/callbackQueriesProcessing.js'
+import { processCallbackQuery } from './src/controllers/tg-bot-controllers/callbackQueriesProcessing.js'
 import { processCommand } from './src/controllers/tg-bot-controllers/commands.js'
-import get from './src/routes/get.js'
+import get from './src/routes/get/get.js'
 import post from './src/routes/post.js'
 import express from 'express'
 import bodyParser from 'body-parser'
 import cors from 'cors'
-import http from 'http'
 import https from 'https'
-import { PORT, HTTPS_PORT } from './src/assets/constants/constants.js'
+import { HTTPS_PORT } from './src/assets/constants/constants.js'
+import getEquipment from './src/routes/get/equipment.js'
+import deleteMethod from './src/routes/delete.js'
+import { logRequestInfo } from './src/middlewaries/logRequestInfo.js'
+import { authenticateToken } from './src/middlewaries/authenticate.js'
+import { logSuccessfulResponse } from './src/middlewaries/logSuccessfulResponse.js'
+import patch from './src/routes/patch.js'
 
 process.on('uncaughtException', err => console.log(err))
 
@@ -30,10 +35,14 @@ const app = express()
 app.use(express.json())
 app.use(cors())
 app.use(bodyParser.urlencoded({ extended: true }))
+app.use(logRequestInfo)
+app.use(authenticateToken)
+app.use(logSuccessfulResponse)
+getEquipment(app)
 get(app)
 post(app)
-
-const httpServer = http.createServer(app)
+deleteMethod(app)
+patch(app)
 
 const httpsServer = https.createServer(
   {
@@ -42,10 +51,6 @@ const httpsServer = https.createServer(
   },
   app,
 )
-
-httpServer.listen(PORT, () => {
-  console.log(`HTTP Server running on port ${PORT}`)
-})
 
 httpsServer.listen(HTTPS_PORT, () => {
   console.log(`HTTPS Server running on port ${HTTPS_PORT}`)

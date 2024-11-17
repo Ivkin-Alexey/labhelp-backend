@@ -1,6 +1,6 @@
 import { prisma } from '../../../index.js'
 import { sendError } from '../../controllers/tg-bot-controllers/botAnswers.js'
-import { transformFavoriteEquipmentList } from './helpers.js'
+import { transformFavoriteEquipmentList } from '../helpers.js'
 
 export async function getFavoriteEquipmentsFromDB(login) {
   try {

@@ -8,10 +8,17 @@ generator client {
 }
 
 model User {
-  login              String              @id
-  password           String
-  favoriteEquipments FavoriteEquipment[]
-  operatingEquipment OperatingEquipment[]
+  login                   String              @id
+  password                String
+  firstName               String?
+  lastName                String?
+  patronymic              String?
+  position                String?
+  department              String?
+  role                    String?
+  favoriteEquipments      FavoriteEquipment[]
+  operatingEquipment      OperatingEquipment[]
+  equipmentSearchHistory  EquipmentSearchHistory[]
 }
 
 model Equipment {
@@ -49,4 +56,13 @@ model OperatingEquipment {
   equipment     Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
 
   @@unique([login, equipmentId])
+}
+
+model EquipmentSearchHistory {
+  login       String 
+  term        String
+
+  user      User      @relation(fields: [login], references: [login], onDelete: Cascade)
+
+  @@unique([login, term])
 }

@@ -6,11 +6,11 @@ import {
   sendConfusedMessage,
   sendCommandList,
 } from './botAnswers.js'
-import { addRandomUser, deleteUsersWithEmptyChatID, updateUserData, getUserData } from '../users.js'
-import { askReagentsManagerChatID } from '../replyToMessage.js'
+import { askReagentsManagerChatID } from './replyToMessage.js'
 import { personRoles } from '../../assets/constants/users.js'
 import localizations from '../../assets/constants/localizations.js'
 import { reloadEquipmentDB } from '../equipment-controller/equipment.js'
+import { getUserData, updateUserData } from '../../data-access/users.js'
 
 async function processCommand(bot, command) {
   const chatID = command.chat.id
@@ -33,18 +33,6 @@ async function processCommand(bot, command) {
         break
       case '/help':
         await sendCommandList(bot, chatID)
-        break
-      case '/addRandomUser':
-        await addRandomUser()
-        break
-      case '/addRandomAdmin':
-        await addRandomUser('admin')
-        break
-      case '/addRandomSuperAdmin':
-        await addRandomUser('superAdmin')
-        break
-      case '/deleteUsersWithEmptyChatID':
-        await deleteUsersWithEmptyChatID(chatID)
         break
       case '/researches':
         await sendResearches(bot, chatID)
