@@ -4,8 +4,8 @@ import bcrypt from 'bcrypt'
 
 export async function getUserData(login) {
   try {
-    const isExist = await checkIsUserExist(login)
-    if (!isExist) {
+    const user = await getUserByLogin(login)
+    if (!user) {
       throw { message: `Пользователь с логином '${login}' не существует.`, status: 404 }
     }
     const userData = await prisma.User.findUnique({
@@ -27,8 +27,8 @@ export async function getUserData(login) {
 
 export async function deleteUser(login) {
   try {
-    const isExist = await checkIsUserExist(login)
-    if (!isExist) {
+    const user = await getUserByLogin(login)
+    if (!user) {
       throw { message: `Пользователь с логином '${login}' не существует.`, status: 404 }
     }
     await prisma.User.delete({
@@ -48,12 +48,13 @@ export async function deleteUser(login) {
 
 export async function createNewPerson(login, userData) {
   try {
-    const isExist = await checkIsUserExist(login)
-    if (isExist) {
+    const user = await getUserByLogin(login)
+    if (user) {
       throw { message: `Пользователь с логином '${login}' уже существует.`, status: 400 }
     }
 
     const hashedPassword = await bcrypt.hash(userData.password, 10)
+    delete userData.password
 
     await prisma.User.create({
       data: {
@@ -62,7 +63,8 @@ export async function createNewPerson(login, userData) {
         password: hashedPassword,
       },
     })
-    return { message: `Пользователь ${login} успешно создан` }
+    const token = generateAccessToken(login)
+    return { message: `Пользователь ${login} успешно создан`, token }
   } catch (error) {
     const errorMsg = `Ошибка при создании нового пользователя. Подробности: ${error.message || error}`
     throw { message: errorMsg, status: error.status || 500 }
@@ -73,8 +75,8 @@ export async function createNewPerson(login, userData) {
 
 export async function updateUserData(login, userData) {
   try {
-    const isExist = await checkIsUserExist(login)
-    if (!isExist) {
+    const user = await getUserByLogin(login)
+    if (!user) {
       throw { message: `Пользователя с логином '${login}' не существует.`, status: 400 }
     }
     await prisma.User.update({
@@ -92,22 +94,15 @@ export async function updateUserData(login, userData) {
   }
 }
 
-async function checkIsUserExist(login) {
-  const existingUser = await prisma.User.findUnique({
+async function getUserByLogin(login) {
+  return await prisma.User.findUnique({
     where: { login },
   })
-
-  return !!existingUser
 }
 
 export async function authenticateUser(login, password) {
   try {
-    const user = await prisma.User.findUnique({
-      where: {
-        login: login,
-      },
-    })
-
+    const user = await getUserByLogin(login)
     if (!user) {
       const msg = 'Неправильный логин или пароль'
       throw { message: msg, status: 404 }
@@ -116,7 +111,7 @@ export async function authenticateUser(login, password) {
     const isPasswordValid = await bcrypt.compare(password, user.password)
 
     if (!isPasswordValid) {
-      const msg = 'Неправильный логин или пароль'
+      const msg = 'Неправильный пароль'
       throw { message: msg, status: 404 }
     }
 

@@ -4,9 +4,9 @@ import { processSearchHistoryRequest } from '../controllers/equipment-controller
 import { loginPersonPost, processUserRequest } from '../controllers/user-controller.js'
 
 export default function post(app) {
-  app.post('/users/:login', processUserRequest)
+  app.post('/auth/sign-up/:login', processUserRequest)
 
-  app.post('/auth/:login', loginPersonPost)
+  app.post('/auth/sign-in/:login', loginPersonPost)
 
   app.post('/equipments/operate/:equipmentId', changeOperateEquipmentStatus)
 
