@@ -47,9 +47,9 @@
 * /users/{user login} - зарегистрировать нового пользователя  
 
 **Оборудование:**
-* /equipments/operate/{equipment ID} - добавить оборудование в список работающего в данный момент  
-* /equipments/favorite/{equipment ID} - добавить оборудование в список избранного для данного пользователя  
-* /equipments/search-history/{user login} - добавить поисковый запрос в историю поиска оборудования  
+* /equipments/operate/{equipment ID}?login={user login} - добавить оборудование в список работающего в данный момент  
+* /equipments/favorite/{equipment ID}?login={user login} - добавить оборудование в список избранного для данного пользователя  
+* /equipments/search-history/{user login}?term={search term} - добавить поисковый запрос в историю поиска оборудования  
 
 ### DELETE
 
@@ -57,7 +57,8 @@
 * /users/{user login} - удалить аккаунт пользователя  
 
 **Оборудование:**
-* /equipments/operate/{equipment ID} - удалить оборудование из списка работающего в данный момент
+* /equipments/operate/{equipment ID}?login={user login} - удалить оборудование из списка работающего в данный момент
+* /equipments/favorite/{equipment ID}?login={user login} - удалить оборудование из списка избранного
 * /equipment/search-history/{user login}?term={search term} - удалить оборудование из списка работающего в данный момент
 
 ### PATCH
