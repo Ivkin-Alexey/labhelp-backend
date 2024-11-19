@@ -12,7 +12,7 @@ export async function changeOperateEquipmentStatus(req, res) {
   try {
     let response
     if (method === 'POST') {
-      response = await startWorkWithEquipment(+login, equipmentId, isLongUse)
+      response = await startWorkWithEquipment(login, equipmentId, isLongUse)
     } else if (method === 'DELETE') {
       response = await endWorkWithEquipment(login, equipmentId)
     } else {
