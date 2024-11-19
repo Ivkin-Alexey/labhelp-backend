@@ -3,7 +3,7 @@ import { processSearchHistoryRequest } from '../controllers/equipment-controller
 import { processUserRequest } from '../controllers/user-controller.js'
 
 export default function deleteMethod(app) {
-  app.delete('/equipments/operate/:id', changeOperateEquipmentStatus)
+  app.delete('/equipments/operate/:equipmentId', changeOperateEquipmentStatus)
 
   app.delete('/users/:login', processUserRequest)
 
