@@ -8,13 +8,13 @@ export async function changeOperateEquipmentStatus(req, res) {
   const { equipmentId } = req.params
   const method = req.method
 
-  const { chatID, login, isLongUse } = req.body
+  const { login, isLongUse } = req.body
   try {
     let response
     if (method === 'POST') {
-      response = await startWorkWithEquipment(+chatID || login, equipmentId, isLongUse)
+      response = await startWorkWithEquipment(+login, equipmentId, isLongUse)
     } else if (method === 'DELETE') {
-      response = await endWorkWithEquipment(+chatID || login, equipmentId)
+      response = await endWorkWithEquipment(login, equipmentId)
     } else {
       res.status(405).json({message: 'Метод не разрешен', status: 405})
     }
