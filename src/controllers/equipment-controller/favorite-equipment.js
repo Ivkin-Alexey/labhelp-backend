@@ -1,24 +1,21 @@
-import {
-  addFavoriteEquipmentToDB,
-  removeFavoriteEquipmentFromDB,
-} from '../../data-access/data-access-equipments/favorite-equipments.js'
+import { addFavoriteEquipmentToDB, removeFavoriteEquipmentFromDB } from '../../data-access/data-access-equipments/favorite-equipments.js'
+import { processEndpointError } from '../../utils/errorProcessing.js'
 
 export async function processFavoriteEquipmentResponse(req, res) {
-  const { add, remove } = req.query
-  const { login, equipmentId } = req.body
   try {
-    if (add) {
-      return await addFavoriteEquipmentToDB(login, equipmentId).then(msg =>
-        res.status(200).json({ message: msg, status: 200 }),
-      )
+    const method = req.method
+    const { equipmentId } = req.params
+    const { login } = req.query
+    let response
+    if (method === 'POST') {
+      response = await addFavoriteEquipmentToDB(login, equipmentId)
+    } else if (method === 'DELETE') {
+      response = await removeFavoriteEquipmentFromDB(login, equipmentId)
+    } else {
+      res.status(405).json({ message: 'Метод не разрешен', status: 405 })
     }
-    if (remove) {
-      return await removeFavoriteEquipmentFromDB(login, equipmentId).then(msg =>
-        res.status(200).json({ message: msg, status: 200 }),
-      )
-    }
+    return res.status(200).json({ message: response, status: 200 })
   } catch (e) {
-    console.log(e)
-    return res.status(500).json(e)
+    processEndpointError(res, e)
   }
 }
