@@ -20,7 +20,7 @@ export async function processUserRequest(req, res) {
     if (method === 'GET') {
       response = await getUserData(login)
     } else if (method === 'POST') {
-      response = await createNewPerson(login, body)
+      response = await createNewPerson(login, body.userData)
     } else if (method === 'DELETE') {
       response = await deleteUser(login)
     } else if (method === 'PATCH') {
