@@ -18,6 +18,16 @@ export default function get(app) {
     return res.status(200).json('Привет')
   })
 
+  app.get('/users/token', async (req, res) => {
+    try {
+      const isValid = req.isAuthenticated
+      return res.status(200).json({message: isValid ? "Токен валидный" : "Токен не валидный", data: isValid})
+    } catch (e) {
+      console.log(e)
+      return res.status(500).json(e)
+    }
+  })
+
   app.get('/users/:login', async (req, res) => {
     try {
       const { login } = req.params
