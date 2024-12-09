@@ -8,14 +8,18 @@ generator client {
 }
 
 model User {
-  login                   String              @id
-  password                String
-  firstName               String?
-  lastName                String?
-  patronymic              String?
-  position                String?
-  department              String?
-  role                    String?
+  login                         String              @id
+  password                      String
+  firstName                     String?
+  lastName                      String?
+  patronymic                    String?
+  position                      String?
+  department                    String?
+  category                      String?
+  role                          String
+  studentsEducationYear         String?
+  postGraduateEducationYear     String?
+
   favoriteEquipments      FavoriteEquipment[]
   operatingEquipment      OperatingEquipment[]
   equipmentSearchHistory  EquipmentSearchHistory[]
