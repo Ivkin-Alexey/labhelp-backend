@@ -57,7 +57,7 @@ export async function createNewPerson(login, userData) {
     const hashedPassword = await bcrypt.hash(userData.password, 10)
     delete userData.password
     if (!userData.role) {
-      userData = personRoles.user
+      userData.role = personRoles.user
     }
 
     await prisma.User.create({
