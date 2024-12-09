@@ -1,4 +1,5 @@
 import { prisma } from '../../index.js'
+import { personRoles } from '../assets/constants/users.js'
 import { generateAccessToken } from '../controllers/jwt.js'
 import bcrypt from 'bcrypt'
 
@@ -55,6 +56,9 @@ export async function createNewPerson(login, userData) {
 
     const hashedPassword = await bcrypt.hash(userData.password, 10)
     delete userData.password
+    if (!userData.role) {
+      userData = personRoles.user
+    }
 
     await prisma.User.create({
       data: {
