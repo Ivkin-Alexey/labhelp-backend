@@ -52,10 +52,10 @@ export default function get(app) {
         const msg = `У пользователя ${login} недостаточно прав для этого запроса`
         throw { message: msg, status: 403 }
       }
-      const users = await prisma.user.findMany({
-        select: {
-          login: true,
-        },
+      const rawData = await prisma.user.findMany()
+      const users = rawData.map(el => {
+        delete el.password
+        return el
       })
       return res.status(200).json(users)
     } catch (e) {
