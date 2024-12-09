@@ -1,6 +1,7 @@
 import { prisma } from '../../../index.js'
 import { processEndpointError } from '../../utils/errorProcessing.js'
 import { getUserData } from '../../data-access/users.js'
+import { personRoles } from '../../assets/constants/users.js'
 
 export default function get(app) {
   // app.use((req, res, next) => {
@@ -40,6 +41,17 @@ export default function get(app) {
 
   app.get('/users', async (req, res) => {
     try {
+      const { login } = req.query
+      if (!login) {
+        const msg = 'Логин отсутствует'
+        throw { message: msg, status: 400 }
+      }
+      const userData = await getUserData(login)
+      const {role} = userData
+      if (role !== personRoles.admin) {
+        const msg = `У пользователя ${login} недостаточно прав для этого запроса`
+        throw { message: msg, status: 403 }
+      }
       const users = await prisma.user.findMany({
         select: {
           login: true,
@@ -47,8 +59,7 @@ export default function get(app) {
       })
       return res.status(200).json(users)
     } catch (e) {
-      console.log(e)
-      return res.status(500).json(e)
+      processEndpointError(res, e)
     }
   })
 
