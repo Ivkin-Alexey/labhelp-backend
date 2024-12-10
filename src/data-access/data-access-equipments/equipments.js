@@ -49,7 +49,6 @@ export async function getEquipmentByID(equipmentId, login, isAuthenticated) {
           operatingEquipment: true,
         },
       })
-      console.log(rowData)
 
       equipment = transformEquipmentInfo(rowData)
     } else {

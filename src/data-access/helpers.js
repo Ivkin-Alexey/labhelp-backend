@@ -35,14 +35,23 @@ export function transformOperateEquipmentList(equipment) {
 }
 
 export function transformEquipmentInfo(equipment) {
-  const {login, isLongUse, startDateTime} = equipment.operatingEquipment[0]
-  const result = {
-    isOperate: equipment.operatingEquipment.length > 0,
-    isFavorite: equipment.favoriteEquipment.length > 0,
-    ...equipment,
-    login,
-    isLongUse,
-    startDateTime
+  let result 
+  if (equipment.operatingEquipment[0]) {
+    const { login, isLongUse, startDateTime } = equipment.operatingEquipment[0]
+    result = {
+      isOperate: true,
+      isFavorite: equipment.favoriteEquipment.length > 0,
+      ...equipment,
+      login,
+      isLongUse,
+      startDateTime
+    }
+  } else {
+    result = {
+      isOperate: false,
+      isFavorite: equipment.favoriteEquipment.length > 0,
+      ...equipment,
+    }
   }
   delete result.favoriteEquipment
   delete result.operatingEquipment

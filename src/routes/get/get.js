@@ -24,8 +24,7 @@ export default function get(app) {
       const isValid = req.isAuthenticated
       return res.status(200).json({message: isValid ? "Токен валидный" : "Токен не валидный", data: isValid})
     } catch (e) {
-      console.log(e)
-      return res.status(500).json(e)
+      processEndpointError(res, e)
     }
   })
 
