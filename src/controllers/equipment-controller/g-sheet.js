@@ -7,7 +7,7 @@ export async function fetchEquipmentListFromGSheet() {
       const equipment = []
       await equipmentList.loadInfo()
       let sheet = equipmentList.sheetsById[equipmentListSheetID]
-      const rows = await sheet.getRows({ offset: 1 })
+      const rows = await sheet.getRows()
       for (let i = 0; i < amountOfEquipment; i++) {
         const isAvailable = rows[i].get('Включить в каталог оборудования')
         if(isAvailable === "FALSE") continue
@@ -28,9 +28,9 @@ export async function fetchEquipmentListFromGSheet() {
         newEquipmentItem.serialNumber = rows[i].get('Заводской №')
         newEquipmentItem.inventoryNumber = rows[i].get('Инвентарный №')
         newEquipmentItem.id = newEquipmentItem.inventoryNumber + newEquipmentItem.serialNumber
-        if (!checkIsCorrect(newEquipmentItem)) {
-          continue
-        }
+        // if (!checkIsCorrect(newEquipmentItem)) {
+        //   continue
+        // }
         equipment.push(newEquipmentItem)
       }
       return equipment
