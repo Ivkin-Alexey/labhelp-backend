@@ -6,8 +6,8 @@ import JWT from 'google-auth-library'
 const equipmentOperationsTableID = '1UZ21neg8OevoKReVYHIAkUmw9v388zF8AwpykXs-EsE'
 const equipmentOperationsSheetIndex = '0'
 const confirmedUsersTableID = '19R0KhK7RvVPKvtmVA7-EGPjakJxfWRflRLHp4Z4FFrs'
-const equipmentListTableID = '1DzK7-8XCBOmPmmtTpVOR_kEYh1oVfyQD4sUODwKmQK0'
-const equipmentListSheetID = '460529131'
+const equipmentListTableID = '1hhApEbP2pB52e-1wstgj7LX4QhRcuzGGLSQTPHLuYdc'
+const equipmentListSheetID = '490152393'
 
 const serviceAccountAuth = new JWT.JWT({
   email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,

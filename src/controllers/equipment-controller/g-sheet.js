@@ -9,6 +9,8 @@ export async function fetchEquipmentListFromGSheet() {
       let sheet = equipmentList.sheetsById[equipmentListSheetID]
       const rows = await sheet.getRows()
       for (let i = 0; i < amountOfEquipment; i++) {
+        const isAvailable = rows[i].get('Включить в каталог оборудования')
+        if(isAvailable === "FALSE") continue
         const newEquipmentItem = new EquipmentItem()
         newEquipmentItem.name = rows[i].get('Наименование оборудования') || ''
         newEquipmentItem.description = rows[i].get('Область применения оборудования') || ''
@@ -23,7 +25,7 @@ export async function fetchEquipmentListFromGSheet() {
               'Паспорт/руководство по эксплуатации',
           ) || ''
         newEquipmentItem.imgUrl = rows[i].get('Ссылки на фотографии') || ''
-        newEquipmentItem.serialNumber = rows[i].get('Заводской номер')
+        newEquipmentItem.serialNumber = rows[i].get('Заводской №')
         newEquipmentItem.inventoryNumber = rows[i].get('Инвентарный №')
         newEquipmentItem.id = newEquipmentItem.inventoryNumber + newEquipmentItem.serialNumber
         if (!checkIsCorrect(newEquipmentItem)) {
