@@ -7,7 +7,7 @@ export async function fetchEquipmentListFromGSheet() {
       const equipment = []
       await equipmentList.loadInfo()
       let sheet = equipmentList.sheetsById[equipmentListSheetID]
-      const rows = await sheet.getRows()
+      const rows = await sheet.getRows({ offset: 1 })
       for (let i = 0; i < amountOfEquipment; i++) {
         const isAvailable = rows[i].get('Включить в каталог оборудования')
         if(isAvailable === "FALSE") continue
