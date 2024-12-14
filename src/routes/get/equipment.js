@@ -14,10 +14,10 @@ export default function getEquipment(app) {
   app.get('/equipments', async (req, res) => {
     let equipmentList
     try {
-      const { category, search, login } = req.query
+      const { category, search, login, filters } = req.query
       const { isAuthenticated } = req
-      if (search) {
-        equipmentList = await getEquipmentListBySearch(search, login, isAuthenticated)
+      if (search || filters) {
+        equipmentList = await getEquipmentListBySearch(search, login, isAuthenticated, filters)
       } else if (category) {
         equipmentList = await getEquipmentListByCategory(category, login, isAuthenticated)
       } else {

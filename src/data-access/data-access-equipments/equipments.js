@@ -110,7 +110,7 @@ export async function getEquipmentListByCategory(category, login, isAuthenticate
   }
 }
 
-export async function getEquipmentListBySearch(searchTerm, login, isAuthenticated) {
+export async function getEquipmentListBySearch(searchTerm, login, isAuthenticated, filters) {
   const fieldsToSearch = [
     'serialNumber',
     'inventoryNumber',
@@ -127,6 +127,17 @@ export async function getEquipmentListBySearch(searchTerm, login, isAuthenticate
       mode: 'insensitive',
     },
   }))
+  
+  const filterConditions = filters && Object.entries(filters).flatMap(([key, values]) => {
+    if (values.length > 0) {
+      return {
+        [key]: {
+          in: values,
+        },
+      }
+    }
+    return []
+  }) || []
 
   try {
     let results
@@ -134,6 +145,7 @@ export async function getEquipmentListBySearch(searchTerm, login, isAuthenticate
       let rowData = await prisma.Equipment.findMany({
         where: {
           OR: whereConditions,
+          AND: filterConditions,
         },
         include: {
           favoriteEquipment: {
@@ -148,6 +160,7 @@ export async function getEquipmentListBySearch(searchTerm, login, isAuthenticate
       results = await prisma.Equipment.findMany({
         where: {
           OR: whereConditions,
+          AND: filterConditions,
         },
       })
     }
@@ -162,6 +175,7 @@ export async function getEquipmentListBySearch(searchTerm, login, isAuthenticate
     await prisma.$disconnect()
   }
 }
+
 
 export async function createEquipmentDbFromGSheet() {
   async function transferEquipments(list) {
