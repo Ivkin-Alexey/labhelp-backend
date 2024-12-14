@@ -29,6 +29,14 @@ export default function getEquipment(app) {
     }
   })
 
+  app.get('/equipments/filters', async (req, res) => {
+    try {
+      return res.status(200).json(equipmentFilterList)
+    } catch (e) {
+      processEndpointError(res, e)
+    }
+  })
+
   app.get('/equipments/:equipmentId', async (req, res) => {
     try {
       const { equipmentId } = req.params
@@ -61,13 +69,7 @@ export default function getEquipment(app) {
     }
   })
 
-  app.get('/equipments/filters', async (req, res) => {
-    try {
-      return res.status(200).json(equipmentFilterList)
-    } catch (e) {
-      processEndpointError(res, e)
-    }
-  })
+
 
   app.get('/equipments/search-history/:login', processSearchHistoryRequest)
 }
