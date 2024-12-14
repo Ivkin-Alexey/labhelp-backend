@@ -1,3 +1,4 @@
+import { equipmentFilterList } from '../../assets/constants/equipments.js'
 import { processSearchHistoryRequest } from '../../controllers/equipment-controller/search-history.js'
 import {
   getEquipmentByID,
@@ -55,6 +56,14 @@ export default function getEquipment(app) {
       const { login } = req.params
       const list = await getFavoriteEquipmentsFromDB(login)
       return res.status(200).json(list)
+    } catch (e) {
+      processEndpointError(res, e)
+    }
+  })
+
+  app.get('/equipments/filters', async (req, res) => {
+    try {
+      return res.status(200).json(equipmentFilterList)
     } catch (e) {
       processEndpointError(res, e)
     }

@@ -36,6 +36,11 @@ model Equipment {
   category          String
   filesUrl          String
   imgUrl            String
+  classification    String?
+  measurements      String?
+  department        String?
+  type              String?
+  kind              String?
   favoriteEquipment FavoriteEquipment[]
   operatingEquipment OperatingEquipment[]
 }

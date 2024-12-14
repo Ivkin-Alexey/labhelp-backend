@@ -165,7 +165,7 @@ export async function getEquipmentListBySearch(searchTerm, login, isAuthenticate
 
 export async function createEquipmentDbFromGSheet() {
   async function transferEquipments(list) {
-    const BATCH_SIZE = 1
+    const BATCH_SIZE = 10
     let nonUniqueRecords = []
     let failedRecords = []
 
