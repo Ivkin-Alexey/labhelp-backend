@@ -1,6 +1,6 @@
 import { createDate, createTime, createFullName } from '../../controllers/helpers.js'
 
-const amountOfEquipment = 600
+const amountOfEquipment = 10000
 
 const equipmentFilterList = [
   {

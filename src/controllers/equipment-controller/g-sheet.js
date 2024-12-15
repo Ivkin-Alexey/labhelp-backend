@@ -5,7 +5,6 @@ import { checkIsCorrect } from "./helpers.js"
 export async function fetchEquipmentListFromGSheet() {
     try {
       const equipment = []
-      const equipmentFilters = 
       await equipmentList.loadInfo()
       let sheet = equipmentList.sheetsById[equipmentListSheetID]
       const rows = await sheet.getRows()
