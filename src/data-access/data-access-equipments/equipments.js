@@ -119,24 +119,26 @@ export async function getEquipmentListBySearch(searchTerm, login, isAuthenticate
     },
   }))
   
-  // const filterConditions = filters && Object.entries(filters).flatMap(([key, values]) => {
-  //   if (values.length > 0) {
-  //     return {
-  //       [key]: {
-  //         in: values,
-  //       },
-  //     }
-  //   }
-  //   return []
-  // }) || []
+  const filterConditions = filters && Object.entries(filters).flatMap(([key, values]) => {
+    if (values.length > 0) {
+      return {
+        [key]: {
+          in: values,
+        },
+      }
+    }
+    return []
+  }) || []
 
   try {
     let results
     if (login && isAuthenticated) {
       let rowData = await prisma.Equipment.findMany({
-        where: {
+        where: filters ? {
           OR: whereConditions,
-          // AND: filterConditions,
+        } : {
+          OR: whereConditions,
+          AND: filterConditions,
         },
         include: {
           favoriteEquipment: {
@@ -149,9 +151,11 @@ export async function getEquipmentListBySearch(searchTerm, login, isAuthenticate
       results = rowData.map(transformEquipmentList)
     } else {
       results = await prisma.Equipment.findMany({
-        where: {
+        where: filters ? {
           OR: whereConditions,
-          // AND: filterConditions,
+          AND: filterConditions,
+        } : {
+          OR: whereConditions,
         },
       })
     }
