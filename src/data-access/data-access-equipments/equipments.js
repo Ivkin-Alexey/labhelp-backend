@@ -1,4 +1,5 @@
 import { prisma } from '../../../index.js'
+import { fieldsToSearch } from '../../assets/constants/equipments.js'
 import localizations from '../../assets/constants/localizations.js'
 import { fetchEquipmentListFromGSheet } from '../../controllers/equipment-controller/g-sheet.js'
 import { sendNotification } from '../../controllers/tg-bot-controllers/botAnswers.js'
@@ -111,16 +112,6 @@ export async function getEquipmentListByCategory(category, login, isAuthenticate
 }
 
 export async function getEquipmentListBySearch(searchTerm, login, isAuthenticated, filters) {
-  const fieldsToSearch = [
-    'serialNumber',
-    'inventoryNumber',
-    'name',
-    'description',
-    'brand',
-    'model',
-    'category',
-  ]
-
   const whereConditions = fieldsToSearch.map(field => ({
     [field]: {
       contains: searchTerm,
@@ -182,14 +173,16 @@ export async function createEquipmentDbFromGSheet() {
     const BATCH_SIZE = 10
     let nonUniqueRecords = []
     let failedRecords = []
+    let successfulRecordsCount = 0
 
     for (let i = 0; i < list.length; i += BATCH_SIZE) {
       const batch = list.slice(i, i + BATCH_SIZE)
 
       try {
-        await prisma.Equipment.createMany({
+        const result = await prisma.Equipment.createMany({
           data: batch,
         })
+        successfulRecordsCount += result.count
       } catch (error) {
         console.log(error)
         if (error.code === 'P2002') {
@@ -219,6 +212,9 @@ export async function createEquipmentDbFromGSheet() {
       )
       nonUniqueRecords = []
     }
+    const successMsg = `Добавлено записей: ${successfulRecordsCount} из ${list.length}`
+    sendNotification(successMsg)
+    console.log(successMsg)
   }
 
   try {
@@ -234,3 +230,4 @@ export async function createEquipmentDbFromGSheet() {
   }
   return localizations.equipment.dbIsReloadedMsg
 }
+

@@ -1,5 +1,6 @@
 import { amountOfEquipment, equipmentItem } from "../../assets/constants/equipments.js"
 import { equipmentList, equipmentListSheetID } from "../../assets/constants/gSpreadSheets.js"
+import { checkIsEmpty } from "./helpers.js"
 
 export async function fetchEquipmentListFromGSheet() {
     try {
@@ -16,9 +17,9 @@ export async function fetchEquipmentListFromGSheet() {
           newEquipmentItem[key] = rows[i].get(equipmentItem[key]) || ""
         }
         newEquipmentItem.id = newEquipmentItem.inventoryNumber + newEquipmentItem.serialNumber
-        // if (!checkIsCorrect(newEquipmentItem)) {
-        //   continue
-        // }
+        if (checkIsEmpty(newEquipmentItem)) {
+          continue
+        }
         equipment.push(newEquipmentItem)
       }
       return equipment

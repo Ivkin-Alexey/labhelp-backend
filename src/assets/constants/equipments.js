@@ -1,6 +1,16 @@
 import { createDate, createTime, createFullName } from '../../controllers/helpers.js'
 
-const amountOfEquipment = 10
+const amountOfEquipment = 10000
+
+const fieldsToSearch = [
+  'serialNumber',
+  'inventoryNumber',
+  'name',
+  'description',
+  'brand',
+  'model',
+  'category',
+]
 
 const equipmentFilterList = [
   {
@@ -174,4 +184,5 @@ export {
   WorkingEquipmentItem,
   amountOfEquipment,
   equipmentFilterList,
+  fieldsToSearch
 }
