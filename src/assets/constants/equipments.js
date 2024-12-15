@@ -1,6 +1,6 @@
 import { createDate, createTime, createFullName } from '../../controllers/helpers.js'
 
-const amountOfEquipment = 10000
+const amountOfEquipment = 10
 
 const equipmentFilterList = [
   {
@@ -119,7 +119,7 @@ const equipmentFilterList = [
   },
 ]
 
-const equipmentItem = Object.assign(equipmentFilterList, {
+const equipmentItem = {
   inventoryNumber: 'Инвентарный №',
   category: 'Категория',
   name: 'Наименование оборудования',
@@ -138,7 +138,7 @@ const equipmentItem = Object.assign(equipmentFilterList, {
   type: 'Тип оборудования',
   kind: 'Вид оборудования',
   department: 'Наименование подразделения',
-})
+}
 
 function WorkingEquipmentItem(equipmentId, userID, longUse = false) {
   this.id = equipmentId

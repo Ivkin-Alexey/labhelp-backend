@@ -1,6 +1,5 @@
-import { amountOfEquipment, equipmentFilterList, equipmentItem } from "../../assets/constants/equipments.js"
+import { amountOfEquipment, equipmentItem } from "../../assets/constants/equipments.js"
 import { equipmentList, equipmentListSheetID } from "../../assets/constants/gSpreadSheets.js"
-import { checkIsCorrect } from "./helpers.js"
 
 export async function fetchEquipmentListFromGSheet() {
     try {
@@ -9,6 +8,7 @@ export async function fetchEquipmentListFromGSheet() {
       let sheet = equipmentList.sheetsById[equipmentListSheetID]
       const rows = await sheet.getRows()
       for (let i = 0; i < amountOfEquipment; i++) {
+        if(!rows[i]) continue
         const isAvailable = rows[i].get('Включить в каталог оборудования')
         if(isAvailable === "FALSE") continue
         const newEquipmentItem = {}

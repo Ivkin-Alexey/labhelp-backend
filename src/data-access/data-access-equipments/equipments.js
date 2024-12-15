@@ -191,6 +191,7 @@ export async function createEquipmentDbFromGSheet() {
           data: batch,
         })
       } catch (error) {
+        console.log(error)
         if (error.code === 'P2002') {
           nonUniqueRecords.push(...batch)
         } else {
