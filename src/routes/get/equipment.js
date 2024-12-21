@@ -12,8 +12,8 @@ import { processEndpointError } from '../../utils/errorProcessing.js'
 
 export default function getEquipment(app) {
   app.get('/equipments', async (req, res) => {
-    let equipmentList
     try {
+      let equipmentList
       const { category, search, login, filters } = req.query
       const { isAuthenticated } = req
       if (search || filters) {
@@ -24,6 +24,23 @@ export default function getEquipment(app) {
         equipmentList = await getEquipmentList(login, isAuthenticated)
       }
       return res.status(200).json(equipmentList)
+    } catch (e) {
+      processEndpointError(res, e)
+    }
+  })
+
+  app.get('/equipments/search', async (req, res) => {
+    try {
+      let equipmentList
+      const { term, login, filters } = req.query
+      const { isAuthenticated } = req
+      if (term) {
+        equipmentList = await getEquipmentListBySearch(term, login, isAuthenticated, filters)
+        return res.status(200).json(equipmentList)
+      } else {
+        const msg = 'Отсутствует поисковая фраза'
+        throw { message: msg, status: 403 }
+      }
     } catch (e) {
       processEndpointError(res, e)
     }
@@ -68,8 +85,6 @@ export default function getEquipment(app) {
       processEndpointError(res, e)
     }
   })
-
-
 
   app.get('/equipments/search-history/:login', processSearchHistoryRequest)
 }
