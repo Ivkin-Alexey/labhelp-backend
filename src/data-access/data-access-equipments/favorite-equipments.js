@@ -77,9 +77,14 @@ export async function addFavoriteEquipmentToDB(login, equipmentId) {
     console.info(infoMessage)
     return infoMessage
   } catch (error) {
-    const errorMsg =
+    let errorMsg
+    if (error.code === 'P2025') {
+      errorMsg = "Такой пользователь не найден"
+    } else {
+      errorMsg =
       `Ошибка при добавлении оборудования в избранное. Логин ${login}, Id оборудования ${equipmentId}. Подробности: ` +
       error
+    }
     console.error(errorMsg)
     sendError(errorMsg)
     await prisma.$disconnect()
