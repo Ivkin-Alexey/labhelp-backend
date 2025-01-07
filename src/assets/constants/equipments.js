@@ -129,6 +129,8 @@ const equipmentFilterList = [
   },
 ]
 
+export const equipmentFilterNames = equipmentFilterList.map(el => el.name)
+
 const equipmentItem = {
   inventoryNumber: 'Инвентарный №',
   category: 'Категория',

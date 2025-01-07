@@ -2,43 +2,26 @@ import { equipmentFilterList } from '../../assets/constants/equipments.js'
 import { processSearchHistoryRequest } from '../../controllers/equipment-controller/search-history.js'
 import {
   getEquipmentByID,
-  getEquipmentList,
-  getEquipmentListByCategory,
   getEquipmentListBySearch,
 } from '../../data-access/data-access-equipments/equipments.js'
 import { getFavoriteEquipmentsFromDB } from '../../data-access/data-access-equipments/favorite-equipments.js'
 import { getWorkingEquipmentListFromDB } from '../../data-access/data-access-equipments/operate-equipments.js'
 import { processEndpointError } from '../../utils/errorProcessing.js'
+import { getFiltersFromQuery } from '../../utils/query.js'
 
 export default function getEquipment(app) {
-  app.get('/equipments', async (req, res) => {
-    try {
-      let equipmentList
-      const { category, search, login, filters } = req.query
-      const { isAuthenticated } = req
-      if (search || filters) {
-        equipmentList = await getEquipmentListBySearch(search, login, isAuthenticated, filters)
-      } else if (category) {
-        equipmentList = await getEquipmentListByCategory(category, login, isAuthenticated)
-      } else {
-        equipmentList = await getEquipmentList(login, isAuthenticated)
-      }
-      return res.status(200).json(equipmentList)
-    } catch (e) {
-      processEndpointError(res, e)
-    }
-  })
-
   app.get('/equipments/search', async (req, res) => {
     try {
       let equipmentList
-      const { term, login, filters } = req.query
+      const { term, login } = req.query
       const { isAuthenticated } = req
-      if (term) {
+      const filters = getFiltersFromQuery(req.query)
+      if (term || filters) {
+        console.log(filters)
         equipmentList = await getEquipmentListBySearch(term, login, isAuthenticated, filters)
         return res.status(200).json(equipmentList)
       } else {
-        const msg = 'Отсутствует поисковая фраза'
+        const msg = 'Отсутствует поисковая фраза или фильтры'
         throw { message: msg, status: 403 }
       }
     } catch (e) {
