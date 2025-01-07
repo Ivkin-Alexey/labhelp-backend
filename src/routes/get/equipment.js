@@ -17,7 +17,6 @@ export default function getEquipment(app) {
       const { isAuthenticated } = req
       const filters = getFiltersFromQuery(req.query)
       if (term || filters) {
-        console.log(filters)
         equipmentList = await getEquipmentListBySearch(term, login, isAuthenticated, filters)
         return res.status(200).json(equipmentList)
       } else {

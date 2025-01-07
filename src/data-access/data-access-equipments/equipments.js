@@ -112,62 +112,61 @@ export async function getEquipmentListByCategory(category, login, isAuthenticate
 }
 
 export async function getEquipmentListBySearch(searchTerm, login, isAuthenticated, filters) {
-  const whereConditions = fieldsToSearch.map(field => ({
+  const whereConditions = searchTerm ? fieldsToSearch.map(field => ({
     [field]: {
       contains: searchTerm,
       mode: 'insensitive',
     },
-  }))
-  
+  })) : [];
+
   const filterConditions = filters && Object.entries(filters).flatMap(([key, values]) => {
     if (values.length > 0) {
       return {
         [key]: {
           in: values,
         },
-      }
+      };
     }
-    return []
-  }) || []
+    return [];
+  }) || [];
 
   try {
-    let results
+    let results;
+    let baseConditions = whereConditions.length > 0 ? { OR: whereConditions } : {};
+  
+    if (filterConditions.length > 0) {
+      baseConditions = {
+        ...baseConditions,
+        AND: filterConditions,
+      };
+    }
+  
     if (login && isAuthenticated) {
-      let rowData = await prisma.Equipment.findMany({
-        where: filters ? {
-          OR: whereConditions,
-        } : {
-          OR: whereConditions,
-          AND: filterConditions,
-        },
+      const rowData = await prisma.Equipment.findMany({
+        where: baseConditions,
         include: {
           favoriteEquipment: {
             where: { login },
           },
           operatingEquipment: true,
         },
-      })
+      });
 
-      results = rowData.map(transformEquipmentList)
+      results = rowData.map(transformEquipmentList);
     } else {
       results = await prisma.Equipment.findMany({
-        where: filters ? {
-          OR: whereConditions,
-          AND: filterConditions,
-        } : {
-          OR: whereConditions,
-        },
-      })
+        where: baseConditions,
+      });
     }
 
-    return results
+    return results;
   } catch (error) {
-    const status = error.status || 500
+    const status = error.status || 500;
     const errorMsg =
-      error.message || 'Внутренняя ошибка сервера (при поиске оборудования): ' + error
-    throw { message: errorMsg, status }
+      error.message || 'Внутренняя ошибка сервера (при поиске оборудования): ' + error;
+    throw { message: errorMsg, status };
   } finally {
-    await prisma.$disconnect()
+    await prisma.$disconnect();
   }
 }
 
