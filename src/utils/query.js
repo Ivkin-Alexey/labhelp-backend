@@ -7,7 +7,7 @@ export function getFiltersFromQuery(object) {
       if (!filters) {
         filters = {}
       }
-      filters[key] = object[key]
+      filters[key] = JSON.parse(object[key])
     }
   }
   return filters
