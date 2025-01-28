@@ -2,6 +2,7 @@ import { equipmentFilterList } from '../../assets/constants/equipments.js'
 import { processSearchHistoryRequest } from '../../controllers/equipment-controller/search-history.js'
 import {
   getEquipmentByID,
+  getEquipmentByIDs,
   getEquipmentListBySearch,
 } from '../../data-access/data-access-equipments/equipments.js'
 import { getFavoriteEquipmentsFromDB } from '../../data-access/data-access-equipments/favorite-equipments.js'
@@ -42,6 +43,18 @@ export default function getEquipment(app) {
       const { login } = req.query
       const { isAuthenticated } = req
       const equipmentData = await getEquipmentByID(equipmentId, login, isAuthenticated)
+      return res.status(200).json(equipmentData)
+    } catch (e) {
+      processEndpointError(res, e)
+    }
+  })
+
+  app.get('/equipments', async (req, res) => {
+    try {
+      const { equipmentIds } = req.params
+      const { login } = req.query
+      const { isAuthenticated } = req
+      const equipmentData = await getEquipmentByIDs(equipmentIds, login, isAuthenticated)
       return res.status(200).json(equipmentData)
     } catch (e) {
       processEndpointError(res, e)

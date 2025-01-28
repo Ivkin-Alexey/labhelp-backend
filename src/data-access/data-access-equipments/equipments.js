@@ -75,6 +75,50 @@ export async function getEquipmentByID(equipmentId, login, isAuthenticated) {
   }
 }
 
+export async function getEquipmentByIDs(equipmentIds, login, isAuthenticated) {
+  try {
+    const equipments = await Promise.all(equipmentIds.map(async (equipmentId) => {
+      let equipment;
+      if (login && isAuthenticated) {
+        let rowData = await prisma.Equipment.findUnique({
+          where: {
+            id: equipmentId,
+          },
+          include: {
+            favoriteEquipment: {
+              where: { login },
+            },
+            operatingEquipment: true,
+          },
+        });
+
+        equipment = transformEquipmentInfo(rowData);
+      } else {
+        equipment = await prisma.Equipment.findUnique({
+          where: {
+            id: equipmentId,
+          },
+        });
+      }
+
+      if (!equipment) {
+        const msg = `Оборудование с Id ${equipmentId} не найдено в БД`;
+        throw { message: msg, status: 404 };
+      } else {
+        return equipment;
+      }
+    }));
+
+    return equipments;
+  } catch (error) {
+    const status = error.status || 500;
+    const errorMsg = error.message || 'Внутренняя ошибка сервера: ' + error;
+    throw { message: errorMsg, status };
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
 export async function getEquipmentListByCategory(category, login, isAuthenticated) {
   try {
     let results
