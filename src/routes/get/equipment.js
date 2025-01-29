@@ -51,8 +51,7 @@ export default function getEquipment(app) {
 
   app.get('/equipments', async (req, res) => {
     try {
-      const { equipmentIds } = req.params
-      const { login } = req.query
+      const { login, equipmentIds } = req.query
       const { isAuthenticated } = req
       const equipmentData = await getEquipmentByIDs(equipmentIds, login, isAuthenticated)
       return res.status(200).json(equipmentData)
