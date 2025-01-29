@@ -53,7 +53,8 @@ export default function getEquipment(app) {
     try {
       const { login, equipmentIds } = req.query
       const { isAuthenticated } = req
-      const equipmentData = await getEquipmentByIDs(equipmentIds, login, isAuthenticated)
+      const arr = equipmentIds.split(",")
+      const equipmentData = await getEquipmentByIDs(arr, login, isAuthenticated)
       return res.status(200).json(equipmentData)
     } catch (e) {
       processEndpointError(res, e)
