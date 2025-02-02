@@ -2,6 +2,10 @@ import { createDate, createTime, createFullName } from '../../controllers/helper
 
 const amountOfEquipment = 10000
 
+const equipmentPageSize = 20
+
+const defaultEquipmentPage = 1
+
 const fieldsToSearch = [
   'serialNumber',
   'inventoryNumber',
@@ -186,5 +190,7 @@ export {
   WorkingEquipmentItem,
   amountOfEquipment,
   equipmentFilterList,
-  fieldsToSearch
+  fieldsToSearch,
+  equipmentPageSize,
+  defaultEquipmentPage
 }

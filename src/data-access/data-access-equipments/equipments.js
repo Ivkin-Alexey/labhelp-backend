@@ -1,5 +1,5 @@
 import { prisma } from '../../../index.js'
-import { fieldsToSearch } from '../../assets/constants/equipments.js'
+import { defaultEquipmentPage, equipmentPageSize, fieldsToSearch } from '../../assets/constants/equipments.js'
 import localizations from '../../assets/constants/localizations.js'
 import { fetchEquipmentListFromGSheet } from '../../controllers/equipment-controller/g-sheet.js'
 import { sendNotification } from '../../controllers/tg-bot-controllers/botAnswers.js'
@@ -155,7 +155,7 @@ export async function getEquipmentListByCategory(category, login, isAuthenticate
   }
 }
 
-export async function getEquipmentListBySearch(searchTerm, login, isAuthenticated, filters) {
+export async function getEquipmentListBySearch(searchTerm, login, isAuthenticated, filters, page = defaultEquipmentPage, pageSize = equipmentPageSize) {
   const whereConditions = searchTerm ? fieldsToSearch.map(field => ({
     [field]: {
       contains: searchTerm,
@@ -175,18 +175,20 @@ export async function getEquipmentListBySearch(searchTerm, login, isAuthenticate
   }) || [];
 
   try {
-    let results;
     let baseConditions = whereConditions.length > 0 ? { OR: whereConditions } : {};
-  
+
     if (filterConditions.length > 0) {
       baseConditions = {
         ...baseConditions,
         AND: filterConditions,
       };
     }
-  
+
+    const skipAmount = (page - 1) * pageSize;
+
+    let results;
     if (login && isAuthenticated) {
-      const rowData = await prisma.Equipment.findMany({
+      results = await prisma.Equipment.findMany({
         where: baseConditions,
         include: {
           favoriteEquipment: {
@@ -194,23 +196,26 @@ export async function getEquipmentListBySearch(searchTerm, login, isAuthenticate
           },
           operatingEquipment: true,
         },
+        skip: skipAmount,
+        take: pageSize,
       });
-
-      results = rowData.map(transformEquipmentList);
+      results = results.map(transformEquipmentList);
     } else {
       results = await prisma.Equipment.findMany({
         where: baseConditions,
+        skip: skipAmount,
+        take: pageSize,
       });
     }
 
-    return results;
+    const totalCount = await prisma.Equipment.count({ where: baseConditions });
+
+    return { results, totalCount, page, pageSize };
   } catch (error) {
     const status = error.status || 500;
     const errorMsg =
       error.message || 'Внутренняя ошибка сервера (при поиске оборудования): ' + error;
     throw { message: errorMsg, status };
-  } finally {
-    await prisma.$disconnect();
   }
 }
 

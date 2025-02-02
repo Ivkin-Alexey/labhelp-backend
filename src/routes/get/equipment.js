@@ -14,11 +14,11 @@ export default function getEquipment(app) {
   app.get('/equipments/search', async (req, res) => {
     try {
       let equipmentList
-      const { term, login } = req.query
+      const { term, login, page, pageSize } = req.query
       const { isAuthenticated } = req
       const filters = getFiltersFromQuery(req.query)
       if (term || filters) {
-        equipmentList = await getEquipmentListBySearch(term, login, isAuthenticated, filters)
+        equipmentList = await getEquipmentListBySearch(term, login, isAuthenticated, filters, page, pageSize)
         return res.status(200).json(equipmentList)
       } else {
         const msg = 'Отсутствует поисковая фраза или фильтры'
