@@ -18,7 +18,7 @@ export default function getEquipment(app) {
       const { isAuthenticated } = req
       const filters = getFiltersFromQuery(req.query)
       if (term || filters) {
-        equipmentList = await getEquipmentListBySearch(term, login, isAuthenticated, filters, page, pageSize)
+        equipmentList = await getEquipmentListBySearch(term, login, isAuthenticated, filters, +page, +pageSize)
         return res.status(200).json(equipmentList)
       } else {
         const msg = 'Отсутствует поисковая фраза или фильтры'
