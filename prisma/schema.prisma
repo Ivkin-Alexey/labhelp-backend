@@ -43,6 +43,7 @@ model Equipment {
   kind              String?
   favoriteEquipment FavoriteEquipment[]
   operatingEquipment OperatingEquipment[]
+  sameList          String[]?
 }
 
 model FavoriteEquipment {

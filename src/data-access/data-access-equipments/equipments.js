@@ -222,64 +222,81 @@ export async function getEquipmentListBySearch(searchTerm, login, isAuthenticate
 
 export async function createEquipmentDbFromGSheet() {
   async function transferEquipments(list) {
-    const BATCH_SIZE = 10
-    let nonUniqueRecords = []
-    let failedRecords = []
-    let successfulRecordsCount = 0
+    const BATCH_SIZE = 10;
+    let nonUniqueRecords = [];
+    let failedRecords = [];
+    let successfulRecordsCount = 0;
 
+    // Шаг 1: Группируем оборудование по модели
+    const groupedByModel = {};
+    for (const item of list) {
+      if (!groupedByModel[item.model]) {
+        groupedByModel[item.model] = [];
+      }
+      groupedByModel[item.model].push(item);
+    }
+
+    // Шаг 2: Добавляем поле sameList для каждого элемента в list
+    for (const item of list) {
+      const sameModelItems = groupedByModel[item.model]; // Все элементы с той же моделью
+      const sameModelIds = sameModelItems.map((i) => i.id); // Получаем их id
+      item.sameList = sameModelIds.filter((id) => id !== item.id); // Исключаем текущий id
+    }
+
+    // Шаг 3: Вставляем данные в базу
     for (let i = 0; i < list.length; i += BATCH_SIZE) {
-      const batch = list.slice(i, i + BATCH_SIZE)
+      const batch = list.slice(i, i + BATCH_SIZE);
 
       try {
         const result = await prisma.Equipment.createMany({
           data: batch,
-        })
-        successfulRecordsCount += result.count
+        });
+        successfulRecordsCount += result.count;
       } catch (error) {
-        console.log(error)
+        console.log(error);
         if (error.code === 'P2002') {
-          nonUniqueRecords.push(...batch)
+          nonUniqueRecords.push(...batch);
         } else {
-          failedRecords.push(...batch)
+          failedRecords.push(...batch);
         }
       }
     }
 
     if (failedRecords.length > 0) {
-      sendNotification(`Ошибка при вставке данных в БД: ${failedRecords.length} позиций(я)`)
+      sendNotification(`Ошибка при вставке данных в БД: ${failedRecords.length} позиций(я)`);
       console.log(
         'Обработка записей с ошибками. Будет показано не более 10 записей:',
         failedRecords.slice(0, 10),
-      )
-      failedRecords = []
+      );
+      failedRecords = [];
     }
 
     if (nonUniqueRecords.length > 0) {
       sendNotification(
         `Обнаружено оборудование с неуникальным Id (при вставке в БД): ${nonUniqueRecords.length} позиций(я)`,
-      )
+      );
       console.log(
         'Обработка записей с неуникальным Id. Будет показано не более 10 записей:',
         nonUniqueRecords.slice(0, 10),
-      )
-      nonUniqueRecords = []
+      );
+      nonUniqueRecords = [];
     }
-    const successMsg = `Добавлено записей: ${successfulRecordsCount} из ${list.length}`
-    sendNotification(successMsg)
-    console.log(successMsg)
+    const successMsg = `Добавлено записей: ${successfulRecordsCount} из ${list.length}`;
+    sendNotification(successMsg);
+    console.log(successMsg);
   }
 
   try {
-    await clearTable(prisma.Equipment)
-    console.info('База данных оборудования обновляется...')
-    const list = await fetchEquipmentListFromGSheet()
-    await transferEquipments(list)
-    console.info('База данных оборудования обновлена')
+    await clearTable(prisma.Equipment);
+    console.info('База данных оборудования обновляется...');
+    const list = await fetchEquipmentListFromGSheet();
+    await transferEquipments(list);
+    console.info('База данных оборудования обновлена');
   } catch (error) {
-    console.error('Ошибка при создании базы данных из GSheet:', error)
+    console.error('Ошибка при создании базы данных из GSheet:', error);
   } finally {
-    await prisma.$disconnect()
+    await prisma.$disconnect();
   }
-  return localizations.equipment.dbIsReloadedMsg
+  return localizations.equipment.dbIsReloadedMsg;
 }
 
