@@ -10,6 +10,6 @@ export function logSuccessfulResponse(req, res, next) {
 }
   
 export function logRequestInfo(req, res, next) {
-  console.info(`Запрос к серверу: метод ${req.method}, путь: ${req.path}, параметры: ${req.params}, query-параметры: ${req.query}`)
+  console.info(`Запрос к серверу: метод ${req.method}, путь: ${req.path}, параметры: ${JSON.stringify(req.params)}, query-параметры: ${JSON.stringify(req.query)}`)
     next()
   }
