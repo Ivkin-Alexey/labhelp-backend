@@ -14,9 +14,8 @@ import https from 'https'
 import { HTTPS_PORT } from './src/assets/constants/constants.js'
 import getEquipment from './src/routes/get/equipment.js'
 import deleteMethod from './src/routes/delete.js'
-import { logRequestInfo } from './src/middlewaries/logRequestInfo.js'
 import { authenticateToken } from './src/middlewaries/authenticate.js'
-import { logSuccessfulResponse } from './src/middlewaries/logSuccessfulResponse.js'
+import { logRequestInfo, logSuccessfulResponse } from './src/middlewaries/logSuccessfulResponse.js'
 import patch from './src/routes/patch.js'
 
 process.on('uncaughtException', err => console.log(err))
