@@ -26,24 +26,24 @@ model User {
 }
 
 model Equipment {
-  id                String              @id
-  serialNumber      String
-  inventoryNumber   String
-  name              String
-  description       String
-  brand             String
-  model             String
-  category          String
-  filesUrl          String
-  imgUrl            String
-  classification    String?
-  measurements      String?
-  department        String?
-  type              String?
-  kind              String?
-  favoriteEquipment FavoriteEquipment[]
-  operatingEquipment OperatingEquipment[]
-  sameList          String[] @default([])
+  id                  String              @id
+  serialNumber        String
+  inventoryNumber     String
+  name                String
+  description         String
+  brand               String
+  model               String
+  category            String
+  filesUrl            String
+  imgUrl              String
+  classification      String?
+  measurements        String?
+  department          String?
+  type                String?
+  kind                String?
+  favoriteEquipment   FavoriteEquipment[]
+  operatingEquipment  OperatingEquipment[]
+  sameList            String[] @default([])
 }
 
 model FavoriteEquipment {
