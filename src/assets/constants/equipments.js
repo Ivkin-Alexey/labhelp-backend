@@ -16,6 +16,8 @@ const fieldsToSearch = [
   'category',
 ]
 
+const invalidEquipmentCellData = ["", "-", " - "]
+
 const equipmentFilterList = [
   {
     name: 'classification',
@@ -185,6 +187,7 @@ function EndData() {
 
 export {
   equipmentItem,
+  invalidEquipmentCellData,
   StartData,
   EndData,
   WorkingEquipmentItem,

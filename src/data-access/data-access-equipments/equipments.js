@@ -1,5 +1,5 @@
 import { prisma } from '../../../index.js'
-import { defaultEquipmentPage, equipmentPageSize, fieldsToSearch } from '../../assets/constants/equipments.js'
+import { defaultEquipmentPage, equipmentPageSize, fieldsToSearch, invalidEquipmentCellData } from '../../assets/constants/equipments.js'
 import localizations from '../../assets/constants/localizations.js'
 import { fetchEquipmentListFromGSheet } from '../../controllers/equipment-controller/g-sheet.js'
 import { sendNotification } from '../../controllers/tg-bot-controllers/botAnswers.js'
@@ -190,6 +190,9 @@ export async function getEquipmentListBySearch(searchTerm, login, isAuthenticate
     if (login && isAuthenticated) {
       results = await prisma.Equipment.findMany({
         where: baseConditions,
+        orderBy: {
+          imgUrl: 'desc', // Сортировка по убыванию, а точнее в данном случает по наличию ссылки на изображение
+        },
         include: {
           favoriteEquipment: {
             where: { login },
@@ -238,9 +241,13 @@ export async function createEquipmentDbFromGSheet() {
 
     // Шаг 2: Добавляем поле sameList для каждого элемента в list
     for (const item of list) {
-      const sameModelItems = groupedByModel[item.model]; // Все элементы с той же моделью
-      const sameModelIds = sameModelItems.map((i) => i.id); // Получаем их id
-      item.sameList = sameModelIds.filter((id) => id !== item.id); // Исключаем текущий id
+      if (invalidEquipmentCellData.includes(item.model)) {
+        continue
+      } else {
+        const sameModelItems = groupedByModel[item.model]; // Все элементы с той же моделью
+        const sameModelIds = sameModelItems.map((i) => i.id); // Получаем их id
+        item.sameList = sameModelIds.filter((id) => id !== item.id); // Исключаем текущий id
+      }
     }
 
     // Шаг 3: Вставляем данные в базу

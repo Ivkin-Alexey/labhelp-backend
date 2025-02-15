@@ -27,15 +27,15 @@ model User {
 
 model Equipment {
   id                  String              @id
-  serialNumber        String
-  inventoryNumber     String
-  name                String
-  description         String
-  brand               String
-  model               String
-  category            String
-  filesUrl            String
-  imgUrl              String
+  serialNumber        String?
+  inventoryNumber     String?
+  name                String?
+  description         String?
+  brand               String?
+  model               String?
+  category            String?
+  filesUrl            String?
+  imgUrl              String?
   classification      String?
   measurements        String?
   department          String?
