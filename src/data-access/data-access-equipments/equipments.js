@@ -17,6 +17,9 @@ export async function getEquipmentList(login, isAuthenticated) {
           },
           operatingEquipment: true,
         },
+        orderBy: {
+          imgUrl: 'desc', // Сортировка по убыванию, а точнее в данном случает по наличию ссылки на изображение
+        },
       })
 
       results = rowData.map(transformEquipmentList)
@@ -127,6 +130,9 @@ export async function getEquipmentListByCategory(category, login, isAuthenticate
         where: {
           category,
         },
+        orderBy: {
+          imgUrl: 'desc', // Сортировка по убыванию, а точнее в данном случает по наличию ссылки на изображение
+        },
         include: {
           favoriteEquipment: {
             where: { login },
@@ -206,6 +212,9 @@ export async function getEquipmentListBySearch(searchTerm, login, isAuthenticate
     } else {
       results = await prisma.Equipment.findMany({
         where: baseConditions,
+        orderBy: {
+          imgUrl: 'desc', // Сортировка по убыванию, а точнее в данном случает по наличию ссылки на изображение
+        },
         skip: skipAmount,
         take: pageSize,
       });
