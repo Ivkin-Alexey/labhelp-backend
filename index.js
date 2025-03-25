@@ -32,17 +32,27 @@ bot.on('message', async msg => await processCommand(bot, msg))
 bot.on('callback_query', async ctx => await processCallbackQuery(bot, ctx))
 
 const app = express()
-app.use(express.json())
-app.use(cors())
-app.use(bodyParser.urlencoded({ extended: true }))
-app.use(logRequestInfo)
-app.use(authenticateToken)
-app.use(logSuccessfulResponse)
-getEquipment(app)
-get(app)
-post(app)
-deleteMethod(app)
-patch(app)
+
+// Создаём роутер для API с базовым путём /api
+const apiRouter = express.Router()
+
+// Мидлвары применяются только к API-роутеру
+apiRouter.use(express.json())
+apiRouter.use(cors())
+apiRouter.use(bodyParser.urlencoded({ extended: true }))
+apiRouter.use(logRequestInfo)
+apiRouter.use(authenticateToken)
+apiRouter.use(logSuccessfulResponse)
+
+// Подключаем все маршруты к API-роутеру
+getEquipment(apiRouter)
+get(apiRouter)
+post(apiRouter)
+deleteMethod(apiRouter)
+patch(apiRouter)
+
+// Основное приложение использует API-роутер по пути /api
+app.use('/api', apiRouter)
 
 const httpsServer = https.createServer(
   {
@@ -61,4 +71,3 @@ httpsServer.listen(HTTPS_PORT, () => {
 httpServer.listen(PORT, () => {
   console.log(`HTTP Server running on port ${PORT}`)
 })
-
