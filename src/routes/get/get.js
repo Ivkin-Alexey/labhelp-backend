@@ -11,7 +11,7 @@ export default function get(app) {
   //   next();
   // });
 
-  app.get('/hello', async (req, res) => {
+  app.get('/test', async (req, res) => {
     return res.status(200).json('Привет')
   })
 
