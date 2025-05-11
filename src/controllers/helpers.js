@@ -42,6 +42,10 @@ function checkEquipmentID(id) {
   return !arr.includes(id)
 }
 
+function createEquipmentId(inventoryNumber, serialNumber) {
+  return inventoryNumber ? String(inventoryNumber) : "" + serialNumber? String(serialNumber) : ""
+}
+
 export {
   createDate,
   createTime,
@@ -49,4 +53,5 @@ export {
   createReagentID,
   createNameWithInitials,
   checkEquipmentID,
+  createEquipmentId
 }

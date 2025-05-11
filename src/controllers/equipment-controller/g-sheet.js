@@ -1,5 +1,6 @@
 import { amountOfEquipment, equipmentItem } from "../../assets/constants/equipments.js"
 import { equipmentList, equipmentListSheetID } from "../../assets/constants/gSpreadSheets.js"
+import { createEquipmentId } from "../helpers.js"
 import { checkIsEmpty } from "./helpers.js"
 
 export async function fetchEquipmentListFromGSheet() {
@@ -16,7 +17,7 @@ export async function fetchEquipmentListFromGSheet() {
         for (let key in equipmentItem) {
           newEquipmentItem[key] = rows[i].get(equipmentItem[key]) || ""
         }
-        newEquipmentItem.id = newEquipmentItem.inventoryNumber + newEquipmentItem.serialNumber
+        newEquipmentItem.id = createEquipmentId(newEquipmentItem.inventoryNumber, newEquipmentItem.serialNumber)
         if (checkIsEmpty(newEquipmentItem)) {
           continue
         }

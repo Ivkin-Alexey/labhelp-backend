@@ -1,3 +1,4 @@
+import { createEquipment } from '../controllers/equipment-controller/equipment.js'
 import { processFavoriteEquipmentResponse } from '../controllers/equipment-controller/favorite-equipment.js'
 import { changeOperateEquipmentStatus } from '../controllers/equipment-controller/operate-equipment.js'
 import { processSearchHistoryRequest } from '../controllers/equipment-controller/search-history.js'
@@ -13,4 +14,6 @@ export default function post(app) {
   app.post('/equipments/favorite/:equipmentId', processFavoriteEquipmentResponse)
 
   app.post('/equipments/search-history/:login', processSearchHistoryRequest)
+
+  app.post('/equipments', createEquipment)
 }
