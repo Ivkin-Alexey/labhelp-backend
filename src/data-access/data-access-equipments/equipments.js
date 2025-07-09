@@ -1,3 +1,4 @@
+import { isBuffer } from 'util'
 import { prisma } from '../../../index.js'
 import { defaultEquipmentPage, equipmentPageSize, fieldsToSearch, invalidEquipmentCellData } from '../../assets/constants/equipments.js'
 import localizations from '../../assets/constants/localizations.js'
@@ -238,30 +239,53 @@ export async function createEquipmentDbFromGSheet() {
     let nonUniqueRecords = [];
     let failedRecords = [];
     let successfulRecordsCount = 0;
+    const updatedList = [];
 
     // Шаг 1: Группируем оборудование по модели
     const groupedByModel = {};
     for (const item of list) {
-      if (!groupedByModel[item.model]) {
-        groupedByModel[item.model] = [];
+      const model = item.model;
+      
+      if (invalidEquipmentCellData.includes(model)) {
+        updatedList.push(item);
+        continue;
       }
-      groupedByModel[item.model].push(item);
+
+      if (!groupedByModel[model]) {
+        groupedByModel[model] = {
+          ...item,
+          sameList: [item.id],
+          departments: new Set([item.department])
+        };
+      } else {
+        groupedByModel[model].sameList.push(item.id);
+        groupedByModel[model].departments.add(item.department);
+      }
     }
 
-    // Шаг 2: Добавляем поле sameList для каждого элемента в list
-    for (const item of list) {
-      if (invalidEquipmentCellData.includes(item.model)) {
-        continue
+    // Шаг 2: Создаем записи для каждого отдела
+    for (const key in groupedByModel) {
+      const equipment = groupedByModel[key];
+      const departments = [...equipment.departments];
+      
+      // Удаляем временное поле departments
+      const { departments: _, ...equipmentData } = equipment;
+      
+      if (departments.length > 0) {
+        departments.forEach(department => {
+          updatedList.push({
+            ...equipmentData,
+            department
+          });
+        });
       } else {
-        const sameModelItems = groupedByModel[item.model]; // Все элементы с той же моделью
-        const sameModelIds = sameModelItems.map((i) => i.id); // Получаем их id
-        item.sameList = sameModelIds.filter((id) => id !== item.id); // Исключаем текущий id
+        updatedList.push(equipmentData);
       }
     }
 
     // Шаг 3: Вставляем данные в базу
-    for (let i = 0; i < list.length; i += BATCH_SIZE) {
-      const batch = list.slice(i, i + BATCH_SIZE);
+    for (let i = 0; i < updatedList.length; i += BATCH_SIZE) {
+      const batch = updatedList.slice(i, i + BATCH_SIZE);
 
       try {
         const result = await prisma.Equipment.createMany({
@@ -278,25 +302,25 @@ export async function createEquipmentDbFromGSheet() {
       }
     }
 
+    // Обработка ошибок и уведомления
     if (failedRecords.length > 0) {
       sendNotification(`Ошибка при вставке данных в БД: ${failedRecords.length} позиций(я)`);
       console.log(
         'Обработка записей с ошибками. Будет показано не более 10 записей:',
         failedRecords.slice(0, 10),
       );
-      failedRecords = [];
     }
 
     if (nonUniqueRecords.length > 0) {
       sendNotification(
-        `Обнаружено оборудование с неуникальным Id (при вставке в БД): ${nonUniqueRecords.length} позиций(я)`,
+        `Обнаружено оборудование с неуникальным Id: ${nonUniqueRecords.length} позиций(я)`,
       );
       console.log(
         'Обработка записей с неуникальным Id. Будет показано не более 10 записей:',
         nonUniqueRecords.slice(0, 10),
       );
-      nonUniqueRecords = [];
     }
+
     const successMsg = `Добавлено записей: ${successfulRecordsCount} из ${list.length}`;
     sendNotification(successMsg);
     console.log(successMsg);
@@ -310,9 +334,11 @@ export async function createEquipmentDbFromGSheet() {
     console.info('База данных оборудования обновлена');
   } catch (error) {
     console.error('Ошибка при создании базы данных из GSheet:', error);
+    throw error; // Пробрасываем ошибку выше для обработки
   } finally {
     await prisma.$disconnect();
   }
+  
   return localizations.equipment.dbIsReloadedMsg;
 }
 
