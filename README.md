@@ -62,3 +62,5 @@
 
 ### PATCH
 * /users/{user login} - обновить данные пользователя
+
+test
