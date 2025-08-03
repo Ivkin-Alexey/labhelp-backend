@@ -37,21 +37,10 @@ function createReagentID() {
   return new Date().getTime()
 }
 
-function checkEquipmentID(id) {
-  const arr = ['нд', 'нет', '']
-  return !arr.includes(id)
-}
-
-function createEquipmentId(inventoryNumber, serialNumber) {
-  return inventoryNumber ? String(inventoryNumber) : "" + serialNumber? String(serialNumber) : ""
-}
-
 export {
   createDate,
   createTime,
   createFullName,
   createReagentID,
   createNameWithInitials,
-  checkEquipmentID,
-  createEquipmentId
 }

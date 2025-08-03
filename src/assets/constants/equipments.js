@@ -6,6 +6,9 @@ const equipmentPageSize = 20
 
 const defaultEquipmentPage = 1
 
+const invalidCellData = ['нд', 'нет', 'б/н', 'б/н_1', 'будетскороприсвоен', 'ненабалансе', '?', '-', 'б//н', 'Б/№', '', " "]
+
+
 const fieldsToSearch = [
   'serialNumber',
   'inventoryNumber',
@@ -188,6 +191,7 @@ function EndData() {
 export {
   equipmentItem,
   invalidEquipmentCellData,
+  invalidCellData,
   StartData,
   EndData,
   WorkingEquipmentItem,
