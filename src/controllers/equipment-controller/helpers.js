@@ -1,4 +1,4 @@
-import { invalidCellData } from "../../assets/constants/equipments"
+import { invalidCellData } from "../../assets/constants/equipments.js"
 
 export function checkIsCorrect(equipment) {
   const incorrect = ['нд', 'нет', '?', '-']
