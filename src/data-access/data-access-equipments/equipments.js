@@ -246,8 +246,8 @@ export async function createEquipmentDbFromGSheet() {
     for (const item of list) {
       const model = item.model;
       
+      // Если модель не указана, то такую единицу оборудования в БД не включаем
       if (invalidEquipmentCellData.includes(model)) {
-        updatedList.push(item);
         continue;
       }
 
@@ -263,7 +263,9 @@ export async function createEquipmentDbFromGSheet() {
       }
     }
 
-    // Шаг 2: Создаем записи для каждого отдела
+    // В итоге мы имеем объект, где ключ - это модель, а значение это единица оборудования
+
+    // Шаг 2: Создаем записи для каждого подразделения
     for (const key in groupedByModel) {
       const equipment = groupedByModel[key];
       const departments = [...equipment.departments];
