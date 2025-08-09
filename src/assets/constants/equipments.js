@@ -6,7 +6,7 @@ const equipmentPageSize = 20
 
 const defaultEquipmentPage = 1
 
-const invalidCellData = ['нд', 'нет', 'б/н', 'б/н_1', 'будетскороприсвоен', 'ненабалансе', '?', '-', 'б//н', 'Б/№', '', " "]
+const invalidCellData = ['нд', 'нет', 'б/н', 'б/н_1', 'будетскороприсвоен', 'ненабалансе', '?', '-', '_', 'б//н', 'Б/№', '', " "]
 
 
 const fieldsToSearch = [
@@ -15,7 +15,6 @@ const fieldsToSearch = [
   'name',
   'description',
   'brand',
-  'model',
   'category',
 ]
 

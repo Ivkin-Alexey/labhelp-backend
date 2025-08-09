@@ -1,9 +1,9 @@
 export function transformEquipmentList(equipment) {
   const result = {
     ...equipment,
-    isFavorite: equipment.favoriteEquipment.length > 0,
-    isOperate: equipment.operatingEquipment.length > 0,
-    login: equipment.operatingEquipment[0]?.login,
+    isFavorite: equipment.favoriteEquipment && equipment.favoriteEquipment.length > 0,
+    isOperate: equipment.operatingEquipment && equipment.operatingEquipment.length > 0,
+    login: equipment.operatingEquipment && Array.isArray(equipment.operatingEquipment) && equipment.operatingEquipment[0]?.login,
   }
   delete result.operatingEquipment
   delete result.favoriteEquipment
@@ -36,12 +36,14 @@ export function transformOperateEquipmentList(equipment) {
 
 export function transformEquipmentInfo(equipment) {
   let result 
-  if (equipment.operatingEquipment[0]) {
+  if (equipment.operatingEquipment && equipment.operatingEquipment[0]) {
     const { login, isLongUse, startDateTime } = equipment.operatingEquipment[0]
     result = {
       isOperate: true,
-      isFavorite: equipment.favoriteEquipment.length > 0,
+      isFavorite: equipment.favoriteEquipment && equipment.favoriteEquipment.length > 0,
       ...equipment,
+      model: equipment.model && equipment.model.name,
+      department: equipment.department && equipment.department.name,
       login,
       isLongUse,
       startDateTime
@@ -49,8 +51,10 @@ export function transformEquipmentInfo(equipment) {
   } else {
     result = {
       isOperate: false,
-      isFavorite: equipment.favoriteEquipment.length > 0,
+      isFavorite: equipment.favoriteEquipment && equipment.favoriteEquipment.length > 0,
       ...equipment,
+      model: equipment.model && equipment.model.name,
+      department: equipment.department && equipment.department.name,
     }
   }
   delete result.favoriteEquipment

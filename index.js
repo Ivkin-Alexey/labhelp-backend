@@ -31,9 +31,15 @@ export const prisma = new PrismaClient();
 bot.on('message', async msg => await processCommand(bot, msg));
 bot.on('callback_query', async ctx => await processCallbackQuery(bot, ctx));
 
+// Р¤РёРєСЃ РѕС€РёР±РєРё РїСЂРёР·РјС‹
+BigInt.prototype.toJSON = function () {
+  const int = Number.parseInt(this.toString());
+  return int ?? this.toString();
+};
+
 const app = express();
 
-// Применяем мидлвары ко всему приложению
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 app.use(express.json());
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -41,7 +47,7 @@ app.use(logRequestInfo);
 app.use(authenticateToken);
 app.use(logSuccessfulResponse);
 
-// Подключаем маршруты напрямую к app (без /api)
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ app (пїЅпїЅпїЅ /api)
 getEquipment(app);
 get(app);
 post(app);

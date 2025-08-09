@@ -1,6 +1,6 @@
 datasource db {
   provider = "postgresql"
-  url = env("DATABASE_URL")
+  url      = env("DATABASE_URL")
 }
 
 generator client {
@@ -8,42 +8,56 @@ generator client {
 }
 
 model User {
-  login                         String              @id
-  password                      String
-  firstName                     String?
-  lastName                      String?
-  patronymic                    String?
-  position                      String?
-  department                    String?
-  category                      String?
-  role                          String
-  studentsEducationYear         String?
-  postGraduateEducationYear     String?
+  login                     String  @id
+  password                  String
+  firstName                 String?
+  lastName                  String?
+  patronymic                String?
+  position                  String?
+  department                String?
+  category                  String?
+  role                      String
+  studentsEducationYear     String?
+  postGraduateEducationYear String?
 
-  favoriteEquipments      FavoriteEquipment[]
-  operatingEquipment      OperatingEquipment[]
-  equipmentSearchHistory  EquipmentSearchHistory[]
+  favoriteEquipments     FavoriteEquipment[]
+  operatingEquipment     OperatingEquipment[]
+  equipmentSearchHistory EquipmentSearchHistory[]
 }
 
 model Equipment {
-  id                  String              @id
-  serialNumber        String?
-  inventoryNumber     String?
-  name                String?
-  description         String?
-  brand               String?
-  model               String?
-  category            String?
-  filesUrl            String?
-  imgUrl              String?
-  classification      String?
-  measurements        String?
-  department          String?
-  type                String?
-  kind                String?
-  favoriteEquipment   FavoriteEquipment[]
-  operatingEquipment  OperatingEquipment[]
-  sameList            String[] @default([])
+  id                 String               @id
+  serialNumber       String?
+  inventoryNumber    String?
+  name               String?
+  description        String?
+  brand              String?
+  model              Model                @relation(fields: [modelId], references: [id])
+  modelId            Int
+  category           String?
+  filesUrl           String?
+  imgUrl             String?
+  classification     String?
+  measurements       String?
+  department         Department           @relation(fields: [departmentId], references: [id])
+  departmentId       Int
+  type               String?
+  kind               String?
+  favoriteEquipment  FavoriteEquipment[]
+  operatingEquipment OperatingEquipment[]
+  sameList           String[]             @default([])
+}
+
+model Model {
+  id        Int         @id @default(autoincrement())
+  name      String      @unique
+  equipment Equipment[]
+}
+
+model Department {
+  id        Int         @id @default(autoincrement())
+  name      String      @unique
+  equipment Equipment[]
 }
 
 model FavoriteEquipment {
@@ -57,22 +71,22 @@ model FavoriteEquipment {
 }
 
 model OperatingEquipment {
-  equipmentId   String   
+  equipmentId   String
   login         String
   isLongUse     Boolean
   startDateTime DateTime @default(now())
 
-  user          User      @relation(fields: [login], references: [login], onDelete: Cascade)
-  equipment     Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [login], references: [login], onDelete: Cascade)
+  equipment Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
 
   @@unique([login, equipmentId])
 }
 
 model EquipmentSearchHistory {
-  login       String 
-  term        String
+  login String
+  term  String
 
-  user      User      @relation(fields: [login], references: [login], onDelete: Cascade)
+  user User @relation(fields: [login], references: [login], onDelete: Cascade)
 
   @@unique([login, term])
 }

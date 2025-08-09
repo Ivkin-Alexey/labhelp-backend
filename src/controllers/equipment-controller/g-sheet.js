@@ -1,6 +1,6 @@
 import { amountOfEquipment, equipmentItem } from '../../assets/constants/equipments.js'
 import { equipmentList, equipmentListSheetID } from '../../assets/constants/gSpreadSheets.js'
-import { createEquipmentId } from './helpers.js'
+import { isIdDataValid } from './helpers.js'
 
 export async function fetchEquipmentListFromGSheet() {
   try {
@@ -38,4 +38,36 @@ function createEquipmentItem(obj) {
   }
   return newEquipmentItem
 }
+
+const idsMap = {};
+
+export function createEquipmentId(inventoryNumber, serialNumber) {
+  if (typeof inventoryNumber !== "string" || typeof serialNumber !== "string") {
+    throw new TypeError("Инвентарный и серийный номер должны быть строками")
+  }
+
+  let invTrimmed = inventoryNumber.trim()
+  const serTrimmed = serialNumber.trim()
+
+  if (!isIdDataValid(invTrimmed)) {
+    console.error("Не валидный инвентарный номер ", invTrimmed)
+    return
+  }
+
+  if (!idsMap[invTrimmed]) {
+    idsMap[invTrimmed] = 1;
+  } else {
+    const prev = invTrimmed;
+    invTrimmed = `${prev}_${idsMap[prev]}`
+    idsMap[prev] = idsMap[prev] + 1;
+  }
+
+
+  if(!isIdDataValid(serTrimmed)) {
+    return invTrimmed
+  }
+
+  return invTrimmed + "_" + serTrimmed
+}
+
 
