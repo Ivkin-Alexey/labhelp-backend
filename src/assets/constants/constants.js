@@ -1,7 +1,7 @@
 import { researches } from './researches.js'
 import localizations from './localizations.js'
 
-const PORT = 8000
+const PORT = process.env.BACKEND_PORT
 const HTTPS_PORT = 443
 export const programmerChatID = 392584400
 const jwtLifeTime = "8h"

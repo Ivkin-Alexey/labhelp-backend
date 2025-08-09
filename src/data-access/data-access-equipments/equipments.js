@@ -233,7 +233,7 @@ export async function getEquipmentListBySearch(searchTerm, login, isAuthenticate
 }
 
 
-export async function createEquipmentDbFromGSheet() {
+export async function createEquipmentDbFromGSheet(botLogs = true) {
   async function transferEquipments(list) {
     const BATCH_SIZE = 10;
     let nonUniqueRecords = [];
@@ -268,12 +268,11 @@ export async function createEquipmentDbFromGSheet() {
     // Шаг 2: Создаем записи для каждого подразделения
     for (const key in groupedByModel) {
       const equipment = groupedByModel[key];
-      const departments = [...equipment.departments];
       
       // Удаляем временное поле departments
-      const { departments: _, ...equipmentData } = equipment;
+      const { departments, ...equipmentData } = equipment;
       
-      if (departments.length > 0) {
+      if (departments.size > 0) {
         departments.forEach(department => {
           updatedList.push({
             ...equipmentData,
@@ -306,7 +305,7 @@ export async function createEquipmentDbFromGSheet() {
 
     // Обработка ошибок и уведомления
     if (failedRecords.length > 0) {
-      sendNotification(`Ошибка при вставке данных в БД: ${failedRecords.length} позиций(я)`);
+      botLogs && sendNotification(`Ошибка при вставке данных в БД: ${failedRecords.length} позиций(я)`);
       console.log(
         'Обработка записей с ошибками. Будет показано не более 10 записей:',
         failedRecords.slice(0, 10),
@@ -314,7 +313,7 @@ export async function createEquipmentDbFromGSheet() {
     }
 
     if (nonUniqueRecords.length > 0) {
-      sendNotification(
+      botLogs && sendNotification(
         `Обнаружено оборудование с неуникальным Id: ${nonUniqueRecords.length} позиций(я)`,
       );
       console.log(
@@ -324,7 +323,7 @@ export async function createEquipmentDbFromGSheet() {
     }
 
     const successMsg = `Добавлено записей: ${successfulRecordsCount} из ${list.length}`;
-    sendNotification(successMsg);
+    botLogs && sendNotification(successMsg);
     console.log(successMsg);
   }
 

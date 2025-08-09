@@ -1,0 +1,18 @@
+services:
+  postgres:
+    image: postgres:17.4
+    container_name: postgres_lab
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "root" ]
+      timeout: 45s
+      interval: 10s
+      retries: 10
+    restart: always
+    environment:
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d/
+    ports:
+      - ${DB_PORT}:${DB_PORT}

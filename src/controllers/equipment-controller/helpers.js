@@ -40,7 +40,8 @@ export function createEquipmentId(inventoryNumber, serialNumber) {
   const serTrimmed = serialNumber.trim()
 
   if (!isIdDataValid(invTrimmed)) {
-    throw new Error("Не валидный инвентарный номер")
+    console.error("Не валидный инвентарный номер ", invTrimmed)
+    return
   }
 
   if(!isIdDataValid(serTrimmed)) {
