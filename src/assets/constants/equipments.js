@@ -18,6 +18,24 @@ const fieldsToSearch = [
   'category',
 ]
 
+const searchConfig = [
+  // Прямые поля Equipment
+  { field: 'serialNumber' },
+  { field: 'inventoryNumber' },
+  { field: 'name' },
+  { field: 'description' },
+  { field: 'brand' },
+  { field: 'category' },
+  { field: 'classification' },
+  { field: 'measurements' },
+  { field: 'type' },
+  { field: 'kind' },
+  
+  // Связанные поля через relations
+  { relation: 'model', field: 'name' },
+  { relation: 'department', field: 'name' }
+];
+
 const invalidEquipmentCellData = ["", "-", " - "]
 
 const equipmentFilterList = [
@@ -197,6 +215,7 @@ export {
   amountOfEquipment,
   equipmentFilterList,
   fieldsToSearch,
+  searchConfig,
   equipmentPageSize,
   defaultEquipmentPage
 }

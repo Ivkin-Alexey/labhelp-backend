@@ -4,6 +4,7 @@ import {
   defaultEquipmentPage,
   equipmentPageSize,
   fieldsToSearch,
+  searchConfig,
 } from '../../assets/constants/equipments.js'
 import localizations from '../../assets/constants/localizations.js'
 import { fetchEquipmentListFromGSheet } from '../../controllers/equipment-controller/g-sheet.js'
@@ -168,41 +169,71 @@ export async function getEquipmentListByCategory(category, login, isAuthenticate
 }
 
 export async function getEquipmentListBySearch(searchTerm, login, isAuthenticated, filters, page = defaultEquipmentPage, pageSize = equipmentPageSize) {
-  const whereConditions = searchTerm ? fieldsToSearch.map(field => ({
-    [field]: {
-      contains: searchTerm,
-      mode: 'insensitive',
-    },
-  })) : []
-
-  const filterConditions = filters && Object.entries(filters).flatMap(([key, values]) => {
-    if (values.length > 0) {
-      return {
-        [key]: {
-          in: values,
-        },
-      }
-    }
-    return []
-  }) || []
-
+  
   try {
-    let baseConditions = whereConditions.length > 0 ? { OR: whereConditions } : {}
+    // Сначала находим уникальные комбинации modelId + departmentId
+    console.log('Search term:', searchTerm);
+console.log('Search config:', searchConfig);
+    const uniqueConditions = searchTerm ? {
+      OR: searchConfig.map(config => {
+        if (config.relation) {
+          return {
+            [config.relation]: {
+              [config.field]: {
+                contains: searchTerm,
+                mode: 'insensitive'
+              }
+            }
+          };
+        } else {
+          return {
+            [config.field]: {
+              contains: searchTerm,
+              mode: 'insensitive'
+            }
+          };
+        }
+      })
+    } : {};
 
-    if (filterConditions.length > 0) {
-      baseConditions = {
-        ...baseConditions,
-        AND: filterConditions,
+    const filterConditions = filters && Object.entries(filters).flatMap(([key, values]) => {
+      if (values.length > 0) {
+        return { [key]: { in: values } };
       }
-    }
+      return [];
+    }) || [];
 
-    const skipAmount = (page - 1) * pageSize
+    const baseConditions = {
+      ...(Object.keys(uniqueConditions).length > 0 ? uniqueConditions : {}),
+      ...(filterConditions.length > 0 ? { AND: filterConditions } : {})
+    };
 
-    let results = await prisma.Equipment.findMany({
-      distinct: ['modelId', 'departmentId'],
+    console.log('Final conditions:', JSON.stringify(baseConditions, null, 2));
+
+    // Находим уникальные комбинации
+    const uniqueCombinations = await prisma.equipment.findMany({
       where: baseConditions,
-      orderBy: {
-        imgUrl: 'desc', // Сортировка по убыванию, а точнее в данном случает по наличию ссылки на изображение
+      distinct: ['modelId', 'departmentId'],
+      select: { modelId: true, departmentId: true },
+      orderBy: { imgUrl: 'desc' }
+    });
+
+    const totalCount = uniqueCombinations.length;
+    const skipAmount = (page - 1) * pageSize;
+    const paginatedCombinations = uniqueCombinations.slice(skipAmount, skipAmount + pageSize);
+
+    // Теперь получаем полные данные для этих комбинаций
+    let results = await prisma.equipment.findMany({
+      where: {
+        AND: [
+          baseConditions,
+          {
+            OR: paginatedCombinations.map(comb => ({
+              modelId: comb.modelId,
+              departmentId: comb.departmentId
+            }))
+          }
+        ]
       },
       include: {
         model: true,
@@ -214,35 +245,21 @@ export async function getEquipmentListBySearch(searchTerm, login, isAuthenticate
           operatingEquipment: true,
         } : {})
       },
-      skip: skipAmount,
-      take: pageSize,
-    })
-    results = results.map(transformEquipmentList)
+      orderBy: { imgUrl: 'desc' }
+    });
 
-    const [{ count: totalCount }] = await prisma.$queryRaw`
-      SELECT COUNT(DISTINCT CONCAT("modelId", '-', "departmentId")) as count
-      FROM "Equipment" e
-      JOIN "Model" m ON e."modelId" = m.id
-      WHERE (
-        e."name" ILIKE ${`%${searchTerm}%`} OR
-        e."description" ILIKE ${`%${searchTerm}%`} OR
-        m."name" ILIKE ${`%${searchTerm}%`} OR
-        e."serialNumber" ILIKE ${`%${searchTerm}%`} OR
-        e."inventoryNumber" ILIKE ${`%${searchTerm}%`} OR
-        e."brand" ILIKE ${`%${searchTerm}%`} OR
-        e."category" ILIKE ${`%${searchTerm}%`}
-      )
-    `
+    results = results.map(transformEquipmentList);
 
-    return { results, totalCount, page, pageSize }
+    console.log('Raw results:', results);
+
+    return { results, totalCount, page, pageSize };
   } catch (error) {
-    const status = error.status || 500
-    const errorMsg =
-      error.message || 'Внутренняя ошибка сервера (при поиске оборудования): ' + error
-    throw { message: errorMsg, status }
+    console.error('Search error:', error);
+    const status = error.status || 500;
+    const errorMsg = error.message || 'Внутренняя ошибка сервера: ' + error;
+    throw { message: errorMsg, status };
   }
 }
-
 
 export async function createEquipmentDbFromGSheet(botLogs = true) {
   async function transferEquipments(list) {
