@@ -4,6 +4,9 @@ export function transformEquipmentList(equipment) {
     isFavorite: equipment.favoriteEquipment && equipment.favoriteEquipment.length > 0,
     isOperate: equipment.operatingEquipment && equipment.operatingEquipment.length > 0,
     login: equipment.operatingEquipment && Array.isArray(equipment.operatingEquipment) && equipment.operatingEquipment[0]?.login,
+    // Добавляем поля количества, если они есть
+    quantity: equipment.quantity || 1,
+    totalQuantity: equipment.totalQuantity || equipment.quantity || 1,
   }
   delete result.operatingEquipment
   delete result.favoriteEquipment

@@ -171,9 +171,6 @@ export async function getEquipmentListByCategory(category, login, isAuthenticate
 export async function getEquipmentListBySearch(searchTerm, login, isAuthenticated, filters, page = defaultEquipmentPage, pageSize = equipmentPageSize) {
   
   try {
-    // Сначала находим уникальные комбинации modelId + departmentId
-    console.log('Search term:', searchTerm);
-console.log('Search config:', searchConfig);
     const uniqueConditions = searchTerm ? {
       OR: searchConfig.map(config => {
         if (config.relation) {
@@ -198,6 +195,14 @@ console.log('Search config:', searchConfig);
 
     const filterConditions = filters && Object.entries(filters).flatMap(([key, values]) => {
       if (values.length > 0) {
+        // Специальная обработка для фильтра по подразделению
+        if (key === 'department') {
+          return {
+            department: {
+              name: { in: values }
+            }
+          };
+        }
         return { [key]: { in: values } };
       }
       return [];
@@ -208,49 +213,57 @@ console.log('Search config:', searchConfig);
       ...(filterConditions.length > 0 ? { AND: filterConditions } : {})
     };
 
-    console.log('Final conditions:', JSON.stringify(baseConditions, null, 2));
-
-    // Находим уникальные комбинации
-    const uniqueCombinations = await prisma.equipment.findMany({
+    // 1) Группировка по modelId + departmentId (кол-во внутри подразделения)
+    const groupedByModelAndDept = await prisma.equipment.groupBy({
+      by: ['modelId', 'departmentId'],
       where: baseConditions,
-      distinct: ['modelId', 'departmentId'],
-      select: { modelId: true, departmentId: true },
-      orderBy: { imgUrl: 'desc' }
+      _count: { _all: true },
+      // Можно сортировать по количеству, либо по ключам группы
+      orderBy: [{ modelId: 'asc' }, { departmentId: 'asc' }]
     });
 
-    const totalCount = uniqueCombinations.length;
+    // 2) Группировка по modelId (общее количество по модели)
+    const totalsByModel = await prisma.equipment.groupBy({
+      by: ['modelId'],
+      where: baseConditions,
+      _count: { _all: true },
+      orderBy: [{ modelId: 'asc' }]
+    });
+    const modelIdToTotal = new Map(totalsByModel.map(x => [x.modelId, x._count._all]));
+
+    // 3) Пагинация на уровне сгруппированных записей
+    const totalCount = groupedByModelAndDept.length;
     const skipAmount = (page - 1) * pageSize;
-    const paginatedCombinations = uniqueCombinations.slice(skipAmount, skipAmount + pageSize);
+    const pageGroups = groupedByModelAndDept.slice(skipAmount, skipAmount + pageSize);
 
-    // Теперь получаем полные данные для этих комбинаций
-    let results = await prisma.equipment.findMany({
-      where: {
-        AND: [
-          baseConditions,
-          {
-            OR: paginatedCombinations.map(comb => ({
-              modelId: comb.modelId,
-              departmentId: comb.departmentId
-            }))
-          }
-        ]
-      },
-      include: {
-        model: true,
-        department: true,
-        ...(login && isAuthenticated ? {
-          favoriteEquipment: {
-            where: { login },
-          },
-          operatingEquipment: true,
-        } : {})
-      },
-      orderBy: { imgUrl: 'desc' }
-    });
+    // 4) Для каждой группы берём один «репрезентативный» экземпляр для обогащения связями
+    const enriched = await Promise.all(pageGroups.map(async g => {
+      const representative = await prisma.equipment.findFirst({
+        where: { modelId: g.modelId, departmentId: g.departmentId, ...(baseConditions || {}) },
+        include: {
+          model: true,
+          department: true,
+          ...(login && isAuthenticated ? {
+            favoriteEquipment: { where: { login } },
+            operatingEquipment: true,
+          } : {})
+        },
+        // Выбираем запись с картинкой приоритетно
+        orderBy: [{ imgUrl: 'desc' }]
+      });
 
-    results = results.map(transformEquipmentList);
+      if (!representative) {
+        return null;
+      }
 
-    console.log('Raw results:', results);
+      return transformEquipmentList({
+        ...representative,
+        quantity: g._count._all,
+        totalQuantity: modelIdToTotal.get(g.modelId) || g._count._all,
+      });
+    }));
+
+    const results = enriched.filter(Boolean);
 
     return { results, totalCount, page, pageSize };
   } catch (error) {
