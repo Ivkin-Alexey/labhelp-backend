@@ -9,6 +9,7 @@ export async function getUserData(login) {
     if (!user) {
       throw { message: `Пользователь с логином '${login}' не существует.`, status: 404 }
     }
+    // @ts-ignore
     const userData = await prisma.User.findUnique({
       where: {
         login: login,
@@ -32,6 +33,7 @@ export async function deleteUser(login) {
     if (!user) {
       throw { message: `Пользователь с логином '${login}' не существует.`, status: 404 }
     }
+    // @ts-ignore
     await prisma.User.delete({
       where: {
         login: login,
@@ -60,6 +62,7 @@ export async function createNewPerson(login, userData) {
       userData.role = personRoles.user
     }
 
+    // @ts-ignore
     await prisma.User.create({
       data: {
         login,
@@ -83,6 +86,7 @@ export async function updateUserData(login, userData) {
     if (!user) {
       throw { message: `Пользователя с логином '${login}' не существует.`, status: 400 }
     }
+    // @ts-ignore
     await prisma.User.update({
       where: {
         login: login,
@@ -99,6 +103,7 @@ export async function updateUserData(login, userData) {
 }
 
 async function getUserByLogin(login) {
+  // @ts-ignore
   return await prisma.User.findUnique({
     where: { login },
   })

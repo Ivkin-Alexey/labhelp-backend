@@ -25,7 +25,8 @@ export async function createEquipment(req, res) {
       })
     }
 
-    const newEquipment = await prisma.equipment.create({
+    // @ts-ignore
+    const newEquipment = await prisma.Equipment.create({
       data
     })
 

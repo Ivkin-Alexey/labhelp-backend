@@ -1,5 +1,5 @@
 export interface IEquipment {
-    id: EquipmentID,
+    id: TEquipmentID,
     category: string,
     name: string,
     brand: string,
@@ -8,7 +8,7 @@ export interface IEquipment {
     filesUrl: string,
     isUsing?: string[],
     isOperate?: boolean,
-    userID?: UserID
+    userID?: TUserID
 }
 
 export type TEquipmentID = string

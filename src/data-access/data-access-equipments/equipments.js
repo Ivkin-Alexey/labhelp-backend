@@ -5,6 +5,8 @@ import {
   equipmentPageSize,
   fieldsToSearch,
   searchConfig,
+  filterFieldsConfig,
+  invalidEquipmentCellData,
 } from '../../assets/constants/equipments.js'
 import localizations from '../../assets/constants/localizations.js'
 import { fetchEquipmentListFromGSheet } from '../../controllers/equipment-controller/g-sheet.js'
@@ -17,6 +19,7 @@ export async function getEquipmentList(login, isAuthenticated) {
   try {
     let results
     if (login && isAuthenticated) {
+      // @ts-ignore
       let rowData = await prisma.Equipment.findMany({
         include: {
           favoriteEquipment: {
@@ -30,9 +33,10 @@ export async function getEquipmentList(login, isAuthenticated) {
       })
 
       results = rowData.map(transformEquipmentList)
-    } else {
-      results = await prisma.Equipment.findMany()
-    }
+      } else {
+        // @ts-ignore
+        results = await prisma.Equipment.findMany()
+      }
 
     return results
   } catch (error) {
@@ -47,6 +51,7 @@ export async function getEquipmentList(login, isAuthenticated) {
 
 export async function getEquipmentByID(equipmentId, login, isAuthenticated) {
   try {
+    // @ts-ignore
     let equipment = await prisma.Equipment.findUnique({
       where: {
         id: equipmentId,
@@ -54,6 +59,10 @@ export async function getEquipmentByID(equipmentId, login, isAuthenticated) {
       include: {
         model: true,
         department: true,
+        classification: true,
+        measurements: true,
+        type: true,
+        kind: true,
         ...(login && isAuthenticated ? {
           favoriteEquipment: {
             where: { login },
@@ -68,10 +77,15 @@ export async function getEquipmentByID(equipmentId, login, isAuthenticated) {
       const msg = `Оборудование с Id ${equipmentId} не найдено в БД (при клике на карточку)`
       throw { message: msg, status: 404 }
     } else {
+      // @ts-ignore
       const res = await prisma.Equipment.findMany({
         where: {
-          modelId: equipment.modelId,
-          departmentId: equipment.departmentId,
+          model: {
+            name: equipment.model
+          },
+          department: {
+            name: equipment.department
+          }
         },
       });
       return { ...equipment, count: res.length, sameList: res.map(x => x.id) }
@@ -90,11 +104,18 @@ export async function getEquipmentByIDs(equipmentIds, login, isAuthenticated) {
     const equipments = await Promise.all(equipmentIds.map(async (equipmentId) => {
       let equipment
       if (login && isAuthenticated) {
+        // @ts-ignore
         let rowData = await prisma.Equipment.findUnique({
           where: {
             id: equipmentId,
           },
           include: {
+            model: true,
+            department: true,
+            classification: true,
+            measurements: true,
+            type: true,
+            kind: true,
             favoriteEquipment: {
               where: { login },
             },
@@ -104,11 +125,22 @@ export async function getEquipmentByIDs(equipmentIds, login, isAuthenticated) {
 
         equipment = transformEquipmentInfo(rowData)
       } else {
-        equipment = await prisma.Equipment.findUnique({
+        // @ts-ignore
+        let rowData = await prisma.Equipment.findUnique({
           where: {
             id: equipmentId,
           },
+          include: {
+            model: true,
+            department: true,
+            classification: true,
+            measurements: true,
+            type: true,
+            kind: true,
+          },
         })
+        
+        equipment = transformEquipmentInfo(rowData)
       }
 
       if (!equipment) {
@@ -133,6 +165,7 @@ export async function getEquipmentListByCategory(category, login, isAuthenticate
   try {
     let results
     if (login && isAuthenticated) {
+      // @ts-ignore
       let rowData = await prisma.Equipment.findMany({
         where: {
           category,
@@ -150,6 +183,7 @@ export async function getEquipmentListByCategory(category, login, isAuthenticate
 
       results = rowData.map(transformEquipmentList)
     } else {
+      // @ts-ignore
       results = await prisma.Equipment.findMany({
         where: {
           category,
@@ -199,6 +233,38 @@ export async function getEquipmentListBySearch(searchTerm, login, isAuthenticate
         if (key === 'department') {
           return {
             department: {
+              name: { in: values }
+            }
+          };
+        }
+        // Специальная обработка для фильтра по типу оборудования
+        if (key === 'type') {
+          return {
+            type: {
+              name: { in: values }
+            }
+          };
+        }
+        // Специальная обработка для фильтра по классификации
+        if (key === 'classification') {
+          return {
+            classification: {
+              name: { in: values }
+            }
+          };
+        }
+        // Специальная обработка для фильтра по измерениям
+        if (key === 'measurements') {
+          return {
+            measurements: {
+              name: { in: values }
+            }
+          };
+        }
+        // Специальная обработка для фильтра по виду оборудования
+        if (key === 'kind') {
+          return {
+            kind: {
               name: { in: values }
             }
           };
@@ -267,7 +333,7 @@ export async function getEquipmentListBySearch(searchTerm, login, isAuthenticate
 
     return { results, totalCount, page, pageSize };
   } catch (error) {
-    console.error('Search error:', error);
+    console.error('Ошибка поиска:', error);
     const status = error.status || 500;
     const errorMsg = error.message || 'Внутренняя ошибка сервера: ' + error;
     throw { message: errorMsg, status };
@@ -275,168 +341,120 @@ export async function getEquipmentListBySearch(searchTerm, login, isAuthenticate
 }
 
 export async function createEquipmentDbFromGSheet(botLogs = true) {
-  async function transferEquipments(list) {
-    const BATCH_SIZE = 10
-    let nonUniqueRecords = []
-    let failedRecords = []
-    let successfulRecordsCount = 0
-    const data = {
-      model: [],
-      department: [],
-    }
-
-    try {
-      console.log('Create departments')
-      const departments = list.reduce((acc, x) => {
-        const trimmed = x.department?.trim()
-
-        if (isIdDataValid(trimmed)) {
-          acc.add(trimmed)
-        }
-
-        return acc
-      }, new Set())
-      data.department = [...departments].map((x, i) => ({ id: i + 1, name: x }))
-      const { count } = await prisma.Department.createMany({
-        skipDuplicates: true,
-        data: data.department,
-      })
-      console.log('Departments created ', count)
-    } catch (e) {
-      console.error('Failed to create departments ', e)
-    }
-
-    try {
-      console.log('Create models')
-      const models = list.reduce((acc, x) => {
-        const trimmed = x.model && x.model.trim()
-
-        if (isIdDataValid(trimmed)) {
-          acc.add(trimmed)
-        }
-
-        return acc
-      }, new Set())
-      data.model = [...models].map((x, i) => ({ id: i + 1, name: x }))
-      const { count } = await prisma.Model.createMany({
-        skipDuplicates: true,
-        data: data.model,
-      })
-      console.log('Models created ', count)
-    } catch (e) {
-      console.error('Failed to create models ', e)
-    }
-
-    const updatedList = list.filter(x => isIdDataValid(x.model.trim()) && isIdDataValid(x.department.trim())).map(x => Object.entries(x).reduce((acc, [k, v]) => {
-      const trimmed = v.trim()
-
-      if (k === 'model' || k === 'department') {
-        acc[k] = {
-          connect: {
-            id: data[k].find(x => x.name === trimmed).id,
-          },
-        }
-        return acc
+  async function createAllTablesAndFilters(list) {
+    
+    // Собираем уникальные значения для всех таблиц
+    const tableData = {}
+    
+    // Departments
+    const departments = list.reduce((acc, x) => {
+      const trimmed = x.department?.trim()
+      if (isIdDataValid(trimmed)) {
+        acc.add(trimmed)
       }
-
-      acc[k] = trimmed
       return acc
-    }, {}))
-
-    // Шаг 1: Группируем оборудование по модели
-    // const groupedByModel = {};
-    // for (const item of list) {
-    //   const model = item.model.trim();
-    //
-    //   // Если модель не указана, то такую единицу оборудования в БД не включаем
-    //   if (invalidEquipmentCellData.includes(model)) {
-    //     continue;
-    //   }
-    //
-    //   if (!groupedByModel[model]) {
-    //     groupedByModel[model] = {
-    //       ...item,
-    //       sameList: [item.id],
-    //       departments: new Set([item.department])
-    //     };
-    //   } else {
-    //     groupedByModel[model].sameList.push(item.id);
-    //     groupedByModel[model].departments.add(item.department);
-    //   }
-    // }
-
-    // В итоге мы имеем объект, где ключ - это модель, а значение это единица оборудования
-
-    // Шаг 2: Создаем записи для каждого подразделения
-    // for (const key in groupedByModel) {
-    //   const equipment = groupedByModel[key];
-    //
-    //   // Удаляем временное поле departments
-    //   const { departments, ...equipmentData } = equipment;
-    //
-    //   if (departments.size > 0) {
-    //     departments.forEach(department => {
-    //       updatedList.push({
-    //         ...equipmentData,
-    //         department
-    //       });
-    //     });
-    //   } else {
-    //     updatedList.push(equipmentData);
-    //   }
-    // }
-
-    // Шаг 3: Вставляем данные в базу
-    for (let i = 0; i < updatedList.length; i += BATCH_SIZE) {
-      const batch = updatedList.slice(i, i + BATCH_SIZE)
-
-      try {
-        const result = await prisma.$transaction(batch.map(x => prisma.Equipment.create({
-          data: x,
-        })))
-        successfulRecordsCount += result.count
-      } catch (error) {
-        console.log(error)
-        if (error.code === 'P2002') {
-          nonUniqueRecords.push(...batch)
-        } else {
-          failedRecords.push(...batch)
-        }
+    }, new Set())
+    tableData.department = [...departments].map((x, i) => ({ id: i + 1, name: x }))
+    
+    // Models
+    const models = list.reduce((acc, x) => {
+      const trimmed = x.model && x.model.trim()
+      if (isIdDataValid(trimmed)) {
+        acc.add(trimmed)
       }
-    }
-
-    // Обработка ошибок и уведомления
-    if (failedRecords.length > 0) {
-      botLogs && sendNotification(`Ошибка при вставке данных в БД: ${failedRecords.length} позиций(я)`)
-      console.log(
-        'Обработка записей с ошибками. Будет показано не более 10 записей:',
-        failedRecords.slice(0, 10),
-      )
-    }
-
-    if (nonUniqueRecords.length > 0) {
-      botLogs && sendNotification(
-        `Обнаружено оборудование с неуникальным Id: ${nonUniqueRecords.length} позиций(я)`,
-      )
-      console.log(
-        'Обработка записей с неуникальным Id. Будет показано не более 10 записей:',
-        nonUniqueRecords.slice(0, 10),
-      )
-    }
-
-    const successMsg = `Добавлено записей: ${successfulRecordsCount} из ${list.length}`
-    botLogs && sendNotification(successMsg)
-    console.log(successMsg)
+      return acc
+    }, new Set())
+    tableData.model = [...models].map((x, i) => ({ id: i + 1, name: x }))
+    
+    // Собираем данные для фильтров (исключаем department и model, так как они уже обработаны)
+    filterFieldsConfig.forEach(config => {
+      if (config.field === 'department' || config.field === 'model') {
+        return // Пропускаем department и model, так как они уже обработаны выше
+      }
+      const values = new Set()
+      list.forEach(equipment => {
+        const value = equipment[config.field]
+        if (value && value.trim()) {
+          values.add(value.trim())
+        }
+      })
+      tableData[config.field] = Array.from(values).sort()
+    })
+    
+    // Создаем все таблицы параллельно
+    const promises = []
+    
+    // Departments
+    promises.push(
+      // @ts-ignore
+      prisma.Department.createMany({
+        skipDuplicates: true,
+        data: tableData.department,
+      }).then(result => console.log(`Таблица Department обновлена`))
+    )
+    
+    // Models
+    promises.push(
+      // @ts-ignore
+      prisma.Model.createMany({
+        skipDuplicates: true,
+        data: tableData.model,
+      }).then(result => console.log(`Таблица Model обновлена`))
+    )
+    
+    // Filter tables (исключаем department и model, так как они уже созданы через createMany)
+    filterFieldsConfig.forEach(config => {
+      if (config.field === 'department' || config.field === 'model') {
+        return // Пропускаем department и model, так как они уже созданы выше
+      }
+      const values = tableData[config.field]
+      if (values.length > 0) {
+        promises.push(
+          Promise.all(
+            values.map(name => 
+              prisma[config.tableName].upsert({
+                where: { name },
+                update: {},
+                create: { name }
+              })
+            )
+          ).then(() => console.log(`Таблица ${config.tableName} обновлена`))
+        )
+      }
+    })
+    
+    await Promise.all(promises)
+    console.log('Все таблицы и фильтры успешно обновлены')
   }
 
+
   try {
+    // Очищаем все таблицы
+    // @ts-ignore
     await clearTable(prisma.Equipment)
+    // @ts-ignore
     await clearTable(prisma.Department)
+    // @ts-ignore
     await clearTable(prisma.Model)
+    // @ts-ignore
+    await clearTable(prisma.Classification)
+    // @ts-ignore
+    await clearTable(prisma.Measurement)
+    // @ts-ignore
+    await clearTable(prisma.EquipmentType)
+    // @ts-ignore
+    await clearTable(prisma.EquipmentKind)
+    
     console.info('База данных оборудования обновляется...')
     const list = await fetchEquipmentListFromGSheet()
-    await transferEquipments(list)
-    console.info('База данных оборудования обновлена')
+    
+    // Создаем все таблицы и фильтры в одном процессе
+    await createAllTablesAndFilters(list)
+    
+    // Создаем оборудование с правильными связями
+    await createEquipmentWithRelations(list)
+    
+    console.info('✅ База данных оборудования обновлена')
   } catch (error) {
     console.error('Ошибка при создании базы данных из GSheet:', error)
     throw error // Пробрасываем ошибку выше для обработки
@@ -445,5 +463,147 @@ export async function createEquipmentDbFromGSheet(botLogs = true) {
   }
 
   return localizations.equipment.dbIsReloadedMsg
+}
+
+// Динамическое получение фильтров из БД (оптимизированная версия)
+export async function getEquipmentFilters() {
+  try {
+    // Создаем массив запросов на основе конфигурации фильтров
+    const prismaQueries = filterFieldsConfig.map(config => {
+      return prisma[config.tableName].findMany({ 
+        select: { id: true, name: true },
+        orderBy: { name: 'asc' } 
+      })
+    })
+
+    // Получаем все данные за один запрос
+    const results = await Promise.all(prismaQueries)
+
+    // Создаем массив данных для удобного доступа
+    const dataMap = {}
+    filterFieldsConfig.forEach((config, index) => {
+      dataMap[config.field] = results[index]
+    })
+
+    // Создаем массив фильтров в цикле
+    const filters = filterFieldsConfig.map(config => ({
+      name: config.field,
+      label: config.label,
+      options: dataMap[config.field]
+        .map(item => item.name)
+        .filter(name => !invalidEquipmentCellData.includes(name))
+    }))
+    
+    return filters
+  } catch (error) {
+    console.error('Ошибка получения фильтров оборудования:', error)
+    throw error
+  } finally {
+    await prisma.$disconnect()
+  }
+}
+
+// Создание оборудования с правильными связями (упрощенная версия)
+async function createEquipmentWithRelations(equipmentList) {
+  try {
+    console.log('Создание оборудования со связями...')
+    
+    // Создаем массив запросов на основе конфигурации фильтров + базовые таблицы
+    const prismaQueries = [
+      prisma.model.findMany({ select: { id: true, name: true } }),
+      prisma.department.findMany({ select: { id: true, name: true } }),
+      ...filterFieldsConfig.map(config => 
+        prisma[config.tableName].findMany({ select: { id: true, name: true } })
+      )
+    ]
+
+    // Получаем все данные за один запрос
+    const results = await Promise.all(prismaQueries)
+    
+    // Извлекаем базовые таблицы
+    const [models, departments] = results
+    
+    // Создаем объект с данными фильтров
+    const filterData = {}
+    filterFieldsConfig.forEach((config, index) => {
+      filterData[config.field] = results[index + 2] // +2 потому что первые два - это models и departments
+    })
+
+    // Создаем мапы для быстрого поиска
+    const modelMap = new Map(models.map(m => [m.name, m.id]))
+    const departmentMap = new Map(departments.map(d => [d.name, d.id]))
+    
+    const filterMaps = {}
+    filterFieldsConfig.forEach(config => {
+      filterMaps[config.field] = new Map(
+        filterData[config.field].map(item => [item.name, item.id])
+      )
+    })
+
+    // Фильтруем и обрабатываем оборудование
+    const validEquipment = equipmentList.filter(x => 
+      isIdDataValid(x.model?.trim()) && 
+      isIdDataValid(x.department?.trim())
+    )
+
+    const BATCH_SIZE = 10
+    let successfulRecordsCount = 0
+
+    for (let i = 0; i < validEquipment.length; i += BATCH_SIZE) {
+      const batch = validEquipment.slice(i, i + BATCH_SIZE)
+      
+      const processedBatch = batch.map(equipment => {
+        const processedData = { ...equipment }
+
+        // Обрабатываем связи
+        if (equipment.model) {
+          const modelId = modelMap.get(equipment.model.trim())
+          if (modelId) {
+            processedData.modelId = modelId
+            delete processedData.model
+          }
+        }
+
+        if (equipment.department) {
+          const departmentId = departmentMap.get(equipment.department.trim())
+          if (departmentId) {
+            processedData.departmentId = departmentId
+            delete processedData.department
+          }
+        }
+
+        // Обрабатываем фильтры
+        filterFieldsConfig.forEach(config => {
+          const value = equipment[config.field]
+          if (value && value.trim()) {
+            const id = filterMaps[config.field].get(value.trim())
+            if (id) {
+              // Исправляем название поля для measurements
+              const fieldId = config.field === 'measurements' ? 'measurementId' : `${config.field}Id`
+              processedData[fieldId] = id
+            }
+          }
+          delete processedData[config.field]
+        })
+
+        return processedData
+      })
+
+      try {
+        await prisma.$transaction(
+          processedBatch.map(data => prisma.equipment.create({ data }))
+        )
+        successfulRecordsCount += processedBatch.length
+      } catch (error) {
+        console.error('Ошибка создания пакета оборудования:', error)
+      }
+    }
+
+    console.log(`Создано ${successfulRecordsCount} записей оборудования со связями`)
+    
+  } catch (error) {
+    console.error('Ошибка создания оборудования со связями:', error)
+    throw error
+  }
 }
 

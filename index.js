@@ -31,8 +31,6 @@ export const prisma = new PrismaClient();
 bot.on('message', async msg => await processCommand(bot, msg));
 bot.on('callback_query', async ctx => await processCallbackQuery(bot, ctx));
 
-console.log("ok2")
-
 // Фикс ошибки призмы
 BigInt.prototype.toJSON = function () {
   const int = Number.parseInt(this.toString());

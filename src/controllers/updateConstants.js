@@ -12,7 +12,7 @@ async function updateConstantsDB(field, data) {
         reject(`Ошибка чтения данных на сервере: ${error}. Сообщите о ней администратору`)
         return
       }
-      let parsedData = JSON.parse(Buffer.from(fileData))
+      let parsedData = JSON.parse(fileData)
       // let isNewUser = true;
       const newData = parsedData[field]
       for (let key in data) {
@@ -38,7 +38,7 @@ async function getConstantFromDB(field, constant) {
         reject(`Ошибка чтения данных на сервере: ${error}. Сообщите о ней администратору`)
         return
       }
-      const parsedData = JSON.parse(Buffer.from(fileData))
+      const parsedData = JSON.parse(fileData)
       const value = parsedData[field][constant]
       if (!value) reject('Такой константы не существует')
       else resolve(value)

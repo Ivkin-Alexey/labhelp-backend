@@ -15,24 +15,32 @@ export async function fetchEquipmentListFromGSheet() {
 
 function createEquipmentList(rows) {
   const equipmentArr = []
+  let invalidIdsCount = 0
+  
   for (let i = 0; i < amountOfEquipment; i++) {
     if (!rows[i]) continue
-    const newEquipmentItem = createEquipmentItem(rows[i])
+    const newEquipmentItem = createEquipmentItem(rows[i], () => invalidIdsCount++)
     if (newEquipmentItem) {
       equipmentArr.push(newEquipmentItem)
     }
   }
+  
+  // Выводим общее сообщение о невалидных ID
+  if (invalidIdsCount > 0) {
+    console.log(`⚠️  Найдено единиц оборудования с невалидными заводскими и/или инвентарными номерами: ${invalidIdsCount}`)
+  }
+  
   return equipmentArr
 }
 
-function createEquipmentItem(obj) {
+function createEquipmentItem(obj, incrementInvalidCount) {
   const isAvailable = obj.get('Включить в каталог оборудования')
   if (isAvailable === 'FALSE') return
   const newEquipmentItem = {}
   for (let key in equipmentItem) {
     newEquipmentItem[key] = obj.get(equipmentItem[key]) || ''
   }
-  newEquipmentItem.id = createEquipmentId(newEquipmentItem.inventoryNumber, newEquipmentItem.serialNumber)
+  newEquipmentItem.id = createEquipmentId(newEquipmentItem.inventoryNumber, newEquipmentItem.serialNumber, incrementInvalidCount)
   if (!newEquipmentItem.id) {
     return
   }
@@ -41,8 +49,9 @@ function createEquipmentItem(obj) {
 
 const idsMap = {};
 
-export function createEquipmentId(inventoryNumber, serialNumber) {
+export function createEquipmentId(inventoryNumber, serialNumber, incrementInvalidCount = () => {}) {
   if (typeof inventoryNumber !== "string" || typeof serialNumber !== "string") {
+    incrementInvalidCount()
     throw new TypeError("Инвентарный и серийный номер должны быть строками")
   }
 
@@ -50,7 +59,7 @@ export function createEquipmentId(inventoryNumber, serialNumber) {
   const serTrimmed = serialNumber.trim()
 
   if (!isIdDataValid(invTrimmed)) {
-    console.error("Не валидный инвентарный номер ", invTrimmed)
+    incrementInvalidCount()
     return
   }
 

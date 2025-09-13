@@ -1,9 +1,10 @@
-import { equipmentFilterList } from '../../assets/constants/equipments.js'
+// import { equipmentFilterList } from '../../assets/constants/equipments.js' // Больше не нужен, используем динамические фильтры
 import { processSearchHistoryRequest } from '../../controllers/equipment-controller/search-history.js'
 import {
   getEquipmentByID,
   getEquipmentByIDs,
   getEquipmentListBySearch,
+  getEquipmentFilters,
 } from '../../data-access/data-access-equipments/equipments.js'
 import { getFavoriteEquipmentsFromDB } from '../../data-access/data-access-equipments/favorite-equipments.js'
 import { getWorkingEquipmentListFromDB } from '../../data-access/data-access-equipments/operate-equipments.js'
@@ -31,7 +32,8 @@ export default function getEquipment(app) {
 
   app.get('/equipments/filters', async (req, res) => {
     try {
-      return res.status(200).json(equipmentFilterList)
+      const filters = await getEquipmentFilters()
+      return res.status(200).json(filters)
     } catch (e) {
       processEndpointError(res, e)
     }

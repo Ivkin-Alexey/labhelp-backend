@@ -2,6 +2,7 @@ import { prisma } from '../../../index.js'
 
 export async function getSearchHistory(login) {
   try {
+    // @ts-ignore
     let data = await prisma.EquipmentSearchHistory.findMany({
       where: {
         login,
@@ -22,6 +23,7 @@ export async function getSearchHistory(login) {
 
 export async function addTermToSearchHistory(login, term) {
   try {
+    // @ts-ignore
     const existingTerm = await prisma.EquipmentSearchHistory.findFirst({
       where: {
         user: {
@@ -37,6 +39,7 @@ export async function addTermToSearchHistory(login, term) {
       return {message}
     }
 
+    // @ts-ignore
     await prisma.EquipmentSearchHistory.create({
       data: {
         user: {
@@ -59,6 +62,7 @@ export async function addTermToSearchHistory(login, term) {
 
 export async function deleteTermFromSearchHistory(login, term) {
   try {
+    // @ts-ignore
     await prisma.EquipmentSearchHistory.delete({
       where: {
         login_term: {

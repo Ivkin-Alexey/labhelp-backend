@@ -5,7 +5,7 @@ export async function getWorkingEquipmentListFromDB(login) {
   try {
     if (!login) throw { message: 'Отсутствует логин', status: 400 }
 
-    const rawData = await prisma.operatingEquipment.findMany({
+    const rawData = await prisma.OperatingEquipment.findMany({
       include: {
         equipment: {
           include: {
@@ -33,7 +33,7 @@ export async function getWorkingEquipmentListFromDB(login) {
 
 export async function startWorkWithEquipment(login, equipmentId, isLongUse = false) {
   try {
-    await prisma.operatingEquipment.create({
+    await prisma.OperatingEquipment.create({
       data: {
         equipmentId,
         login,
@@ -55,7 +55,7 @@ export async function startWorkWithEquipment(login, equipmentId, isLongUse = fal
 
 export async function endWorkWithEquipment(login, equipmentId) {
   try {
-    await prisma.operatingEquipment.delete({
+    await prisma.OperatingEquipment.delete({
       where: {
         login_equipmentId: {
           login,

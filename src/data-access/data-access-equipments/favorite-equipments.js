@@ -8,6 +8,7 @@ export async function getFavoriteEquipmentsFromDB(login) {
       throw { message: 'Отсутствует логин при запросе избранного оборудования', status: 500 }
     console.info(`GET-запрос избранного оборудования. Логин ${login}.`)
 
+    // @ts-ignore
     const rawData = await prisma.FavoriteEquipment.findMany({
       where: { login },
       include: {
@@ -36,6 +37,7 @@ export async function removeFavoriteEquipmentFromDB(login, equipmentId) {
     console.info(
       `DELETE-запрос на удаление оборудования из избранного. Логин ${login}, Id оборудования ${equipmentId}.`,
     )
+    // @ts-ignore
     await prisma.FavoriteEquipment.delete({
       where: {
         login_equipmentId: {
@@ -63,6 +65,7 @@ export async function addFavoriteEquipmentToDB(login, equipmentId) {
     console.info(
       `POST-запрос на добавление оборудования в избранное. Логин ${login}, Id оборудования ${equipmentId}.`,
     )
+    // @ts-ignore
     await prisma.FavoriteEquipment.create({
       data: {
         user: {
