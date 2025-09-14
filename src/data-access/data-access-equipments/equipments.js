@@ -610,3 +610,16 @@ async function createEquipmentWithRelations(equipmentList) {
   }
 }
 
+export async function getEquipmentCount() {
+  try {
+    // @ts-ignore
+    const count = await prisma.equipment.count()
+    return count
+  } catch (error) {
+    console.error('Ошибка получения количества оборудования:', error)
+    throw error
+  } finally {
+    await prisma.$disconnect()
+  }
+}
+
