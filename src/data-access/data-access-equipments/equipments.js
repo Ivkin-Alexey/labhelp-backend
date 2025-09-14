@@ -15,6 +15,7 @@ import { clearTable } from '../common.js'
 import { transformEquipmentInfo, transformEquipmentList } from '../helpers.js'
 import { isIdDataValid } from '../../controllers/equipment-controller/helpers.js'
 import { handleDatabaseConnectionError } from '../../utils/dbConnectionHandler.js'
+import { notifyAdmins } from '../../services/telegram-notifier.js'
 
 export async function getEquipmentList(login, isAuthenticated) {
   try {
@@ -601,6 +602,7 @@ async function createEquipmentWithRelations(equipmentList) {
     }
 
     console.log(`Создано ${successfulRecordsCount} записей оборудования со связями`)
+    notifyAdmins(`Создано ${successfulRecordsCount} записей оборудования со связями`)
     
   } catch (error) {
     console.error('Ошибка создания оборудования со связями:', error)

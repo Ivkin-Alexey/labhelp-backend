@@ -4,7 +4,6 @@ import {
   sendResearches,
   sendResearch,
   sendConfusedMessage,
-  sendCommandList,
 } from './botAnswers.js'
 import { askReagentsManagerChatID } from './replyToMessage.js'
 import { personRoles } from '../../assets/constants/users.js'
@@ -31,14 +30,11 @@ async function processCommand(bot, command) {
       case '/start':
         await sendStartMessage(bot, chatID, first_name, last_name)
         break
-      case '/help':
-        await sendCommandList(bot, chatID)
-        break
       case '/researches':
         await sendResearches(bot, chatID)
         break
-      case '/get_chat_id':
-        await bot.sendMessage(chatID, 'Чат Id: ' + chatID)
+      case '/getMyChatId':
+        await bot.sendMessage(chatID, chatID)
         break
       case '/reloadEquipmentDB':
         await reloadEquipmentDB(bot, chatID)

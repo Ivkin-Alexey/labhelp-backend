@@ -1,5 +1,5 @@
 import { getConstantFromDB } from './updateConstants.js'
-import { programmerChatID } from '../assets/constants/constants.js'
+import { admins, programmerChatID } from '../assets/constants/constants.js'
 
 async function checkIsUserReagentManager(chatID) {
   return new Promise((resolve, reject) => {
@@ -13,7 +13,7 @@ async function checkIsUserReagentManager(chatID) {
 }
 
 async function checkIsUserSuperAdmin(chatID) {
-  return chatID === programmerChatID
+  return chatID === programmerChatID || admins.includes(chatID)
 }
 
 

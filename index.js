@@ -42,7 +42,6 @@ BigInt.prototype.toJSON = function () {
 
 const app = express();
 
-// ��������� �������� �� ����� ����������
 app.use(express.json());
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -50,7 +49,6 @@ app.use(logRequestInfo);
 app.use(authenticateToken);
 app.use(logSuccessfulResponse);
 
-// ���������� �������� �������� � app (��� /api)
 getEquipment(app);
 get(app);
 post(app);
@@ -63,14 +61,13 @@ const httpServer = http.createServer(app);
 forceCheckDatabaseConnection().then(({ isConnected, error }) => {
   if (isConnected) {
     console.log('✅ Подключение к базе данных успешно установлено')
-    
+    httpServer.listen(PORT, () => {
+      console.log(`✅ HTTP-сервер успешно запущен на порту: ${PORT}`);
+    });
     // Запускаем периодическую проверку подключения к БД
     startPeriodicConnectionCheck()
     console.log(`🔄 Запущена периодическая проверка подключения к БД (каждые ${CHECK_INTERVAL / 1000} секунд)`)
-    
-    httpServer.listen(PORT, () => {
-      console.log(`HTTP Server running on port ${PORT}`);
-    });
+
   } else {
     handleStartupDatabaseError(error);
     process.exit(1);

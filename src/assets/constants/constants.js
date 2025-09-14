@@ -4,6 +4,7 @@ import localizations from './localizations.js'
 const PORT = process.env.BACKEND_PORT
 const HTTPS_PORT = 443
 export const programmerChatID = 392584400
+export const admins = [392584400]
 const jwtLifeTime = "8h"
 
 const timeZoneRelativeToUTC = 3
@@ -30,50 +31,15 @@ const keyboards = {
 
 const commands = [
   {
-    command: '/start',
-    description: 'Старт',
-    access: 'all',
-  },
-  {
-    command: '/help',
-    description: 'Список команд',
-    access: 'all',
-  },
-  {
-    command: '/researches',
-    description: 'Научные направления',
-    access: 'all',
-  },
-  {
-    command: '/addRandomUser',
-    description: 'Добавить случайного пользователя',
-    access: 'superAdmin',
-  },
-  {
-    command: '/addRandomAdmin',
-    description: 'Добавить случайного администратора',
-    access: 'superAdmin',
-  },
-  {
-    command: '/addRandomSuperAdmin',
-    description: 'Добавить случайного суперадминистратора',
-    access: 'superAdmin',
-  },
-  {
-    command: '/deleteUsersWithEmptyChatID',
-    description: 'Удалить пользователей с пустыми полями',
-    access: 'superAdmin',
+    command: '/getMyChatId',
+    description: 'Узнать свой чат ID',
+    access: 'admin',
   },
   {
     command: '/reloadEquipmentDB',
     description: 'Создать заново базу данных по оборудованию',
-    access: 'superAdmin',
-  },
-  {
-    command: '/setReagentsManagerChatID',
-    description: 'Установить чат Id менеджера по реактивам',
-    access: 'superAdmin',
-  },
+    access: 'admin',
+  }
 ]
 
 const userCommands = commands.reduce((sum, cur) => {
@@ -81,8 +47,8 @@ const userCommands = commands.reduce((sum, cur) => {
   else return sum
 }, '')
 
-const superAdminCommands = commands.reduce((sum, cur) => {
-  return sum + '\n' + cur.command + ` - ` + cur.description
+const adminCommands = commands.reduce((sum, cur) => {
+  return sum + '\n' + '\n' + cur.command + ` - ` + cur.description
 }, '')
 
 const stickers = {
@@ -106,6 +72,6 @@ export {
   timeZoneRelativeToUTC,
   localizations,
   userCommands,
-  superAdminCommands,
+  adminCommands,
   jwtLifeTime,
 }
