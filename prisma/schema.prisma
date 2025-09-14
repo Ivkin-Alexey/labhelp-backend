@@ -37,12 +37,16 @@ model Equipment {
   category           String?
   filesUrl           String?
   imgUrl             String?
-  classification     String?
-  measurements       String?
+  classification     Classification?      @relation(fields: [classificationId], references: [id])
+  classificationId   Int?
+  measurements       Measurement?         @relation(fields: [measurementId], references: [id])
+  measurementId      Int?
   department         Department           @relation(fields: [departmentId], references: [id])
   departmentId       Int
-  type               String?
-  kind               String?
+  type               EquipmentType?       @relation(fields: [typeId], references: [id])
+  typeId             Int?
+  kind               EquipmentKind?       @relation(fields: [kindId], references: [id])
+  kindId             Int?
   favoriteEquipment  FavoriteEquipment[]
   operatingEquipment OperatingEquipment[]
   sameList           String[]             @default([])
@@ -55,6 +59,30 @@ model Model {
 }
 
 model Department {
+  id        Int         @id @default(autoincrement())
+  name      String      @unique
+  equipment Equipment[]
+}
+
+model Classification {
+  id        Int         @id @default(autoincrement())
+  name      String      @unique
+  equipment Equipment[]
+}
+
+model Measurement {
+  id        Int         @id @default(autoincrement())
+  name      String      @unique
+  equipment Equipment[]
+}
+
+model EquipmentType {
+  id        Int         @id @default(autoincrement())
+  name      String      @unique
+  equipment Equipment[]
+}
+
+model EquipmentKind {
   id        Int         @id @default(autoincrement())
   name      String      @unique
   equipment Equipment[]

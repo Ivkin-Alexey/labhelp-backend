@@ -38,15 +38,27 @@ export function transformOperateEquipmentList(equipment) {
 }
 
 export function transformEquipmentInfo(equipment) {
+  // Создаем копию без связанных объектов и полей с ID
+  const { 
+    model, department, classification, measurements, type, kind, 
+    favoriteEquipment, operatingEquipment, 
+    modelId, departmentId, classificationId, measurementId, typeId, kindId,
+    ...baseEquipment 
+  } = equipment
+  
   let result 
   if (equipment.operatingEquipment && equipment.operatingEquipment[0]) {
     const { login, isLongUse, startDateTime } = equipment.operatingEquipment[0]
     result = {
       isOperate: true,
       isFavorite: equipment.favoriteEquipment && equipment.favoriteEquipment.length > 0,
-      ...equipment,
-      model: equipment.model && equipment.model.name,
-      department: equipment.department && equipment.department.name,
+      ...baseEquipment,
+      model: equipment.model && equipment.model.name || '',
+      department: equipment.department && equipment.department.name || '',
+      classification: equipment.classification && equipment.classification.name || '',
+      measurements: equipment.measurements && equipment.measurements.name || '',
+      type: equipment.type && equipment.type.name || '',
+      kind: equipment.kind && equipment.kind.name || '',
       login,
       isLongUse,
       startDateTime
@@ -55,12 +67,14 @@ export function transformEquipmentInfo(equipment) {
     result = {
       isOperate: false,
       isFavorite: equipment.favoriteEquipment && equipment.favoriteEquipment.length > 0,
-      ...equipment,
-      model: equipment.model && equipment.model.name,
-      department: equipment.department && equipment.department.name,
+      ...baseEquipment,
+      model: equipment.model && equipment.model.name || '',
+      department: equipment.department && equipment.department.name || '',
+      classification: equipment.classification && equipment.classification.name || '',
+      measurements: equipment.measurements && equipment.measurements.name || '',
+      type: equipment.type && equipment.type.name || '',
+      kind: equipment.kind && equipment.kind.name || '',
     }
   }
-  delete result.favoriteEquipment
-  delete result.operatingEquipment
   return result
 }

@@ -5,7 +5,7 @@ import {
   researches,
   editProfileUrl,
   userCommands,
-  superAdminCommands,
+  adminCommands,
 } from '../../assets/constants/constants.js'
 import localizations from '../../assets/constants/localizations.js'
 import { personRoles } from '../../assets/constants/users.js'
@@ -17,23 +17,8 @@ async function sendStartMessage(bot, chatID, first_name, last_name) {
   await bot.sendMessage(
     chatID,
     `Привет ${last_name} ${first_name}! ` + localizations.startMessage,
-    {
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: 'Да',
-              callback_data: JSON.stringify({ userAnswer: 'Yes' }),
-            },
-            {
-              text: 'Нет',
-              callback_data: JSON.stringify({ userAnswer: 'No' }),
-            },
-          ],
-        ],
-      },
-    },
   )
+  bot.sendMessage(chatID, adminCommands)
 }
 
 async function sendWebAppButtonWithMessage(bot, chatID, message) {
@@ -55,24 +40,10 @@ async function sendResearches(bot, chatID) {
   })
 }
 
-async function sendCommandList(bot, chatID) {
-  const { user } = personRoles
-  // eslint-disable-next-line no-undef
-  await getUserData(chatID)
-    .then(userData => {
-      if (userData.role === user) bot.sendMessage(chatID, userCommands)
-      else bot.sendMessage(chatID, superAdminCommands)
-    })
-    .catch(err => bot.sendMessage(chatID, err))
-}
-
 async function sendNotification(message) {
   await bot.sendMessage(programmerChatID, message)
 }
 
-export async function sendError(error) {
-  await bot.sendMessage(programmerChatID, error)
-}
 
 async function sendResearch(bot, chatID, researchTopic) {
   const research = researches.find(el => el.name === researchTopic)
@@ -102,6 +73,10 @@ async function sendResearch(bot, chatID, researchTopic) {
 async function sendConfusedMessage(bot, chatID) {
   await bot.sendSticker(chatID, stickers.unknown)
   await bot.sendMessage(chatID, localizations.iDontUnderstand)
+}
+
+async function sendCommandList(bot, chatID) {
+  await bot.sendMessage(chatID, userCommands)
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -139,6 +114,6 @@ export {
   sendResearches,
   sendConfusedMessage,
   sendWebAppButtonWithMessage,
-  sendCommandList,
   sendNotification,
+  sendCommandList,
 }
