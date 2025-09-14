@@ -70,9 +70,6 @@ async function sendNotification(message) {
   await bot.sendMessage(programmerChatID, message)
 }
 
-export async function sendError(error) {
-  await bot.sendMessage(programmerChatID, error)
-}
 
 async function sendResearch(bot, chatID, researchTopic) {
   const research = researches.find(el => el.name === researchTopic)

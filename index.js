@@ -18,6 +18,8 @@ import deleteMethod from './src/routes/delete.js';
 import { authenticateToken } from './src/middlewaries/authenticate.js';
 import { logRequestInfo, logSuccessfulResponse } from './src/middlewaries/logSuccessfulResponse.js';
 import patch from './src/routes/patch.js';
+import { forceCheckDatabaseConnection, startPeriodicConnectionCheck, handleStartupDatabaseError } from './src/utils/dbConnectionHandler.js';
+import { CHECK_INTERVAL } from './src/utils/dbConnectionHandler.js';
 
 process.on('uncaughtException', err => console.log(err));
 
@@ -32,6 +34,7 @@ bot.on('message', async msg => await processCommand(bot, msg));
 bot.on('callback_query', async ctx => await processCallbackQuery(bot, ctx));
 
 // Фикс ошибки призмы
+// @ts-ignore
 BigInt.prototype.toJSON = function () {
   const int = Number.parseInt(this.toString());
   return int ?? this.toString();
@@ -56,6 +59,20 @@ patch(app);
 
 const httpServer = http.createServer(app);
 
-httpServer.listen(PORT, () => {
-  console.log(`HTTP Server running on port ${PORT}`);
+// Проверяем подключение к БД при запуске (принудительно)
+forceCheckDatabaseConnection().then(({ isConnected, error }) => {
+  if (isConnected) {
+    console.log('✅ Подключение к базе данных успешно установлено')
+    
+    // Запускаем периодическую проверку подключения к БД
+    startPeriodicConnectionCheck()
+    console.log(`🔄 Запущена периодическая проверка подключения к БД (каждые ${CHECK_INTERVAL / 1000} секунд)`)
+    
+    httpServer.listen(PORT, () => {
+      console.log(`HTTP Server running on port ${PORT}`);
+    });
+  } else {
+    handleStartupDatabaseError(error);
+    process.exit(1);
+  }
 });

@@ -1,5 +1,5 @@
 import { jwtTokenSecret } from '../../index.js'
-import { sendError } from '../controllers/tg-bot-controllers/botAnswers.js'
+import { sendNotification } from '../controllers/tg-bot-controllers/botAnswers.js'
 import jwt from 'jsonwebtoken'
 
 function verifyToken(token) {
@@ -27,14 +27,14 @@ export function authenticateToken(req, res, next) {
   if (token == null) {
     const msg = `Отсутствует JWT-токен. Запрос по адресу: ${req.url}`
     console.error(msg)
-    sendError(msg)
+    sendNotification(`❌ ${msg}`)
     return res.status(401).json({ message: msg, status: 401 })
   }
 
   if (!isTokenVerified) {
     const msg = `Не валидный JWT-токен. Запрос по адресу: ${req.url}`
     console.error(msg)
-    sendError(msg)
+    sendNotification(`❌ ${msg}`)
     return res.status(401).json({ message: msg, status: 401 })
   }
 

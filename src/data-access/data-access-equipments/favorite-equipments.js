@@ -1,5 +1,5 @@
 import { prisma } from '../../../index.js'
-import { sendError } from '../../controllers/tg-bot-controllers/botAnswers.js'
+import { sendNotification } from '../../controllers/tg-bot-controllers/botAnswers.js'
 import { transformFavoriteEquipmentList } from '../helpers.js'
 
 export async function getFavoriteEquipmentsFromDB(login) {
@@ -54,7 +54,7 @@ export async function removeFavoriteEquipmentFromDB(login, equipmentId) {
       `Ошибка при удалении оборудования из избранного. Логин ${login}, Id оборудования ${equipmentId}. Подробности: ` +
       error
     console.error(errorMsg)
-    sendError(errorMsg)
+    sendNotification(`❌ ${errorMsg}`)
     await prisma.$disconnect()
     throw { message: errorMsg, status: 500 }
   }
@@ -89,7 +89,7 @@ export async function addFavoriteEquipmentToDB(login, equipmentId) {
       error
     }
     console.error(errorMsg)
-    sendError(errorMsg)
+    sendNotification(`❌ ${errorMsg}`)
     await prisma.$disconnect()
     throw { message: errorMsg, status: 500 }
   }

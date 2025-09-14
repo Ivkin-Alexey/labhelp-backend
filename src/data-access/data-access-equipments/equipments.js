@@ -14,6 +14,7 @@ import { sendNotification } from '../../controllers/tg-bot-controllers/botAnswer
 import { clearTable } from '../common.js'
 import { transformEquipmentInfo, transformEquipmentList } from '../helpers.js'
 import { isIdDataValid } from '../../controllers/equipment-controller/helpers.js'
+import { handleDatabaseConnectionError } from '../../utils/dbConnectionHandler.js'
 
 export async function getEquipmentList(login, isAuthenticated) {
   try {
