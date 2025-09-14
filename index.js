@@ -20,6 +20,7 @@ import { logRequestInfo, logSuccessfulResponse } from './src/middlewaries/logSuc
 import patch from './src/routes/patch.js';
 import { forceCheckDatabaseConnection, startPeriodicConnectionCheck, handleStartupDatabaseError } from './src/utils/dbConnectionHandler.js';
 import { CHECK_INTERVAL } from './src/utils/dbConnectionHandler.js';
+import { handleServerError } from './src/utils/serverErrorHandler.js';
 
 process.on('uncaughtException', err => console.log(err));
 
@@ -63,7 +64,7 @@ forceCheckDatabaseConnection().then(({ isConnected, error }) => {
     console.log('✅ Подключение к базе данных успешно установлено')
     httpServer.listen(PORT, () => {
       console.log(`✅ HTTP-сервер успешно запущен на порту: ${PORT}`);
-    });
+    }).on('error', handleServerError);
     // Запускаем периодическую проверку подключения к БД
     startPeriodicConnectionCheck()
     console.log(`🔄 Запущена периодическая проверка подключения к БД (каждые ${CHECK_INTERVAL / 1000} секунд)`)
