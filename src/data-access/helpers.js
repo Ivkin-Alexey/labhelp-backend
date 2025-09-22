@@ -48,6 +48,12 @@ export function transformOperateEquipmentList(equipment) {
 }
 
 export function transformEquipmentInfo(equipment) {
+  // Проверяем, что equipment существует
+  if (!equipment) {
+    console.warn('Equipment is null or undefined in transformEquipmentInfo')
+    return null
+  }
+
   // Создаем копию без связанных объектов и полей с ID
   const { 
     model, department, classification, measurements, type, kind, 

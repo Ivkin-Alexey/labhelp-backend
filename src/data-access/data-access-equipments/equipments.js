@@ -125,7 +125,7 @@ export async function getEquipmentByIDs(equipmentIds, login, isAuthenticated) {
           },
         })
 
-        equipment = transformEquipmentInfo(rowData)
+        equipment = rowData ? transformEquipmentInfo(rowData) : null
       } else {
         // @ts-ignore
         let rowData = await prisma.Equipment.findUnique({
@@ -142,7 +142,7 @@ export async function getEquipmentByIDs(equipmentIds, login, isAuthenticated) {
           },
         })
         
-        equipment = transformEquipmentInfo(rowData)
+        equipment = rowData ? transformEquipmentInfo(rowData) : null
       }
 
       if (!equipment) {
