@@ -14,10 +14,20 @@ export function transformEquipmentList(equipment) {
 }
 
 export function transformFavoriteEquipmentList(equipment) {
+  const equipmentData = (equipment && equipment.equipment) ? equipment.equipment : {}
+  const operatingEquipment = Array.isArray(equipmentData.operatingEquipment) ? equipmentData.operatingEquipment : []
+
   const result = {
-    ...equipment.equipment,
-    ...equipment.equipment.operatingEquipment[0],
-    isOperate: equipment.equipment.operatingEquipment.length > 0
+    ...equipmentData,
+    ...(operatingEquipment[0] || {}),
+    isOperate: operatingEquipment.length > 0,
+    // Безопасно извлекаем данные из связанных объектов
+    model: equipmentData.model?.name || '',
+    department: equipmentData.department?.name || '',
+    classification: equipmentData.classification?.name || '',
+    measurements: equipmentData.measurements?.name || '',
+    type: equipmentData.type?.name || '',
+    kind: equipmentData.kind?.name || '',
   }
   delete result.operatingEquipment
   return result
