@@ -299,12 +299,17 @@ export async function getEquipmentListBySearch(searchTerm, login, isAuthenticate
     });
     const modelIdToTotal = new Map(totalsByModel.map(x => [x.modelId, x._count._all]));
 
-    // 3) Пагинация на уровне сгруппированных записей
-    const totalCount = groupedByModelAndDept.length;
+    // 3) Подсчет общего количества найденного оборудования
+    const totalEquipmentUnits = await prisma.equipment.count({
+      where: baseConditions
+    });
+    
+    // 4) Пагинация на уровне сгруппированных записей (карточек)
+    const totalEquipmentCards = groupedByModelAndDept.length;
     const skipAmount = (page - 1) * pageSize;
     const pageGroups = groupedByModelAndDept.slice(skipAmount, skipAmount + pageSize);
 
-    // 4) Для каждой группы берём один «репрезентативный» экземпляр для обогащения связями
+    // 5) Для каждой группы берём один «репрезентативный» экземпляр для обогащения связями
     const enriched = await Promise.all(pageGroups.map(async g => {
       const representative = await prisma.equipment.findFirst({
         where: { modelId: g.modelId, departmentId: g.departmentId, ...(baseConditions || {}) },
@@ -333,7 +338,13 @@ export async function getEquipmentListBySearch(searchTerm, login, isAuthenticate
 
     const results = enriched.filter(Boolean);
 
-    return { results, totalCount, page, pageSize };
+    return { 
+      results, 
+      totalEquipmentCards, // Количество карточек оборудования (для пагинации)
+      totalEquipmentUnits, // Общее количество единиц найденного оборудования
+      page, 
+      pageSize 
+    };
   } catch (error) {
     console.error('Ошибка поиска:', error);
     const status = error.status || 500;
