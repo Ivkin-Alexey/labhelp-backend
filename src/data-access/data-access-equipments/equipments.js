@@ -205,9 +205,9 @@ export async function getEquipmentListByCategory(category, login, isAuthenticate
 }
 
 export async function getEquipmentListBySearch(searchTerm, login, isAuthenticated, filters, page = defaultEquipmentPage, pageSize = equipmentPageSize) {
-  
   try {
-    const uniqueConditions = searchTerm ? {
+    // 1. Строим условия поиска
+    const searchConditions = searchTerm ? {
       OR: searchConfig.map(config => {
         if (config.relation) {
           return {
@@ -229,47 +229,23 @@ export async function getEquipmentListBySearch(searchTerm, login, isAuthenticate
       })
     } : {};
 
+    // 2. Строим условия фильтрации
     const filterConditions = filters && Object.entries(filters).flatMap(([key, values]) => {
       if (values.length > 0) {
-        // Специальная обработка для фильтра по подразделению
         if (key === 'department') {
-          return {
-            department: {
-              name: { in: values }
-            }
-          };
+          return { department: { name: { in: values } } };
         }
-        // Специальная обработка для фильтра по типу оборудования
         if (key === 'type') {
-          return {
-            type: {
-              name: { in: values }
-            }
-          };
+          return { type: { name: { in: values } } };
         }
-        // Специальная обработка для фильтра по классификации
         if (key === 'classification') {
-          return {
-            classification: {
-              name: { in: values }
-            }
-          };
+          return { classification: { name: { in: values } } };
         }
-        // Специальная обработка для фильтра по измерениям
         if (key === 'measurements') {
-          return {
-            measurements: {
-              name: { in: values }
-            }
-          };
+          return { measurements: { name: { in: values } } };
         }
-        // Специальная обработка для фильтра по виду оборудования
         if (key === 'kind') {
-          return {
-            kind: {
-              name: { in: values }
-            }
-          };
+          return { kind: { name: { in: values } } };
         }
         return { [key]: { in: values } };
       }
@@ -277,42 +253,43 @@ export async function getEquipmentListBySearch(searchTerm, login, isAuthenticate
     }) || [];
 
     const baseConditions = {
-      ...(Object.keys(uniqueConditions).length > 0 ? uniqueConditions : {}),
+      ...(Object.keys(searchConditions).length > 0 ? searchConditions : {}),
       ...(filterConditions.length > 0 ? { AND: filterConditions } : {})
     };
 
-    // 1) Группировка по modelId + departmentId (кол-во внутри подразделения)
-    const groupedByModelAndDept = await prisma.equipment.groupBy({
-      by: ['modelId', 'departmentId'],
-      where: baseConditions,
-      _count: { _all: true },
-      // Можно сортировать по количеству, либо по ключам группы
-      orderBy: [{ modelId: 'asc' }, { departmentId: 'asc' }]
-    });
+    // 3. ОПТИМИЗАЦИЯ: Используем один запрос вместо четырех
+    const [groupedResults, totalCount, modelTotals] = await Promise.all([
+      // Группировка с пагинацией в одном запросе
+      prisma.equipment.groupBy({
+        by: ['modelId', 'departmentId'],
+        where: baseConditions,
+        _count: { _all: true },
+        orderBy: [{ modelId: 'asc' }, { departmentId: 'asc' }],
+        skip: (page - 1) * pageSize,
+        take: pageSize
+      }),
+      
+      // Общий счетчик
+      prisma.equipment.count({ where: baseConditions }),
+      
+      // Получаем общие количества по моделям
+      prisma.equipment.groupBy({
+        by: ['modelId'],
+        where: baseConditions,
+        _count: { _all: true }
+      })
+    ]);
 
-    // 2) Группировка по modelId (общее количество по модели)
-    const totalsByModel = await prisma.equipment.groupBy({
-      by: ['modelId'],
-      where: baseConditions,
-      _count: { _all: true },
-      orderBy: [{ modelId: 'asc' }]
-    });
-    const modelIdToTotal = new Map(totalsByModel.map(x => [x.modelId, x._count._all]));
+    const modelIdToTotal = new Map(modelTotals.map(x => [x.modelId, x._count._all]));
 
-    // 3) Подсчет общего количества найденного оборудования
-    const totalEquipmentUnits = await prisma.equipment.count({
-      where: baseConditions
-    });
-    
-    // 4) Пагинация на уровне сгруппированных записей (карточек)
-    const totalEquipmentCards = groupedByModelAndDept.length;
-    const skipAmount = (page - 1) * pageSize;
-    const pageGroups = groupedByModelAndDept.slice(skipAmount, skipAmount + pageSize);
-
-    // 5) Для каждой группы берём один «репрезентативный» экземпляр для обогащения связями
-    const enriched = await Promise.all(pageGroups.map(async g => {
+    // 4. Получаем репрезентативные записи с обогащением
+    const enriched = await Promise.all(groupedResults.map(async g => {
       const representative = await prisma.equipment.findFirst({
-        where: { modelId: g.modelId, departmentId: g.departmentId, ...(baseConditions || {}) },
+        where: { 
+          modelId: g.modelId, 
+          departmentId: g.departmentId, 
+          ...baseConditions 
+        },
         include: {
           model: true,
           department: true,
@@ -321,13 +298,10 @@ export async function getEquipmentListBySearch(searchTerm, login, isAuthenticate
             operatingEquipment: true,
           } : {})
         },
-        // Выбираем запись с картинкой приоритетно
         orderBy: [{ imgUrl: 'desc' }]
       });
 
-      if (!representative) {
-        return null;
-      }
+      if (!representative) return null;
 
       return transformEquipmentList({
         ...representative,
@@ -340,8 +314,8 @@ export async function getEquipmentListBySearch(searchTerm, login, isAuthenticate
 
     return { 
       results, 
-      totalEquipmentCards, // Количество карточек оборудования (для пагинации)
-      totalEquipmentUnits, // Общее количество единиц найденного оборудования
+      totalEquipmentCards: groupedResults.length,
+      totalEquipmentUnits: totalCount,
       page, 
       pageSize 
     };
