@@ -257,8 +257,8 @@ export async function getEquipmentListBySearch(searchTerm, login, isAuthenticate
       ...(filterConditions.length > 0 ? { AND: filterConditions } : {})
     };
 
-    // 3. ОПТИМИЗАЦИЯ: Используем один запрос вместо четырех
-    const [groupedResults, totalCount, modelTotals] = await Promise.all([
+    // 3. ОПТИМИЗАЦИЯ: Используем параллельные запросы
+    const [groupedResults, totalCount, modelTotals, groupedAll] = await Promise.all([
       // Группировка с пагинацией в одном запросе
       prisma.equipment.groupBy({
         by: ['modelId', 'departmentId'],
@@ -275,6 +275,13 @@ export async function getEquipmentListBySearch(searchTerm, login, isAuthenticate
       // Получаем общие количества по моделям
       prisma.equipment.groupBy({
         by: ['modelId'],
+        where: baseConditions,
+        _count: { _all: true }
+      }),
+
+      // Считаем общее число карточек (уникальные пары modelId+departmentId) без пагинации
+      prisma.equipment.groupBy({
+        by: ['modelId', 'departmentId'],
         where: baseConditions,
         _count: { _all: true }
       })
@@ -314,7 +321,7 @@ export async function getEquipmentListBySearch(searchTerm, login, isAuthenticate
 
     return { 
       results, 
-      totalEquipmentCards: groupedResults.length,
+      totalEquipmentCards: groupedAll.length,
       totalEquipmentUnits: totalCount,
       page, 
       pageSize 
