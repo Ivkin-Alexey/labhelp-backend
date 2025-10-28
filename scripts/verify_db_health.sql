@@ -6,12 +6,11 @@
 --                  Measurement, EquipmentType, EquipmentKind, FavoriteEquipment, OperatingEquipment, EquipmentSearchHistory
 -- Total expected: 11 таблиц
 
-\echo '🔍 Database Health Check'
-\echo '========================================'
+SELECT 'Database Health Check' as info;
+SELECT '========================================' as info;
+SELECT '1. Required Tables:' as info;
 
 -- 1. Проверка таблиц (динамическая проверка всех моделей Prisma)
-\echo ''
-\echo '1️⃣ Required Tables:'
 WITH expected_tables AS (
   SELECT unnest(ARRAY[
     'User', 'Equipment', 'Model', 'Department', 'Classification',
@@ -37,8 +36,7 @@ LEFT JOIN information_schema.tables t ON t.table_schema = 'public'
   AND lower(t.table_name) = lower(expected.table_name);
 
 -- 2. Проверка критических колонок в Equipment
-\echo ''
-\echo '2️⃣ Equipment Table Columns:'
+SELECT '2. Equipment Table Columns:' as info;
 SELECT 
     CASE 
         WHEN COUNT(*) = 4 THEN '✅ Все FK колонки существуют'
@@ -53,8 +51,7 @@ FROM (
 ) as existing;
 
 -- 3. Проверка миграций
-\echo ''
-\echo '3️⃣ Prisma Migrations (last 5):'
+SELECT '3. Prisma Migrations (last 5):' as info;
 SELECT 
     migration_name,
     CASE 
@@ -66,8 +63,7 @@ ORDER BY started_at DESC
 LIMIT 5;
 
 -- 4. Проверка расширения pg_trgm
-\echo ''
-\echo '4️⃣ PostgreSQL Extensions:'
+SELECT '4. PostgreSQL Extensions:' as info;
 SELECT 
     extname,
     CASE 
@@ -79,8 +75,7 @@ WHERE extname = 'pg_trgm';
 
 -- 5. Проверка триграммных индексов (динамическая)
 -- Список индексов синхронизировать с apply_search_indexes.sql при изменениях!
-\echo ''
-\echo '5️⃣ Trigrams Indexes:'
+SELECT '5. Trigrams Indexes:' as info;
 DO $$
 DECLARE
     trgm_count INTEGER;
@@ -101,8 +96,7 @@ BEGIN
 END $$;
 
 -- 6. Проверка B-tree индексов в Equipment (динамическая)
-\echo ''
-\echo '6️⃣ B-tree Indexes in Equipment:'
+SELECT '6. B-tree Indexes in Equipment:' as info;
 SELECT 
     COUNT(*) as total_indexes,
     CASE 
@@ -115,9 +109,5 @@ WHERE schemaname = 'public'
   AND indexname NOT LIKE '%_trgm%'
   AND indexname NOT LIKE '%_pkey%'; -- Исключаем primary key
 
-\echo ''
-\echo '========================================'
-\echo 'Health Check Complete'
-\echo ''
-\echo '⚠️ ВАЖНО: При изменении схемы Prisma или apply_search_indexes.sql'
-\echo '   обновите этот скрипт (строки с метками UPDATE)!'
+SELECT '========================================' as info;
+SELECT 'Health Check Complete' as info;
