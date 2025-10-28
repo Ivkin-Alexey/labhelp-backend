@@ -66,8 +66,9 @@ LIMIT 5;
 SELECT '4. PostgreSQL Extensions:' as info;
 SELECT 
     extname,
+    extversion as version,
     CASE 
-        WHEN installed_version IS NOT NULL THEN '✅ Установлено'
+        WHEN extname = 'pg_trgm' THEN '✅ Установлено'
         ELSE '❌ НЕ установлено'
     END as status
 FROM pg_extension 
