@@ -8,16 +8,12 @@ export const CHECK_INTERVAL = 30000 // 30 секунд
 export async function checkDatabaseConnection() {
   const now = Date.now()
   
-  // Если проверяли недавно и соединение было успешным, возвращаем кэш
-  if (connectionStatus.isConnected && (now - connectionStatus.lastCheck) < CHECK_INTERVAL) {
-    return { isConnected: true }
-  }
-  
   // Если проверяли недавно и соединение было неуспешным, возвращаем кэш
   if (!connectionStatus.isConnected && (now - connectionStatus.lastCheck) < CHECK_INTERVAL) {
     return { isConnected: false, error: connectionStatus.error }
   }
   
+  // Для успешных соединений всегда делаем реальную проверку, чтобы не пропустить отключение БД
   // Выполняем реальную проверку
   try {
     await prisma.$connect()
@@ -38,6 +34,7 @@ export async function handleDatabaseConnectionError(error, context = '') {
 export async function handleStartupDatabaseError(error) {
   const errorMessage = `❌ Сервер не запущен из-за проблем с подключением к базе данных: ${error?.message || 'Неизвестная ошибка'}`
   console.error(errorMessage)
+  await sendNotification(errorMessage)
 }
 
 export async function forceCheckDatabaseConnection() {
@@ -53,9 +50,13 @@ export async function forceCheckDatabaseConnection() {
 
 export function startPeriodicConnectionCheck() {
   setInterval(async () => {
+    const checkTime = new Date().toLocaleString('ru-RU')
     const { isConnected, error } = await checkDatabaseConnection()
     if (!isConnected) {
       await handleDatabaseConnectionError(error || new Error('Подключение к БД недоступно'), 'периодическая проверка')
+      console.error(`⏰ Время проверки: ${checkTime}`)
+    } else {
+      console.log(`✅ Проверка подключения к БД: подключение активно [${checkTime}]`)
     }
   }, CHECK_INTERVAL)
 }

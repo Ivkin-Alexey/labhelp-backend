@@ -17,6 +17,58 @@ import { isIdDataValid } from '../../controllers/equipment-controller/helpers.js
 import { handleDatabaseConnectionError } from '../../utils/dbConnectionHandler.js'
 import { notifyAdmins } from '../../services/telegram-notifier.js'
 
+function isPrismaConnectionError(error) {
+  return error?.code?.startsWith('P100') || error?.errorCode?.startsWith('P100') || 
+         (error?.message && error.message.includes("Can't reach database server"))
+}
+
+export async function createTrgmIndexes() {
+  try {
+    console.info('Создание триграммных индексов для оптимизации поиска...')
+    
+    // Проверяем что расширение pg_trgm установлено
+    await prisma.$executeRawUnsafe(`CREATE EXTENSION IF NOT EXISTS pg_trgm;`)
+    
+    // Создаем индексы с IF NOT EXISTS для безопасности (как в SQL скрипте)
+    // Используем IF NOT EXISTS чтобы не пересоздавать существующие индексы
+    const indexesToCreate = [
+      `CREATE INDEX IF NOT EXISTS idx_equipment_name_trgm ON "Equipment" USING gin(name gin_trgm_ops)`,
+      `CREATE INDEX IF NOT EXISTS idx_equipment_description_trgm ON "Equipment" USING gin(description gin_trgm_ops)`,
+      `CREATE INDEX IF NOT EXISTS idx_equipment_brand_trgm ON "Equipment" USING gin(brand gin_trgm_ops)`,
+      `CREATE INDEX IF NOT EXISTS idx_equipment_serial_number_trgm ON "Equipment" USING gin("serialNumber" gin_trgm_ops)`,
+      `CREATE INDEX IF NOT EXISTS idx_equipment_inventory_number_trgm ON "Equipment" USING gin("inventoryNumber" gin_trgm_ops)`,
+      `CREATE INDEX IF NOT EXISTS idx_equipment_category_trgm ON "Equipment" USING gin(category gin_trgm_ops)`,
+      `CREATE INDEX IF NOT EXISTS idx_model_name_trgm ON "Model" USING gin(name gin_trgm_ops)`,
+      `CREATE INDEX IF NOT EXISTS idx_department_name_trgm ON "Department" USING gin(name gin_trgm_ops)`,
+      `CREATE INDEX IF NOT EXISTS idx_classification_name_trgm ON "Classification" USING gin(name gin_trgm_ops)`,
+      `CREATE INDEX IF NOT EXISTS idx_measurement_name_trgm ON "Measurement" USING gin(name gin_trgm_ops)`,
+      `CREATE INDEX IF NOT EXISTS idx_equipment_type_name_trgm ON "EquipmentType" USING gin(name gin_trgm_ops)`,
+      `CREATE INDEX IF NOT EXISTS idx_equipment_kind_name_trgm ON "EquipmentKind" USING gin(name gin_trgm_ops)`,
+    ]
+    
+    let createdCount = 0
+    let failedCount = 0
+    
+    for (const createIndexSql of indexesToCreate) {
+      try {
+        await prisma.$executeRawUnsafe(createIndexSql)
+        createdCount++
+      } catch (error) {
+        failedCount++
+        console.warn(`Не удалось создать индекс: ${error.message}`)
+      }
+    }
+    
+    console.info(`✅ Триграммные индексы успешно созданы: ${createdCount} из ${indexesToCreate.length}`)
+    if (failedCount > 0) {
+      console.warn(`⚠️ Не удалось создать ${failedCount} индексов`)
+    }
+  } catch (error) {
+    console.error('Ошибка при создании триграммных индексов:', error.message)
+    throw error // Пробрасываем ошибку для обработки в вызывающем коде
+  }
+}
+
 export async function getEquipmentList(login, isAuthenticated) {
   try {
     let results
@@ -260,7 +312,7 @@ export async function getEquipmentListBySearch(searchTerm, login, isAuthenticate
     // 3. ОПТИМИЗАЦИЯ: Используем параллельные запросы
     const [groupedResults, totalCount, modelTotals, groupedAll] = await Promise.all([
       // Группировка с пагинацией в одном запросе
-      prisma.equipment.groupBy({
+      prisma.Equipment.groupBy({
         by: ['modelId', 'departmentId'],
         where: baseConditions,
         _count: { _all: true },
@@ -270,17 +322,17 @@ export async function getEquipmentListBySearch(searchTerm, login, isAuthenticate
       }),
       
       // Общий счетчик
-      prisma.equipment.count({ where: baseConditions }),
+      prisma.Equipment.count({ where: baseConditions }),
       
       // Получаем общие количества по моделям
-      prisma.equipment.groupBy({
+      prisma.Equipment.groupBy({
         by: ['modelId'],
         where: baseConditions,
         _count: { _all: true }
       }),
 
       // Считаем общее число карточек (уникальные пары modelId+departmentId) без пагинации
-      prisma.equipment.groupBy({
+      prisma.Equipment.groupBy({
         by: ['modelId', 'departmentId'],
         where: baseConditions,
         _count: { _all: true }
@@ -291,7 +343,7 @@ export async function getEquipmentListBySearch(searchTerm, login, isAuthenticate
 
     // 4. Получаем репрезентативные записи с обогащением
     const enriched = await Promise.all(groupedResults.map(async g => {
-      const representative = await prisma.equipment.findFirst({
+      const representative = await prisma.Equipment.findFirst({
         where: { 
           modelId: g.modelId, 
           departmentId: g.departmentId, 
@@ -328,6 +380,14 @@ export async function getEquipmentListBySearch(searchTerm, login, isAuthenticate
     };
   } catch (error) {
     console.error('Ошибка поиска:', error);
+    
+    // Обработка Prisma ошибок подключения
+    if (isPrismaConnectionError(error)) {
+      const errorMessage = `❌ Ошибка подключения к БД при поиске оборудования: ${error.message || 'Не удается подключиться к серверу БД'}`
+      await sendNotification(errorMessage)
+      throw { message: 'Проблемы с подключением к базе данных', status: 503 }
+    }
+    
     const status = error.status || 500;
     const errorMsg = error.message || 'Внутренняя ошибка сервера: ' + error;
     throw { message: errorMsg, status };
@@ -448,6 +508,9 @@ export async function createEquipmentDbFromGSheet(botLogs = true) {
     // Создаем оборудование с правильными связями
     await createEquipmentWithRelations(list)
     
+    // Создаем триграммные индексы для оптимизации поиска
+    await createTrgmIndexes()
+    
     console.info('✅ База данных оборудования обновлена')
   } catch (error) {
     console.error('Ошибка при создании базы данных из GSheet:', error)
@@ -491,6 +554,14 @@ export async function getEquipmentFilters() {
     return filters
   } catch (error) {
     console.error('Ошибка получения фильтров оборудования:', error)
+    
+    // Обработка Prisma ошибок подключения
+    if (isPrismaConnectionError(error)) {
+      const errorMessage = `❌ Ошибка подключения к БД при получении фильтров: ${error.message || 'Не удается подключиться к серверу БД'}`
+      await sendNotification(errorMessage)
+      throw { message: 'Проблемы с подключением к базе данных', status: 503 }
+    }
+    
     throw error
   } finally {
     await prisma.$disconnect()
@@ -585,7 +656,7 @@ async function createEquipmentWithRelations(equipmentList) {
 
       try {
         await prisma.$transaction(
-          processedBatch.map(data => prisma.equipment.create({ data }))
+          processedBatch.map(data => prisma.Equipment.create({ data }))
         )
         successfulRecordsCount += processedBatch.length
       } catch (error) {
@@ -594,7 +665,12 @@ async function createEquipmentWithRelations(equipmentList) {
     }
 
     console.log(`Создано ${successfulRecordsCount} записей оборудования со связями`)
-    notifyAdmins(`Создано ${successfulRecordsCount} записей оборудования со связями`)
+    try {
+      await notifyAdmins(`Создано ${successfulRecordsCount} записей оборудования со связями`)
+    } catch (error) {
+      // Игнорируем ошибки отправки уведомлений, чтобы не прерывать выполнение seed скрипта
+      console.warn('Не удалось отправить уведомление админам:', error.message)
+    }
     
   } catch (error) {
     console.error('Ошибка создания оборудования со связями:', error)
@@ -605,10 +681,18 @@ async function createEquipmentWithRelations(equipmentList) {
 export async function getEquipmentCount() {
   try {
     // @ts-ignore
-    const count = await prisma.equipment.count()
+    const count = await prisma.Equipment.count()
     return count
   } catch (error) {
     console.error('Ошибка получения количества оборудования:', error)
+    
+    // Обработка Prisma ошибок подключения
+    if (isPrismaConnectionError(error)) {
+      const errorMessage = `❌ Ошибка подключения к БД при получении количества оборудования: ${error.message || 'Не удается подключиться к серверу БД'}`
+      await sendNotification(errorMessage)
+      throw { message: 'Проблемы с подключением к базе данных', status: 503 }
+    }
+    
     throw error
   } finally {
     await prisma.$disconnect()

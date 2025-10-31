@@ -1,12 +1,15 @@
 import { bot } from "../../index.js";
 import { admins, programmerChatID } from "../assets/constants/constants.js";
+import { sendTelegramMessageSafe } from "../utils/telegram-helpers.js";
 
 export async function notifyProgrammer(message) {
-  await bot.sendMessage(programmerChatID, message)
+  await sendTelegramMessageSafe(bot, programmerChatID, message)
 }
 
 export async function notifyAdmins(message) {
-  admins.forEach(admin => {
-    bot.sendMessage(admin, message)
-  })
+  const promises = admins.map(admin => 
+    sendTelegramMessageSafe(bot, admin, message)
+  )
+  
+  await Promise.all(promises)
 }

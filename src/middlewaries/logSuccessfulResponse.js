@@ -1,15 +1,12 @@
 export function logSuccessfulResponse(req, res, next) {
-    const originalSend = res.send
-    res.send = function (body) {
-      if (res.statusCode >= 200 && res.statusCode < 300) {
-        console.log(`Данные успешно отправлены для: метод ${req.method}, путь ${req.path}:`)
-      }
-      return originalSend.call(this, body)
-    }
-    next()
+  // Функция оставлена для совместимости, но логирование отключено
+  // Успешные ответы логируются через logRequestInfo при входящем запросе
+  next()
 }
   
 export function logRequestInfo(req, res, next) {
-  console.info(`Запрос к серверу: метод ${req.method}, путь: ${req.path}, параметры: ${JSON.stringify(req.params)}, query-параметры: ${JSON.stringify(req.query)}`)
-    next()
-  }
+  const params = Object.keys(req.params).length > 0 ? ` params: ${JSON.stringify(req.params)}` : ''
+  const query = Object.keys(req.query).length > 0 ? ` query: ${JSON.stringify(req.query)}` : ''
+  console.info(`${req.method} ${req.path}${params}${query}`)
+  next()
+}

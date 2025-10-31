@@ -11,6 +11,7 @@ import localizations from '../../assets/constants/localizations.js'
 import { personRoles } from '../../assets/constants/users.js'
 import { bot } from '../../../index.js'
 import { programmerChatID } from '../../assets/constants/constants.js'
+import { sendTelegramMessageSafe } from '../../utils/telegram-helpers.js'
 
 async function sendStartMessage(bot, chatID, first_name, last_name) {
   await bot.sendSticker(chatID, stickers.hello)
@@ -41,7 +42,7 @@ async function sendResearches(bot, chatID) {
 }
 
 async function sendNotification(message) {
-  await bot.sendMessage(programmerChatID, message)
+  await sendTelegramMessageSafe(bot, programmerChatID, message)
 }
 
 
