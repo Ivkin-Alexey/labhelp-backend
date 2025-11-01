@@ -14,9 +14,9 @@ export async function checkDatabaseConnection() {
   }
   
   // Для успешных соединений всегда делаем реальную проверку, чтобы не пропустить отключение БД
-  // Выполняем реальную проверку
+  // Используем реальный SQL запрос для проверки доступности БД
   try {
-    await prisma.$connect()
+    await prisma.$queryRaw`SELECT 1`
     connectionStatus = { isConnected: true, lastCheck: now, error: null }
     return { isConnected: true }
   } catch (error) {
@@ -39,7 +39,8 @@ export async function handleStartupDatabaseError(error) {
 
 export async function forceCheckDatabaseConnection() {
   try {
-    await prisma.$connect()
+    // Используем реальный SQL запрос для проверки доступности БД
+    await prisma.$queryRaw`SELECT 1`
     connectionStatus = { isConnected: true, lastCheck: Date.now(), error: null }
     return { isConnected: true }
   } catch (error) {

@@ -8,13 +8,25 @@ import { prisma } from '../index.js'
 async function main() {
   try {
     console.info('🔄 Запуск создания триграммных индексов...')
+    console.info('📍 Текущая директория:', process.cwd())
+    console.info('📦 DATABASE_URL:', process.env.DATABASE_URL ? 'установлен' : 'НЕ УСТАНОВЛЕН')
+    
     await createTrgmIndexes()
+    
     console.info('✅ Процесс завершен успешно')
+    process.exit(0)
   } catch (error) {
     console.error('❌ Ошибка при создании индексов:', error.message)
+    if (error.stack) {
+      console.error('Stack trace:', error.stack)
+    }
     process.exit(1)
   } finally {
-    await prisma.$disconnect()
+    try {
+      await prisma.$disconnect()
+    } catch (disconnectError) {
+      console.warn('⚠️ Ошибка при отключении от БД:', disconnectError.message)
+    }
   }
 }
 
