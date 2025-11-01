@@ -25,8 +25,23 @@ export async function checkDatabaseConnection() {
   }
 }
 
-export async function handleDatabaseConnectionError(error, context = '') {
-  const errorMessage = `❌ Ошибка подключения к БД${context ? ` (${context})` : ''}: ${error.message}`
+export async function handleDatabaseConnectionError(error, checkTime = '') {
+  // Извлекаем только основное сообщение об ошибке, убираем технические детали Prisma
+  let cleanMessage = error.message || 'Неизвестная ошибка'
+  
+  // Убираем технические детали Prisma из сообщения
+  if (cleanMessage.includes("Can't reach database server")) {
+    cleanMessage = cleanMessage.split('\n')[0] // Берем только первую строку
+    cleanMessage = cleanMessage.replace('Invalid `prisma.$queryRaw()` invocation:', '').trim()
+    // Извлекаем только суть: адрес сервера
+    const match = cleanMessage.match(/Can't reach database server at `(.+?)`/)
+    if (match) {
+      cleanMessage = `Сервер БД недоступен: ${match[1]}`
+    }
+  }
+  
+  const timeText = checkTime ? ` [${checkTime}]` : ''
+  const errorMessage = `❌ БД недоступна${timeText}: ${cleanMessage}`
   console.error(errorMessage)
   await sendNotification(errorMessage)
 }
@@ -54,10 +69,9 @@ export function startPeriodicConnectionCheck() {
     const checkTime = new Date().toLocaleString('ru-RU')
     const { isConnected, error } = await checkDatabaseConnection()
     if (!isConnected) {
-      await handleDatabaseConnectionError(error || new Error('Подключение к БД недоступно'), 'периодическая проверка')
-      console.error(`⏰ Время проверки: ${checkTime}`)
+      await handleDatabaseConnectionError(error || new Error('Подключение к БД недоступно'), checkTime)
     } else {
-      console.log(`✅ Проверка подключения к БД: подключение активно [${checkTime}]`)
+      console.log(`✅ БД доступна [${checkTime}]`)
     }
   }, CHECK_INTERVAL)
 }

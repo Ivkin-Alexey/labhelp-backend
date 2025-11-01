@@ -22,89 +22,49 @@ function isPrismaConnectionError(error) {
          (error?.message && error.message.includes("Can't reach database server"))
 }
 
-export async function createTrgmIndexes(prismaClient = prisma) {
+export async function createTrgmIndexes() {
   try {
     console.info('Создание триграммных индексов для оптимизации поиска...')
     
     // Проверяем что расширение pg_trgm установлено
-    try {
-      const extensionExists = await prismaClient.$queryRaw`
-        SELECT EXISTS(
-          SELECT 1 FROM pg_extension WHERE extname = 'pg_trgm'
-        ) as exists
-      `
-      const exists = extensionExists[0]?.exists || false
-      
-      if (!exists) {
-        console.info('Создание расширения pg_trgm...')
-        await prismaClient.$executeRawUnsafe(`CREATE EXTENSION IF NOT EXISTS pg_trgm;`)
-        console.info('✅ Расширение pg_trgm создано')
-      } else {
-        console.info('✅ Расширение pg_trgm уже существует')
-      }
-    } catch (error) {
-      console.warn(`⚠️ Не удалось создать/проверить расширение pg_trgm: ${error.message}`)
-      // Продолжаем, возможно расширение уже есть
-    }
+    await prisma.$executeRawUnsafe(`CREATE EXTENSION IF NOT EXISTS pg_trgm;`)
     
     // Создаем индексы с IF NOT EXISTS для безопасности (как в SQL скрипте)
     // Используем IF NOT EXISTS чтобы не пересоздавать существующие индексы
     const indexesToCreate = [
-      { name: 'idx_equipment_name_trgm', sql: `CREATE INDEX IF NOT EXISTS idx_equipment_name_trgm ON "Equipment" USING gin(name gin_trgm_ops)` },
-      { name: 'idx_equipment_description_trgm', sql: `CREATE INDEX IF NOT EXISTS idx_equipment_description_trgm ON "Equipment" USING gin(description gin_trgm_ops)` },
-      { name: 'idx_equipment_brand_trgm', sql: `CREATE INDEX IF NOT EXISTS idx_equipment_brand_trgm ON "Equipment" USING gin(brand gin_trgm_ops)` },
-      { name: 'idx_equipment_serial_number_trgm', sql: `CREATE INDEX IF NOT EXISTS idx_equipment_serial_number_trgm ON "Equipment" USING gin("serialNumber" gin_trgm_ops)` },
-      { name: 'idx_equipment_inventory_number_trgm', sql: `CREATE INDEX IF NOT EXISTS idx_equipment_inventory_number_trgm ON "Equipment" USING gin("inventoryNumber" gin_trgm_ops)` },
-      { name: 'idx_equipment_category_trgm', sql: `CREATE INDEX IF NOT EXISTS idx_equipment_category_trgm ON "Equipment" USING gin(category gin_trgm_ops)` },
-      { name: 'idx_model_name_trgm', sql: `CREATE INDEX IF NOT EXISTS idx_model_name_trgm ON "Model" USING gin(name gin_trgm_ops)` },
-      { name: 'idx_department_name_trgm', sql: `CREATE INDEX IF NOT EXISTS idx_department_name_trgm ON "Department" USING gin(name gin_trgm_ops)` },
-      { name: 'idx_classification_name_trgm', sql: `CREATE INDEX IF NOT EXISTS idx_classification_name_trgm ON "Classification" USING gin(name gin_trgm_ops)` },
-      { name: 'idx_measurement_name_trgm', sql: `CREATE INDEX IF NOT EXISTS idx_measurement_name_trgm ON "Measurement" USING gin(name gin_trgm_ops)` },
-      { name: 'idx_equipment_type_name_trgm', sql: `CREATE INDEX IF NOT EXISTS idx_equipment_type_name_trgm ON "EquipmentType" USING gin(name gin_trgm_ops)` },
-      { name: 'idx_equipment_kind_name_trgm', sql: `CREATE INDEX IF NOT EXISTS idx_equipment_kind_name_trgm ON "EquipmentKind" USING gin(name gin_trgm_ops)` },
+      `CREATE INDEX IF NOT EXISTS idx_equipment_name_trgm ON "Equipment" USING gin(name gin_trgm_ops)`,
+      `CREATE INDEX IF NOT EXISTS idx_equipment_description_trgm ON "Equipment" USING gin(description gin_trgm_ops)`,
+      `CREATE INDEX IF NOT EXISTS idx_equipment_brand_trgm ON "Equipment" USING gin(brand gin_trgm_ops)`,
+      `CREATE INDEX IF NOT EXISTS idx_equipment_serial_number_trgm ON "Equipment" USING gin("serialNumber" gin_trgm_ops)`,
+      `CREATE INDEX IF NOT EXISTS idx_equipment_inventory_number_trgm ON "Equipment" USING gin("inventoryNumber" gin_trgm_ops)`,
+      `CREATE INDEX IF NOT EXISTS idx_equipment_category_trgm ON "Equipment" USING gin(category gin_trgm_ops)`,
+      `CREATE INDEX IF NOT EXISTS idx_model_name_trgm ON "Model" USING gin(name gin_trgm_ops)`,
+      `CREATE INDEX IF NOT EXISTS idx_department_name_trgm ON "Department" USING gin(name gin_trgm_ops)`,
+      `CREATE INDEX IF NOT EXISTS idx_classification_name_trgm ON "Classification" USING gin(name gin_trgm_ops)`,
+      `CREATE INDEX IF NOT EXISTS idx_measurement_name_trgm ON "Measurement" USING gin(name gin_trgm_ops)`,
+      `CREATE INDEX IF NOT EXISTS idx_equipment_type_name_trgm ON "EquipmentType" USING gin(name gin_trgm_ops)`,
+      `CREATE INDEX IF NOT EXISTS idx_equipment_kind_name_trgm ON "EquipmentKind" USING gin(name gin_trgm_ops)`,
     ]
     
     let createdCount = 0
     let failedCount = 0
-    const failedIndexes = []
     
-    for (const { name, sql } of indexesToCreate) {
+    for (const createIndexSql of indexesToCreate) {
       try {
-        await prismaClient.$executeRawUnsafe(sql)
+        await prisma.$executeRawUnsafe(createIndexSql)
         createdCount++
-        console.info(`✅ Индекс ${name} создан`)
       } catch (error) {
         failedCount++
-        failedIndexes.push(name)
-        console.error(`❌ Не удалось создать индекс ${name}: ${error.message}`)
-        console.error(`   SQL: ${sql}`)
+        console.warn(`Не удалось создать индекс: ${error.message}`)
       }
     }
     
-    console.info(`✅ Триграммные индексы: ${createdCount} из ${indexesToCreate.length} успешно созданы`)
+    console.info(`✅ Триграммные индексы успешно созданы: ${createdCount} из ${indexesToCreate.length}`)
     if (failedCount > 0) {
-      console.warn(`⚠️ Не удалось создать ${failedCount} индексов: ${failedIndexes.join(', ')}`)
-    }
-    
-    // Проверяем фактическое количество созданных индексов
-    try {
-      const indexCount = await prismaClient.$queryRaw`
-        SELECT COUNT(*)::int as count 
-        FROM pg_indexes 
-        WHERE schemaname = 'public' AND indexname LIKE '%_trgm%'
-      `
-      const actualCount = indexCount[0]?.count || 0
-      console.info(`📊 Фактически найдено триграммных индексов в БД: ${actualCount}`)
-      
-      if (actualCount < indexesToCreate.length) {
-        console.warn(`⚠️ Ожидалось ${indexesToCreate.length} индексов, найдено ${actualCount}`)
-      }
-    } catch (error) {
-      console.warn(`⚠️ Не удалось проверить количество индексов: ${error.message}`)
+      console.warn(`⚠️ Не удалось создать ${failedCount} индексов`)
     }
   } catch (error) {
     console.error('Ошибка при создании триграммных индексов:', error.message)
-    console.error('Stack:', error.stack)
     throw error // Пробрасываем ошибку для обработки в вызывающем коде
   }
 }
