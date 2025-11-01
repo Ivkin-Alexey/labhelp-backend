@@ -22,13 +22,13 @@ function isPrismaConnectionError(error) {
          (error?.message && error.message.includes("Can't reach database server"))
 }
 
-export async function createTrgmIndexes() {
+export async function createTrgmIndexes(prismaClient = prisma) {
   try {
     console.info('Создание триграммных индексов для оптимизации поиска...')
     
     // Проверяем что расширение pg_trgm установлено
     try {
-      const extensionExists = await prisma.$queryRaw`
+      const extensionExists = await prismaClient.$queryRaw`
         SELECT EXISTS(
           SELECT 1 FROM pg_extension WHERE extname = 'pg_trgm'
         ) as exists
@@ -37,7 +37,7 @@ export async function createTrgmIndexes() {
       
       if (!exists) {
         console.info('Создание расширения pg_trgm...')
-        await prisma.$executeRawUnsafe(`CREATE EXTENSION IF NOT EXISTS pg_trgm;`)
+        await prismaClient.$executeRawUnsafe(`CREATE EXTENSION IF NOT EXISTS pg_trgm;`)
         console.info('✅ Расширение pg_trgm создано')
       } else {
         console.info('✅ Расширение pg_trgm уже существует')
@@ -70,7 +70,7 @@ export async function createTrgmIndexes() {
     
     for (const { name, sql } of indexesToCreate) {
       try {
-        await prisma.$executeRawUnsafe(sql)
+        await prismaClient.$executeRawUnsafe(sql)
         createdCount++
         console.info(`✅ Индекс ${name} создан`)
       } catch (error) {
@@ -88,7 +88,7 @@ export async function createTrgmIndexes() {
     
     // Проверяем фактическое количество созданных индексов
     try {
-      const indexCount = await prisma.$queryRaw`
+      const indexCount = await prismaClient.$queryRaw`
         SELECT COUNT(*)::int as count 
         FROM pg_indexes 
         WHERE schemaname = 'public' AND indexname LIKE '%_trgm%'

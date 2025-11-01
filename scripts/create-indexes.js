@@ -1,7 +1,19 @@
 import * as dotenv from 'dotenv'
 dotenv.config()
+import { PrismaClient } from '@prisma/client'
+
+// Создаем отдельный экземпляр Prisma для скрипта, чтобы не запускать сервер
+const prisma = new PrismaClient()
+
+// Фикс для сериализации BigInt
+// @ts-ignore
+BigInt.prototype.toJSON = function () {
+  const int = Number.parseInt(this.toString())
+  return int ?? this.toString()
+}
+
+// Импортируем функцию после инициализации Prisma
 import { createTrgmIndexes } from '../src/data-access/data-access-equipments/equipments.js'
-import { prisma } from '../index.js'
 
 // Скрипт для создания триграммных индексов из командной строки
 // Используется в CI/CD деплое и может быть вызван напрямую
@@ -11,7 +23,8 @@ async function main() {
     console.info('📍 Текущая директория:', process.cwd())
     console.info('📦 DATABASE_URL:', process.env.DATABASE_URL ? 'установлен' : 'НЕ УСТАНОВЛЕН')
     
-    await createTrgmIndexes()
+    // Передаем свой экземпляр Prisma, чтобы не запускать сервер
+    await createTrgmIndexes(prisma)
     
     console.info('✅ Процесс завершен успешно')
     process.exit(0)
