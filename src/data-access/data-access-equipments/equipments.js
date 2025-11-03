@@ -8,6 +8,7 @@ import {
   filterFieldsConfig,
   invalidEquipmentCellData,
 } from '../../assets/constants/equipments.js'
+import { EXPECTED_TRGM_INDEXES_COUNT } from '../../assets/constants/database.js'
 import localizations from '../../assets/constants/localizations.js'
 import { fetchEquipmentListFromGSheet } from '../../controllers/equipment-controller/g-sheet.js'
 import { sendNotification } from '../../controllers/tg-bot-controllers/botAnswers.js'
@@ -22,49 +23,121 @@ function isPrismaConnectionError(error) {
          (error?.message && error.message.includes("Can't reach database server"))
 }
 
+/**
+ * Устанавливает расширение pg_trgm если оно еще не установлено
+ * @returns {Promise<{version: string}>} Информация об установленном расширении
+ * @throws {Error} Если расширение не удалось установить или проверить
+ */
+async function ensurePgTrgmExtension() {
+  await prisma.$executeRawUnsafe(`CREATE EXTENSION IF NOT EXISTS pg_trgm;`)
+  
+  // Проверяем, что расширение действительно установлено
+  const extensionCheck = await prisma.$queryRawUnsafe(`
+    SELECT extname, extversion 
+    FROM pg_extension 
+    WHERE extname = 'pg_trgm';
+  `)
+  
+  if (!Array.isArray(extensionCheck) || extensionCheck.length === 0) {
+    throw new Error('Не удалось установить расширение pg_trgm. Возможно, требуется права superuser.')
+  }
+  
+  const version = extensionCheck[0]?.extversion || 'неизвестна'
+  console.info(`✅ Расширение pg_trgm установлено (версия: ${version})`)
+  return { version }
+}
+
+/**
+ * Преобразует значение COUNT из PostgreSQL в число
+ * Prisma может вернуть BigInt, Number или строку в зависимости от версии
+ * @param {bigint|number|string} value - Значение COUNT из запроса
+ * @returns {number} Числовое значение
+ */
+function parsePostgresCount(value) {
+  if (value == null) return 0
+  if (typeof value === 'number') return value
+  if (typeof value === 'bigint') return Number(value)
+  const parsed = parseInt(String(value), 10)
+  return isNaN(parsed) ? 0 : parsed
+}
+
+/**
+ * Создает триграммные индексы для оптимизации ILIKE поиска
+ * @returns {Promise<{createdCount: number, failedCount: number, actualCount: number}>}
+ * @throws {Error} Если произошла критическая ошибка
+ */
 export async function createTrgmIndexes() {
   try {
     console.info('Создание триграммных индексов для оптимизации поиска...')
     
-    // Проверяем что расширение pg_trgm установлено
-    await prisma.$executeRawUnsafe(`CREATE EXTENSION IF NOT EXISTS pg_trgm;`)
+    // Устанавливаем расширение pg_trgm
+    await ensurePgTrgmExtension()
     
     // Создаем индексы с IF NOT EXISTS для безопасности (как в SQL скрипте)
     // Используем IF NOT EXISTS чтобы не пересоздавать существующие индексы
     const indexesToCreate = [
-      `CREATE INDEX IF NOT EXISTS idx_equipment_name_trgm ON "Equipment" USING gin(name gin_trgm_ops)`,
-      `CREATE INDEX IF NOT EXISTS idx_equipment_description_trgm ON "Equipment" USING gin(description gin_trgm_ops)`,
-      `CREATE INDEX IF NOT EXISTS idx_equipment_brand_trgm ON "Equipment" USING gin(brand gin_trgm_ops)`,
-      `CREATE INDEX IF NOT EXISTS idx_equipment_serial_number_trgm ON "Equipment" USING gin("serialNumber" gin_trgm_ops)`,
-      `CREATE INDEX IF NOT EXISTS idx_equipment_inventory_number_trgm ON "Equipment" USING gin("inventoryNumber" gin_trgm_ops)`,
-      `CREATE INDEX IF NOT EXISTS idx_equipment_category_trgm ON "Equipment" USING gin(category gin_trgm_ops)`,
-      `CREATE INDEX IF NOT EXISTS idx_model_name_trgm ON "Model" USING gin(name gin_trgm_ops)`,
-      `CREATE INDEX IF NOT EXISTS idx_department_name_trgm ON "Department" USING gin(name gin_trgm_ops)`,
-      `CREATE INDEX IF NOT EXISTS idx_classification_name_trgm ON "Classification" USING gin(name gin_trgm_ops)`,
-      `CREATE INDEX IF NOT EXISTS idx_measurement_name_trgm ON "Measurement" USING gin(name gin_trgm_ops)`,
-      `CREATE INDEX IF NOT EXISTS idx_equipment_type_name_trgm ON "EquipmentType" USING gin(name gin_trgm_ops)`,
-      `CREATE INDEX IF NOT EXISTS idx_equipment_kind_name_trgm ON "EquipmentKind" USING gin(name gin_trgm_ops)`,
+      { name: 'idx_equipment_name_trgm', sql: `CREATE INDEX IF NOT EXISTS idx_equipment_name_trgm ON "Equipment" USING gin(name gin_trgm_ops)`, table: 'Equipment', column: 'name' },
+      { name: 'idx_equipment_description_trgm', sql: `CREATE INDEX IF NOT EXISTS idx_equipment_description_trgm ON "Equipment" USING gin(description gin_trgm_ops)`, table: 'Equipment', column: 'description' },
+      { name: 'idx_equipment_brand_trgm', sql: `CREATE INDEX IF NOT EXISTS idx_equipment_brand_trgm ON "Equipment" USING gin(brand gin_trgm_ops)`, table: 'Equipment', column: 'brand' },
+      { name: 'idx_equipment_serial_number_trgm', sql: `CREATE INDEX IF NOT EXISTS idx_equipment_serial_number_trgm ON "Equipment" USING gin("serialNumber" gin_trgm_ops)`, table: 'Equipment', column: 'serialNumber' },
+      { name: 'idx_equipment_inventory_number_trgm', sql: `CREATE INDEX IF NOT EXISTS idx_equipment_inventory_number_trgm ON "Equipment" USING gin("inventoryNumber" gin_trgm_ops)`, table: 'Equipment', column: 'inventoryNumber' },
+      { name: 'idx_equipment_category_trgm', sql: `CREATE INDEX IF NOT EXISTS idx_equipment_category_trgm ON "Equipment" USING gin(category gin_trgm_ops)`, table: 'Equipment', column: 'category' },
+      { name: 'idx_model_name_trgm', sql: `CREATE INDEX IF NOT EXISTS idx_model_name_trgm ON "Model" USING gin(name gin_trgm_ops)`, table: 'Model', column: 'name' },
+      { name: 'idx_department_name_trgm', sql: `CREATE INDEX IF NOT EXISTS idx_department_name_trgm ON "Department" USING gin(name gin_trgm_ops)`, table: 'Department', column: 'name' },
+      { name: 'idx_classification_name_trgm', sql: `CREATE INDEX IF NOT EXISTS idx_classification_name_trgm ON "Classification" USING gin(name gin_trgm_ops)`, table: 'Classification', column: 'name' },
+      { name: 'idx_measurement_name_trgm', sql: `CREATE INDEX IF NOT EXISTS idx_measurement_name_trgm ON "Measurement" USING gin(name gin_trgm_ops)`, table: 'Measurement', column: 'name' },
+      { name: 'idx_equipment_type_name_trgm', sql: `CREATE INDEX IF NOT EXISTS idx_equipment_type_name_trgm ON "EquipmentType" USING gin(name gin_trgm_ops)`, table: 'EquipmentType', column: 'name' },
+      { name: 'idx_equipment_kind_name_trgm', sql: `CREATE INDEX IF NOT EXISTS idx_equipment_kind_name_trgm ON "EquipmentKind" USING gin(name gin_trgm_ops)`, table: 'EquipmentKind', column: 'name' },
     ]
     
     let createdCount = 0
     let failedCount = 0
+    const failedIndexes = []
     
-    for (const createIndexSql of indexesToCreate) {
+    for (const index of indexesToCreate) {
       try {
-        await prisma.$executeRawUnsafe(createIndexSql)
+        await prisma.$executeRawUnsafe(index.sql)
         createdCount++
+        console.info(`  ✓ Индекс ${index.name} создан/проверен`)
       } catch (error) {
         failedCount++
-        console.warn(`Не удалось создать индекс: ${error.message}`)
+        const errorMessage = error?.message || String(error)
+        failedIndexes.push({ name: index.name, error: errorMessage })
+        console.error(`  ✗ Не удалось создать индекс ${index.name} (${index.table}.${index.column}): ${errorMessage}`)
       }
     }
     
-    console.info(`✅ Триграммные индексы успешно созданы: ${createdCount} из ${indexesToCreate.length}`)
+    // Проверяем, что индексы действительно созданы
+    const indexCheck = await prisma.$queryRawUnsafe(`
+      SELECT COUNT(*) as count 
+      FROM pg_indexes 
+      WHERE schemaname = 'public' 
+        AND indexname LIKE '%_trgm%';
+    `)
+    
+    const actualCount = parsePostgresCount(indexCheck?.[0]?.count)
+    
+    console.info(`✅ Попытка создания завершена: ${createdCount} из ${indexesToCreate.length}`)
+    console.info(`🔍 Фактически найдено триграммных индексов в БД: ${actualCount}`)
+    
     if (failedCount > 0) {
-      console.warn(`⚠️ Не удалось создать ${failedCount} индексов`)
+      console.warn(`⚠️ Не удалось создать ${failedCount} индексов:`)
+      failedIndexes.forEach(failed => {
+        console.warn(`   - ${failed.name}: ${failed.error}`)
+      })
     }
+    
+    if (actualCount < EXPECTED_TRGM_INDEXES_COUNT) {
+      console.warn(`⚠️ Предупреждение: ожидалось ${EXPECTED_TRGM_INDEXES_COUNT} триграммных индексов, найдено только ${actualCount}`)
+      if (actualCount === 0 && failedCount === 0) {
+        throw new Error('Индексы не были созданы, но ошибок не было зафиксировано. Возможно, проблема с правами доступа к БД.')
+      }
+    }
+    
+    return { createdCount, failedCount, actualCount }
   } catch (error) {
-    console.error('Ошибка при создании триграммных индексов:', error.message)
+    const errorMessage = error?.message || String(error)
+    console.error('❌ Ошибка при создании триграммных индексов:', errorMessage)
     throw error // Пробрасываем ошибку для обработки в вызывающем коде
   }
 }
@@ -515,9 +588,9 @@ export async function createEquipmentDbFromGSheet(botLogs = true) {
   } catch (error) {
     console.error('Ошибка при создании базы данных из GSheet:', error)
     throw error // Пробрасываем ошибку выше для обработки
-  } finally {
-    await prisma.$disconnect()
   }
+  // НЕ отключаем prisma здесь - это долгоживущий клиент для всего приложения
+  // Отключение должно происходить только при graceful shutdown приложения
 
   return localizations.equipment.dbIsReloadedMsg
 }
