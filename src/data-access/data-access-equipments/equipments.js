@@ -272,13 +272,17 @@ export async function getEquipmentByIDs(equipmentIds, login, isAuthenticated) {
 
       if (!equipment) {
         const msg = `Оборудование с Id ${equipmentId} не найдено в БД`
-        throw { message: msg, status: 404 }
+        console.warn(msg)
+        return null
       } else {
         return equipment
       }
     }))
 
-    return equipments
+    // Фильтруем null значения (не найденные записи) и возвращаем только найденные карточки
+    const foundEquipments = equipments.filter(equipment => equipment !== null)
+    
+    return foundEquipments
   } catch (error) {
     const status = error.status || 500
     const errorMsg = error.message || 'Внутренняя ошибка сервера: ' + error
