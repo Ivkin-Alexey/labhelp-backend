@@ -23,7 +23,8 @@ export function checkIsEmpty(obj) {
   return Object.values(obj).length === 0
 }
 
-export function isIdDataValid(value) {
+export function isCellDataValid(value) {
+
   if (typeof value !== "string") return false
 
   if (invalidCellData.includes(value)) return false

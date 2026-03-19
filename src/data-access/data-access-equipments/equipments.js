@@ -7,6 +7,7 @@ import {
   searchConfig,
   filterFieldsConfig,
   invalidEquipmentCellData,
+  UNSPECIFIED,
 } from '../../assets/constants/equipments.js'
 import { EXPECTED_TRGM_INDEXES_COUNT } from '../../assets/constants/database.js'
 import localizations from '../../assets/constants/localizations.js'
@@ -14,9 +15,8 @@ import { fetchEquipmentListFromGSheet } from '../../controllers/equipment-contro
 import { sendNotification } from '../../controllers/tg-bot-controllers/botAnswers.js'
 import { clearTable } from '../common.js'
 import { transformEquipmentInfo, transformEquipmentList } from '../helpers.js'
-import { isIdDataValid } from '../../controllers/equipment-controller/helpers.js'
-import { handleDatabaseConnectionError } from '../../utils/dbConnectionHandler.js'
 import { notifyAdmins } from '../../services/telegram-notifier.js'
+import { isCellDataValid } from '../../controllers/equipment-controller/helpers.js'
 
 function isPrismaConnectionError(error) {
   return error?.code?.startsWith('P100') || error?.errorCode?.startsWith('P100') || 
@@ -476,41 +476,60 @@ export async function createEquipmentDbFromGSheet(botLogs = true) {
     
     // Собираем уникальные значения для всех таблиц
     const tableData = {}
-    
-    // Departments
-    const departments = list.reduce((acc, x) => {
-      const trimmed = x.department?.trim()
-      if (isIdDataValid(trimmed)) {
-        acc.add(trimmed)
+
+    // --- Departments ---
+    const deptSet = new Set();
+    list.forEach(item => {
+      const trimmed = item?.department.trim();;
+      if (isCellDataValid(trimmed)) {
+        deptSet.add(trimmed);
       }
-      return acc
-    }, new Set())
-    tableData.department = [...departments].map((x, i) => ({ id: i + 1, name: x }))
-    
-    // Models
-    const models = list.reduce((acc, x) => {
-      const trimmed = x.model && x.model.trim()
-      if (isIdDataValid(trimmed)) {
-        acc.add(trimmed)
+    });
+    // Сортируем валидные значения
+    const sortedDepts = Array.from(deptSet).sort();
+    // Вставляем "не указано" в начало
+    const finalDepts = [UNSPECIFIED, ...sortedDepts];
+    tableData.department = finalDepts.map((name, index) => ({ id: index + 1, name }));
+
+    // --- Models ---
+    const modelSet = new Set();
+    list.forEach(item => {
+      const trimmed = item.model.trim();
+      if (isCellDataValid(trimmed)) {
+        modelSet.add(trimmed);
       }
-      return acc
-    }, new Set())
-    tableData.model = [...models].map((x, i) => ({ id: i + 1, name: x }))
+    });
+    
+    const sortedModels = Array.from(modelSet).sort();
+    const finalModels = [UNSPECIFIED, ...sortedModels];
+    tableData.model = finalModels.map((name, index) => ({ id: index + 1, name }));
     
     // Собираем данные для фильтров (исключаем department и model, так как они уже обработаны)
+
     filterFieldsConfig.forEach(config => {
+      // Пропускаем department и model, так как они обрабатываются отдельно
       if (config.field === 'department' || config.field === 'model') {
-        return // Пропускаем department и model, так как они уже обработаны выше
+        return;
       }
-      const values = new Set()
+
+      // Собираем уникальные непустые значения
+      const values = new Set();
       list.forEach(equipment => {
-        const value = equipment[config.field]
+        const value = equipment[config.field];
         if (value && value.trim()) {
-          values.add(value.trim())
+          values.add(value.trim());
         }
-      })
-      tableData[config.field] = Array.from(values).sort()
-    })
+      });
+
+      // Преобразуем Set в массив, удаляем возможное "не указано",
+      // сортируем остальные по алфавиту, затем вставляем "не указано" в начало
+      const rawValues = Array.from(values);
+      const otherValues = rawValues
+        .filter(v => v !== UNSPECIFIED)
+        .sort((a, b) => a.localeCompare(b));
+
+      tableData[config.field] = [UNSPECIFIED, ...otherValues];
+    });
     
     // Создаем все таблицы параллельно
     const promises = []
@@ -648,88 +667,89 @@ export async function getEquipmentFilters() {
 // Создание оборудования с правильными связями (упрощенная версия)
 async function createEquipmentWithRelations(equipmentList) {
   try {
-    console.log('Создание оборудования со связями...')
-    
-    // Создаем массив запросов на основе конфигурации фильтров + базовые таблицы
+    console.log('Создание оборудования со связями...');
+
+    // Запросы для получения всех справочников (без изменений)
     const prismaQueries = [
       prisma.model.findMany({ select: { id: true, name: true } }),
       prisma.department.findMany({ select: { id: true, name: true } }),
       ...filterFieldsConfig.map(config => 
         prisma[config.tableName].findMany({ select: { id: true, name: true } })
       )
-    ]
+    ];
 
-    // Получаем все данные за один запрос
-    const results = await Promise.all(prismaQueries)
-    
-    // Извлекаем базовые таблицы
-    const [models, departments] = results
-    
-    // Создаем объект с данными фильтров
-    const filterData = {}
+    const results = await Promise.all(prismaQueries);
+    const [models, departments] = results;
+
+    // Мапы для быстрого поиска ID по имени (без изменений)
+    const modelMap = new Map(models.map(m => [m.name, m.id]));
+    const departmentMap = new Map(departments.map(d => [d.name, d.id]));
+
+    const filterMaps = {};
     filterFieldsConfig.forEach((config, index) => {
-      filterData[config.field] = results[index + 2] // +2 потому что первые два - это models и departments
-    })
+      const data = results[index + 2];
+      filterMaps[config.field] = new Map(data.map(item => [item.name, item.id]));
+    });
 
-    // Создаем мапы для быстрого поиска
-    const modelMap = new Map(models.map(m => [m.name, m.id]))
-    const departmentMap = new Map(departments.map(d => [d.name, d.id]))
-    
-    const filterMaps = {}
-    filterFieldsConfig.forEach(config => {
-      filterMaps[config.field] = new Map(
-        filterData[config.field].map(item => [item.name, item.id])
-      )
-    })
+    const BATCH_SIZE = 10;
+    let successfulRecordsCount = 0;
 
-    // Фильтруем и обрабатываем оборудование
-    const validEquipment = equipmentList.filter(x => 
-      isIdDataValid(x.model?.trim()) && 
-      isIdDataValid(x.department?.trim())
-    )
-
-    const BATCH_SIZE = 10
-    let successfulRecordsCount = 0
-
-    for (let i = 0; i < validEquipment.length; i += BATCH_SIZE) {
-      const batch = validEquipment.slice(i, i + BATCH_SIZE)
+    for (let i = 0; i < equipmentList.length; i += BATCH_SIZE) {
+      const batch = equipmentList.slice(i, i + BATCH_SIZE);
       
       const processedBatch = batch.map(equipment => {
-        const processedData = { ...equipment }
+        const processedData = { ...equipment };
 
-        // Обрабатываем связи
-        if (equipment.model) {
-          const modelId = modelMap.get(equipment.model.trim())
-          if (modelId) {
-            processedData.modelId = modelId
-            delete processedData.model
-          }
+        // --- Обработка model ---
+        const modelTrimmed = equipment.model?.trim();
+        let modelId;
+        if (isCellDataValid(modelTrimmed)) {
+          modelId = modelMap.get(modelTrimmed);
+        } else {
+          // ИЗМЕНЕНО: для невалидных значений используем ID записи "не указано"
+          modelId = modelMap.get(UNSPECIFIED);
         }
-
-        if (equipment.department) {
-          const departmentId = departmentMap.get(equipment.department.trim())
-          if (departmentId) {
-            processedData.departmentId = departmentId
-            delete processedData.department
-          }
+        if (modelId) {
+          processedData.modelId = modelId;
         }
+        delete processedData.model;
 
-        // Обрабатываем фильтры
+        // --- Обработка department ---
+        const deptTrimmed = equipment.department?.trim();
+        let deptId;
+        if (isCellDataValid(deptTrimmed)) {
+          deptId = departmentMap.get(deptTrimmed);
+        } else {
+          // ИЗМЕНЕНО: для невалидных значений используем ID записи "не указано"
+          deptId = departmentMap.get(UNSPECIFIED);
+        }
+        if (deptId) {
+          processedData.departmentId = deptId;
+        }
+        delete processedData.department;
+
+        // --- Обработка остальных фильтров ---
         filterFieldsConfig.forEach(config => {
-          const value = equipment[config.field]
-          if (value && value.trim()) {
-            const id = filterMaps[config.field].get(value.trim())
-            if (id) {
-              // Исправляем название поля для measurements
-              const fieldId = config.field === 'measurements' ? 'measurementId' : `${config.field}Id`
-              processedData[fieldId] = id
-            }
+          const value = equipment[config.field];
+          const trimmed = value?.trim();
+          let id;
+          if (isCellDataValid(trimmed)) {
+            id = filterMaps[config.field].get(trimmed);
+          } else {
+            // ИЗМЕНЕНО: для невалидных значений используем ID записи "не указано"
+            id = filterMaps[config.field].get(UNSPECIFIED);
           }
-          delete processedData[config.field]
-        })
+          
+          if (id) {
+            // Поле для measurements уже корректно обрабатывалось (без изменений)
+            const fieldId = config.field === 'measurements' ? 'measurementId' : `${config.field}Id`;
+            processedData[fieldId] = id;
+          }
+          delete processedData[config.field];
+        });
 
-        return processedData
-      })
+        return processedData;
+      });
 
       try {
         await prisma.$transaction(
@@ -737,7 +757,7 @@ async function createEquipmentWithRelations(equipmentList) {
         )
         successfulRecordsCount += processedBatch.length
       } catch (error) {
-        console.error('Ошибка создания пакета оборудования:', error)
+        console.error('Ошибка создания пакета оборудования:', error);
       }
     }
 
@@ -750,11 +770,10 @@ async function createEquipmentWithRelations(equipmentList) {
     }
     
   } catch (error) {
-    console.error('Ошибка создания оборудования со связями:', error)
-    throw error
+    console.error('Ошибка создания оборудования со связями:', error);
+    throw error;
   }
 }
-
 export async function getEquipmentCount() {
   try {
     // @ts-ignore

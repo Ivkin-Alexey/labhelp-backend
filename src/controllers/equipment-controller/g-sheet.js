@@ -1,6 +1,7 @@
 import { amountOfEquipment, equipmentItem } from '../../assets/constants/equipments.js'
 import { equipmentList, equipmentListSheetID } from '../../assets/constants/gSpreadSheets.js'
-import { isIdDataValid } from './helpers.js'
+
+import { isCellDataValid } from './helpers.js'
 import { notifyProgrammer } from '../../services/telegram-notifier.js'
 
 export async function fetchEquipmentListFromGSheet() {
@@ -61,7 +62,7 @@ export function createEquipmentId(inventoryNumber, serialNumber, incrementInvali
   let invTrimmed = inventoryNumber.trim()
   const serTrimmed = serialNumber.trim()
 
-  if (!isIdDataValid(invTrimmed)) {
+  if (!isCellDataValid(invTrimmed)) {
     incrementInvalidCount()
     return
   }
@@ -75,7 +76,7 @@ export function createEquipmentId(inventoryNumber, serialNumber, incrementInvali
   }
 
 
-  if(!isIdDataValid(serTrimmed)) {
+  if(!isCellDataValid(serTrimmed)) {
     return invTrimmed
   }
 
