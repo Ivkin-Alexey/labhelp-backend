@@ -23,6 +23,11 @@ model User {
   favoriteEquipments     FavoriteEquipment[]
   operatingEquipment     OperatingEquipment[]
   equipmentSearchHistory EquipmentSearchHistory[]
+
+  @@index([role])
+  @@index([department])
+  @@index([position])
+  @@index([category])
 }
 
 model Equipment {
@@ -50,6 +55,26 @@ model Equipment {
   favoriteEquipment  FavoriteEquipment[]
   operatingEquipment OperatingEquipment[]
   sameList           String[]             @default([])
+
+  // Базовые индексы для поиска
+  @@index([serialNumber])
+  @@index([inventoryNumber])
+  @@index([name])
+  @@index([description])
+  @@index([brand])
+  @@index([category])
+  
+  // Индексы для внешних ключей
+  @@index([modelId])
+  @@index([departmentId])
+  @@index([classificationId])
+  @@index([measurementId])
+  @@index([typeId])
+  @@index([kindId])
+  
+  // Составные индексы для частых запросов
+  @@index([modelId, departmentId])
+  @@index([category, departmentId])
 }
 
 model Model {
@@ -96,6 +121,10 @@ model FavoriteEquipment {
   equipment Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
 
   @@unique([login, equipmentId])
+  
+  // Для поиска избранного по пользователю
+  @@index([login])
+  @@index([equipmentId])
 }
 
 model OperatingEquipment {
@@ -108,6 +137,13 @@ model OperatingEquipment {
   equipment Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
 
   @@unique([login, equipmentId])
+  
+  // Для поиска операций по дате и пользователю
+  @@index([login])
+  @@index([equipmentId])
+  @@index([startDateTime])
+  @@index([isLongUse])
+  @@index([login, startDateTime])
 }
 
 model EquipmentSearchHistory {
@@ -117,4 +153,9 @@ model EquipmentSearchHistory {
   user User @relation(fields: [login], references: [login], onDelete: Cascade)
 
   @@unique([login, term])
+  
+  // Для анализа популярных поисковых запросов
+  @@index([term])
+  @@index([login])
+  @@index([term, login])
 }

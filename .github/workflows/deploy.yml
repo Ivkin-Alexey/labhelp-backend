@@ -40,11 +40,21 @@ jobs:
             exit 1
           }
           
-          # Исправляем проблему с миграцией если она есть
-          echo "🔧 Проверяем и исправляем проблемы с миграциями..."
-          npx prisma db execute --file scripts/fix-migration-issue.sql || {
-            echo "⚠️ Не удалось выполнить скрипт исправления, продолжаем с миграциями"
+          # Проверяем здоровье БД
+          echo "🏥 Проверяем здоровье базы данных..."
+          npx prisma db execute --file scripts/verify_db_health.sql || {
+            echo "⚠️ Проблемы с проверкой здоровья БД, продолжаем..."
           }
+          
+          # Дополнительная проверка и исправление проблемных миграций
+          echo "🔧 Проверяем наличие проблемных миграций..."
+          FAILED_MIGRATIONS=$(npx prisma migrate status 2>&1 | grep "failed" || true)
+          if [ ! -z "$FAILED_MIGRATIONS" ]; then
+            echo "⚠️ Найдены проблемные миграции, исправляем..."
+            npx prisma db execute --file scripts/fix-failed-migration.sql || true
+            npx prisma migrate resolve --applied 20250115000000_add_search_indexes || true
+            echo "✅ Проблемные миграции исправлены"
+          fi
           
           # Проверяем наличие новых миграций
           echo "🔍 Проверяем статус миграций..."
@@ -58,11 +68,76 @@ jobs:
             echo "📦 Выполняем миграции базы данных..."
             npx prisma migrate deploy || {
               echo "❌ Ошибка выполнения миграций, пытаемся исправить..."
+              # Исправляем проблемную миграцию поиска индексов
+              npx prisma migrate resolve --applied 20250115000000_add_search_indexes || true
               npx prisma migrate resolve --applied 20250913150808_add_filter_tables || true
               npx prisma migrate deploy
             }
             echo "✅ Миграции выполнены успешно"
           fi
+          
+          # Проверяем и применяем индексы для оптимизации поиска (триграммы)
+          echo "🔍 Проверяем наличие триграммных индексов..."
+          TRGM_COUNT=$(node scripts/check-trgm-count.js 2>/dev/null || echo "0")
+          
+          # Проверяем что получили число
+          if [ -z "$TRGM_COUNT" ] || ! [[ "$TRGM_COUNT" =~ ^[0-9]+$ ]]; then
+            TRGM_COUNT=0
+            echo "⚠️ Не удалось определить количество индексов, считаем что их 0"
+          fi
+          
+          echo "Найдено триграммных индексов: $TRGM_COUNT"
+          
+          if [ "$TRGM_COUNT" -lt "12" ]; then
+            echo "📦 Применяем триграммные индексы для оптимизации ILIKE поиска (сейчас: $TRGM_COUNT, ожидается: 12)..."
+            
+            # Применяем индексы через JS скрипт (использует отдельный Prisma клиент)
+            echo "📦 Применяем триграммные индексы через JS скрипт..."
+            if node scripts/create-indexes.js; then
+              echo "✅ JS скрипт выполнен успешно"
+            else
+              JS_EXIT_CODE=$?
+              echo "⚠️ JS скрипт завершился с кодом $JS_EXIT_CODE, пробуем SQL скрипт..."
+              
+              # Проверяем расширение
+              echo "🔍 Проверяем наличие расширения pg_trgm..."
+              npx prisma db execute --stdin <<< "CREATE EXTENSION IF NOT EXISTS pg_trgm;" 2>&1 || echo "⚠️ Не удалось создать расширение (возможно, уже существует или нет прав)"
+              
+              # Применяем SQL скрипт
+              echo "📦 Применяем SQL скрипт для создания индексов..."
+              if npx prisma db execute --file scripts/apply_search_indexes.sql 2>&1; then
+                echo "✅ SQL скрипт выполнен успешно"
+              else
+                echo "⚠️ Ошибка при применении SQL скрипта, проверяем результат..."
+              fi
+            fi
+            
+            # Проверяем результат после применения
+            sleep 2  # Даем время БД обработать запросы
+            TRGM_COUNT_AFTER=$(node scripts/check-trgm-count.js 2>/dev/null || echo "0")
+            
+            # Проверяем что получили число
+            if [ -z "$TRGM_COUNT_AFTER" ] || ! [[ "$TRGM_COUNT_AFTER" =~ ^[0-9]+$ ]]; then
+              TRGM_COUNT_AFTER=0
+            fi
+            
+            echo "🔍 Проверка после применения: найдено $TRGM_COUNT_AFTER индексов"
+            
+            if [ "$TRGM_COUNT_AFTER" -ge "12" ]; then
+              echo "✅ Триграммные индексы успешно применены (теперь: $TRGM_COUNT_AFTER)"
+            else
+              echo "⚠️ Предупреждение: ожидалось 12 индексов, найдено только $TRGM_COUNT_AFTER"
+              echo "💡 Проверьте права доступа к БД и логи выше для деталей"
+            fi
+          else
+            echo "✅ Триграммные индексы уже существуют ($TRGM_COUNT шт.)"
+          fi
+          
+          # Финальная проверка структуры БД после деплоя
+          echo "🔍 Выполняем финальную проверку структуры БД..."
+          npx prisma db execute --file scripts/verify_db_health.sql || {
+            echo "⚠️ Обнаружены проблемы со структурой БД, но продолжаем..."
+          }
           
           # Генерируем клиент Prisma
           echo "🔄 Генерируем клиент Prisma..."
