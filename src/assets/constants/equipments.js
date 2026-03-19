@@ -6,7 +6,9 @@ const equipmentPageSize = 20
 
 const defaultEquipmentPage = 1
 
-const invalidCellData = ['нд', 'нет', 'б/н', 'б/н_1', 'будетскороприсвоен', 'ненабалансе', '?', '-', '_', 'б//н', 'Б/№', '', " "]
+const invalidCellData = ['нд', 'нет', 'б/н', 'б/н_1', 'будетскороприсвоен', 'ненабалансе', '?', '-', '_', 'б//н', 'Б/№', '']
+
+const UNSPECIFIED = "не указано";
 
 
 const fieldsToSearch = [
@@ -108,5 +110,6 @@ export {
   fieldsToSearch,
   searchConfig,
   equipmentPageSize,
-  defaultEquipmentPage
+  defaultEquipmentPage,
+  UNSPECIFIED
 }
