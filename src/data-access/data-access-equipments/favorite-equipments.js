@@ -14,6 +14,12 @@ export async function getFavoriteEquipmentsFromDB(login) {
       include: {
         equipment: {
           include: {
+            model: true,
+            department: true,
+            classification: true,
+            measurements: true,
+            type: true,
+            kind: true,
             operatingEquipment: true,
           },
         },

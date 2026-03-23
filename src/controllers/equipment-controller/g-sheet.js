@@ -1,5 +1,6 @@
 import { amountOfEquipment, equipmentItem } from '../../assets/constants/equipments.js'
 import { equipmentList, equipmentListSheetID } from '../../assets/constants/gSpreadSheets.js'
+
 import { isCellDataValid } from './helpers.js'
 import { notifyProgrammer } from '../../services/telegram-notifier.js'
 
@@ -8,13 +9,13 @@ export async function fetchEquipmentListFromGSheet() {
     await equipmentList.loadInfo()
     let sheet = equipmentList.sheetsById[equipmentListSheetID]
     const rows = await sheet.getRows()
-    return createEquipmentList(rows)
+    return await createEquipmentList(rows)
   } catch (e) {
     console.log(e)
   }
 }
 
-function createEquipmentList(rows) {
+async function createEquipmentList(rows) {
   const equipmentArr = []
   let invalidIdsCount = 0
   
@@ -28,7 +29,9 @@ function createEquipmentList(rows) {
   
   // Выводим общее сообщение о невалидных ID
   if (invalidIdsCount > 0) {
-    console.log(`⚠️  Найдено единиц оборудования с невалидными заводскими и/или инвентарными номерами: ${invalidIdsCount}`)
+    const message = `⚠️ Невалидные номера оборудования: ${invalidIdsCount}`
+    console.log(message)
+    await notifyProgrammer(message)
   }
   
   return equipmentArr

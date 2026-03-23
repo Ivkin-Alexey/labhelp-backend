@@ -12,8 +12,10 @@ async function checkIsUserReagentManager(chatID) {
   })
 }
 
-async function checkIsUserSuperAdmin(chatID) {
-  return chatID === programmerChatID || admins.includes(chatID)
+function checkIsUserSuperAdmin(chatID) {
+  // Преобразуем chatID в число для корректного сравнения
+  const numericChatID = Number(chatID)
+  return numericChatID === programmerChatID || admins.includes(numericChatID)
 }
 
 
