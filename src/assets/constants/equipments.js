@@ -8,7 +8,7 @@ const defaultEquipmentPage = 1
 
 const invalidCellData = ['нд', 'нет', 'б/н', 'б/н_1', 'будетскороприсвоен', 'ненабалансе', '?', '-', '_', 'б//н', 'Б/№', '']
 
-const UNSPECIFIED = "не указано";
+const UNSPECIFIED = "Не указано";
 
 
 const fieldsToSearch = [
