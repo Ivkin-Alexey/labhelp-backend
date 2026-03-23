@@ -343,7 +343,45 @@ export async function getEquipmentListBySearch(searchTerm, login, isAuthenticate
 }
 
 export async function createEquipmentDbFromGSheet(botLogs = true) {
-  async function createAllTablesAndFilters(list) {
+
+  try {
+    // Очищаем все таблицы
+    // @ts-ignore
+    await clearTable(prisma.Equipment)
+    // @ts-ignore
+    await clearTable(prisma.Department)
+    // @ts-ignore
+    await clearTable(prisma.Model)
+    // @ts-ignore
+    await clearTable(prisma.Classification)
+    // @ts-ignore
+    await clearTable(prisma.Measurement)
+    // @ts-ignore
+    await clearTable(prisma.EquipmentType)
+    // @ts-ignore
+    await clearTable(prisma.EquipmentKind)
+    
+    console.info('База данных оборудования обновляется...')
+    const list = await fetchEquipmentListFromGSheet()
+    
+    // Создаем все таблицы и фильтры в одном процессе
+    await createAllTablesAndFilters(list)
+    
+    // Создаем оборудование с правильными связями
+    await createEquipmentWithRelations(list)
+    
+    console.info('✅ База данных оборудования обновлена')
+  } catch (error) {
+    console.error('Ошибка при создании базы данных из GSheet:', error)
+    throw error // Пробрасываем ошибку выше для обработки
+  } finally {
+    await prisma.$disconnect()
+  }
+
+  return localizations.equipment.dbIsReloadedMsg
+}
+
+async function createAllTablesAndFilters(list) {
     
     // Собираем уникальные значения для всех таблиц
     const tableData = {}
@@ -356,10 +394,8 @@ export async function createEquipmentDbFromGSheet(botLogs = true) {
         deptSet.add(trimmed);
       }
     });
-    // Сортируем валидные значения
-    const sortedDepts = Array.from(deptSet).sort();
-    // Вставляем "не указано" в начало
-    const finalDepts = [UNSPECIFIED, ...sortedDepts];
+
+    const finalDepts = buildFilterValues(deptSet)
     tableData.department = finalDepts.map((name, index) => ({ id: index + 1, name }));
 
     // --- Models ---
@@ -371,8 +407,7 @@ export async function createEquipmentDbFromGSheet(botLogs = true) {
       }
     });
     
-    const sortedModels = Array.from(modelSet).sort();
-    const finalModels = [UNSPECIFIED, ...sortedModels];
+    const finalModels = buildFilterValues(modelSet)
     tableData.model = finalModels.map((name, index) => ({ id: index + 1, name }));
     
     // Собираем данные для фильтров (исключаем department и model, так как они уже обработаны)
@@ -394,12 +429,8 @@ export async function createEquipmentDbFromGSheet(botLogs = true) {
 
       // Преобразуем Set в массив, удаляем возможное "не указано",
       // сортируем остальные по алфавиту, затем вставляем "не указано" в начало
-      const rawValues = Array.from(values);
-      const otherValues = rawValues
-        .filter(v => v !== UNSPECIFIED)
-        .sort((a, b) => a.localeCompare(b));
 
-      tableData[config.field] = [UNSPECIFIED, ...otherValues];
+      tableData[config.field] = buildFilterValues(values);
     });
     
     // Создаем все таблицы параллельно
@@ -448,42 +479,116 @@ export async function createEquipmentDbFromGSheet(botLogs = true) {
     console.log('Все таблицы и фильтры успешно обновлены')
   }
 
-
+async function createEquipmentWithRelations(equipmentList) {
   try {
-    // Очищаем все таблицы
-    // @ts-ignore
-    await clearTable(prisma.Equipment)
-    // @ts-ignore
-    await clearTable(prisma.Department)
-    // @ts-ignore
-    await clearTable(prisma.Model)
-    // @ts-ignore
-    await clearTable(prisma.Classification)
-    // @ts-ignore
-    await clearTable(prisma.Measurement)
-    // @ts-ignore
-    await clearTable(prisma.EquipmentType)
-    // @ts-ignore
-    await clearTable(prisma.EquipmentKind)
-    
-    console.info('База данных оборудования обновляется...')
-    const list = await fetchEquipmentListFromGSheet()
-    
-    // Создаем все таблицы и фильтры в одном процессе
-    await createAllTablesAndFilters(list)
-    
-    // Создаем оборудование с правильными связями
-    await createEquipmentWithRelations(list)
-    
-    console.info('✅ База данных оборудования обновлена')
-  } catch (error) {
-    console.error('Ошибка при создании базы данных из GSheet:', error)
-    throw error // Пробрасываем ошибку выше для обработки
-  } finally {
-    await prisma.$disconnect()
-  }
+    console.log('Создание оборудования со связями...');
 
-  return localizations.equipment.dbIsReloadedMsg
+    // Запросы для получения всех справочников (без изменений)
+    const prismaQueries = [
+      prisma.model.findMany({ select: { id: true, name: true } }),
+      prisma.department.findMany({ select: { id: true, name: true } }),
+      ...filterFieldsConfig.map(config => 
+        prisma[config.tableName].findMany({ select: { id: true, name: true } })
+      )
+    ];
+
+    const results = await Promise.all(prismaQueries);
+    const [models, departments] = results;
+
+    // Мапы для быстрого поиска ID по имени (без изменений)
+    const modelMap = new Map(models.map(m => [m.name, m.id]));
+    const departmentMap = new Map(departments.map(d => [d.name, d.id]));
+
+    const filterMaps = {};
+    filterFieldsConfig.forEach((config, index) => {
+      const data = results[index + 2];
+      filterMaps[config.field] = new Map(data.map(item => [item.name, item.id]));
+    });
+
+    const BATCH_SIZE = 10;
+    let successfulRecordsCount = 0;
+
+    for (let i = 0; i < equipmentList.length; i += BATCH_SIZE) {
+      const batch = equipmentList.slice(i, i + BATCH_SIZE);
+      
+      const processedBatch = batch.map(equipment => {
+        const processedData = { ...equipment };
+
+        // --- Обработка model ---
+        const modelTrimmed = equipment.model?.trim();
+        let modelId;
+        if (isCellDataValid(modelTrimmed)) {
+          modelId = modelMap.get(modelTrimmed);
+        } else {
+          // ИЗМЕНЕНО: для невалидных значений используем ID записи "не указано"
+          modelId = modelMap.get(UNSPECIFIED);
+        }
+        if (modelId) {
+          processedData.modelId = modelId;
+        }
+        delete processedData.model;
+
+        // --- Обработка department ---
+        const deptTrimmed = equipment.department?.trim();
+        let deptId;
+        if (isCellDataValid(deptTrimmed)) {
+          deptId = departmentMap.get(deptTrimmed);
+        } else {
+          // ИЗМЕНЕНО: для невалидных значений используем ID записи "не указано"
+          deptId = departmentMap.get(UNSPECIFIED);
+        }
+        if (deptId) {
+          processedData.departmentId = deptId;
+        }
+        delete processedData.department;
+
+        // --- Обработка остальных фильтров ---
+        filterFieldsConfig.forEach(config => {
+          const value = equipment[config.field];
+          const trimmed = value?.trim();
+          let id;
+          if (isCellDataValid(trimmed)) {
+            id = filterMaps[config.field].get(trimmed);
+          } else {
+            // ИЗМЕНЕНО: для невалидных значений используем ID записи "не указано"
+            id = filterMaps[config.field].get(UNSPECIFIED);
+          }
+          
+          if (id) {
+            // Поле для measurements уже корректно обрабатывалось (без изменений)
+            const fieldId = config.field === 'measurements' ? 'measurementId' : `${config.field}Id`;
+            processedData[fieldId] = id;
+          }
+          delete processedData[config.field];
+        });
+
+        return processedData;
+      });
+
+      try {
+        await prisma.$transaction(
+          processedBatch.map(data => prisma.equipment.create({ data }))
+        );
+        successfulRecordsCount += processedBatch.length;
+      } catch (error) {
+        console.error('Ошибка создания пакета оборудования:', error);
+      }
+    }
+
+    console.log(`Создано ${successfulRecordsCount} записей оборудования со связями`);
+    notifyAdmins(`Создано ${successfulRecordsCount} записей оборудования со связями`);
+    
+  } catch (error) {
+    console.error('Ошибка создания оборудования со связями:', error);
+    throw error;
+  }
+}
+
+function buildFilterValues(values) {
+  const sorted = Array.from(values)
+    .filter(v => v !== UNSPECIFIED)
+    .sort((a, b) => a.localeCompare(b));
+  return [...sorted, UNSPECIFIED];
 }
 
 // Динамическое получение фильтров из БД (оптимизированная версия)
@@ -507,13 +612,25 @@ export async function getEquipmentFilters() {
     })
 
     // Создаем массив фильтров в цикле
-    const filters = filterFieldsConfig.map(config => ({
-      name: config.field,
-      label: config.label,
-      options: dataMap[config.field]
+    const filters = filterFieldsConfig.map(config => {
+      let names = dataMap[config.field]
         .map(item => item.name)
         .filter(name => !invalidEquipmentCellData.includes(name))
-    }))
+
+      // Ищем индекс "Не указано"
+      const unspecifiedIndex = names.findIndex(name => name === UNSPECIFIED)
+      if (unspecifiedIndex !== -1) {
+        const unspecified = names[unspecifiedIndex]
+        names.splice(unspecifiedIndex, 1) // удаляем из текущей позиции
+        names.push(unspecified)           // добавляем в конец
+      }
+
+      return {
+        name: config.field,
+        label: config.label,
+        options: names,
+      }
+    })
     
     return filters
   } catch (error) {
@@ -629,6 +746,7 @@ async function createEquipmentWithRelations(equipmentList) {
     throw error;
   }
 }
+
 export async function getEquipmentCount() {
   try {
     // @ts-ignore
