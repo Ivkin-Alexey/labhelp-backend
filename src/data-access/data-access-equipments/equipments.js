@@ -629,25 +629,29 @@ export async function getEquipmentFilters() {
     })
 
     // Создаем массив фильтров в цикле
-    const filters = filterFieldsConfig.map(config => ({
-      name: config.field,
-      label: config.label,
-      options: dataMap[config.field]
+    const filters = filterFieldsConfig.map(config => {
+      let names = dataMap[config.field]
         .map(item => item.name)
         .filter(name => !invalidEquipmentCellData.includes(name))
-    }))
+
+      // Ищем индекс "Не указано"
+      const unspecifiedIndex = names.findIndex(name => name === UNSPECIFIED)
+      if (unspecifiedIndex !== -1) {
+        const unspecified = names[unspecifiedIndex]
+        names.splice(unspecifiedIndex, 1) // удаляем из текущей позиции
+        names.push(unspecified)           // добавляем в конец
+      }
+
+      return {
+        name: config.field,
+        label: config.label,
+        options: names,
+      }
+    })
     
     return filters
   } catch (error) {
     console.error('Ошибка получения фильтров оборудования:', error)
-    
-    // Обработка Prisma ошибок подключения
-    if (isPrismaConnectionError(error)) {
-      const errorMessage = `❌ Ошибка подключения к БД при получении фильтров: ${error.message || 'Не удается подключиться к серверу БД'}`
-      await sendNotification(errorMessage)
-      throw { message: 'Проблемы с подключением к базе данных', status: 503 }
-    }
-    
     throw error
   } finally {
     await prisma.$disconnect()
