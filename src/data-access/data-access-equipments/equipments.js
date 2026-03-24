@@ -1,4 +1,3 @@
-import { isBuffer } from 'util'
 import { prisma } from '../../../index.js'
 import {
   defaultEquipmentPage,
@@ -606,47 +605,8 @@ async function createAllTablesAndFilters(list) {
     
     await Promise.all(promises)
     console.log('Все таблицы и фильтры успешно обновлены')
-  }
-
-  try {
-    // Очищаем все таблицы
-    // @ts-ignore
-    await clearTable(prisma.Equipment)
-    // @ts-ignore
-    await clearTable(prisma.Department)
-    // @ts-ignore
-    await clearTable(prisma.Model)
-    // @ts-ignore
-    await clearTable(prisma.Classification)
-    // @ts-ignore
-    await clearTable(prisma.Measurement)
-    // @ts-ignore
-    await clearTable(prisma.EquipmentType)
-    // @ts-ignore
-    await clearTable(prisma.EquipmentKind)
-    
-    console.info('База данных оборудования обновляется...')
-    const list = await fetchEquipmentListFromGSheet()
-    
-    // Создаем все таблицы и фильтры в одном процессе
-    await createAllTablesAndFilters(list)
-    
-    // Создаем оборудование с правильными связями
-    await createEquipmentWithRelations(list)
-    
-    // Создаем триграммные индексы для оптимизации поиска
-    await createTrgmIndexes()
-    
-    console.info('✅ База данных оборудования обновлена')
-  } catch (error) {
-    console.error('Ошибка при создании базы данных из GSheet:', error)
-    throw error // Пробрасываем ошибку выше для обработки
-  }
-  // НЕ отключаем prisma здесь - это долгоживущий клиент для всего приложения
-  // Отключение должно происходить только при graceful shutdown приложения
-
-  return localizations.equipment.dbIsReloadedMsg
 }
+
 
 // Динамическое получение фильтров из БД (оптимизированная версия)
 export async function getEquipmentFilters() {
@@ -810,56 +770,6 @@ function buildFilterValues(values) {
     .filter(v => v !== UNSPECIFIED)
     .sort((a, b) => a.localeCompare(b));
   return [...sorted, UNSPECIFIED];
-}
-
-// Динамическое получение фильтров из БД (оптимизированная версия)
-export async function getEquipmentFilters() {
-  try {
-    // Создаем массив запросов на основе конфигурации фильтров
-    const prismaQueries = filterFieldsConfig.map(config => {
-      return prisma[config.tableName].findMany({ 
-        select: { id: true, name: true },
-        orderBy: { name: 'asc' } 
-      })
-    })
-
-    // Получаем все данные за один запрос
-    const results = await Promise.all(prismaQueries)
-
-    // Создаем массив данных для удобного доступа
-    const dataMap = {}
-    filterFieldsConfig.forEach((config, index) => {
-      dataMap[config.field] = results[index]
-    })
-
-    // Создаем массив фильтров в цикле
-    const filters = filterFieldsConfig.map(config => {
-      let names = dataMap[config.field]
-        .map(item => item.name)
-        .filter(name => !invalidEquipmentCellData.includes(name))
-
-      // Ищем индекс "Не указано"
-      const unspecifiedIndex = names.findIndex(name => name === UNSPECIFIED)
-      if (unspecifiedIndex !== -1) {
-        const unspecified = names[unspecifiedIndex]
-        names.splice(unspecifiedIndex, 1) // удаляем из текущей позиции
-        names.push(unspecified)           // добавляем в конец
-      }
-
-      return {
-        name: config.field,
-        label: config.label,
-        options: names,
-      }
-    })
-    
-    return filters
-  } catch (error) {
-    console.error('Ошибка получения фильтров оборудования:', error)
-    throw error
-  } finally {
-    await prisma.$disconnect()
-  }
 }
 
 export async function getEquipmentCount() {
