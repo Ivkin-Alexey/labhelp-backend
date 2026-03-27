@@ -516,49 +516,55 @@ async function createAllTablesAndFilters(list) {
 
     // --- Departments ---
     const deptSet = new Set();
+    let deptHasInvalid = false;
     list.forEach(item => {
-      const trimmed = item?.department.trim();;
+      const trimmed = item?.department?.trim();
       if (isCellDataValid(trimmed)) {
         deptSet.add(trimmed);
+      } else {
+        deptHasInvalid = true;
       }
     });
 
-    const finalDepts = buildFilterValues(deptSet)
+    const finalDepts = buildFilterValues(deptSet, deptHasInvalid);
     tableData.department = finalDepts.map((name, index) => ({ id: index + 1, name }));
 
     // --- Models ---
     const modelSet = new Set();
+    let modelHasInvalid = false;
     list.forEach(item => {
-      const trimmed = item.model.trim();
+      const trimmed = item.model?.trim();
       if (isCellDataValid(trimmed)) {
         modelSet.add(trimmed);
+      } else {
+        modelHasInvalid = true;
       }
     });
     
-    const finalModels = buildFilterValues(modelSet)
+    const finalModels = buildFilterValues(modelSet, modelHasInvalid);
     tableData.model = finalModels.map((name, index) => ({ id: index + 1, name }));
     
     // Собираем данные для фильтров (исключаем department и model, так как они уже обработаны)
-
     filterFieldsConfig.forEach(config => {
       // Пропускаем department и model, так как они обрабатываются отдельно
       if (config.field === 'department' || config.field === 'model') {
         return;
       }
 
-      // Собираем уникальные непустые значения
+      // Собираем уникальные значения и проверяем наличие невалидных
       const values = new Set();
+      let hasInvalid = false;
       list.forEach(equipment => {
         const value = equipment[config.field];
-        if (value && value.trim()) {
-          values.add(value.trim());
+        const trimmed = value?.trim();
+        if (isCellDataValid(trimmed)) {
+          values.add(trimmed);
+        } else {
+          hasInvalid = true;
         }
       });
 
-      // Преобразуем Set в массив, удаляем возможное "не указано",
-      // сортируем остальные по алфавиту, затем вставляем "не указано" в начало
-
-      tableData[config.field] = buildFilterValues(values);
+      tableData[config.field] = buildFilterValues(values, hasInvalid);
     });
     
     // Создаем все таблицы параллельно
@@ -607,8 +613,7 @@ async function createAllTablesAndFilters(list) {
     console.log('Все таблицы и фильтры успешно обновлены')
 }
 
-
-// Динамическое получение фильтров из БД (оптимизированная версия)
+// Динамическое получение фильтров из БД
 export async function getEquipmentFilters() {
   try {
     // Создаем массив запросов на основе конфигурации фильтров
@@ -659,11 +664,12 @@ export async function getEquipmentFilters() {
 }
 
 // Создание оборудования с правильными связями (упрощенная версия)
+// Создание оборудования с правильными связями
 async function createEquipmentWithRelations(equipmentList) {
   try {
     console.log('Создание оборудования со связями...');
 
-    // Запросы для получения всех справочников (без изменений)
+    // Запросы для получения всех справочников
     const prismaQueries = [
       prisma.model.findMany({ select: { id: true, name: true } }),
       prisma.department.findMany({ select: { id: true, name: true } }),
@@ -675,7 +681,7 @@ async function createEquipmentWithRelations(equipmentList) {
     const results = await Promise.all(prismaQueries);
     const [models, departments] = results;
 
-    // Мапы для быстрого поиска ID по имени (без изменений)
+    // Мапы для быстрого поиска ID по имени
     const modelMap = new Map(models.map(m => [m.name, m.id]));
     const departmentMap = new Map(departments.map(d => [d.name, d.id]));
 
@@ -696,48 +702,58 @@ async function createEquipmentWithRelations(equipmentList) {
 
         // --- Обработка model ---
         const modelTrimmed = equipment.model?.trim();
-        let modelId;
         if (isCellDataValid(modelTrimmed)) {
-          modelId = modelMap.get(modelTrimmed);
+          const modelId = modelMap.get(modelTrimmed);
+          if (modelId) {
+            processedData.modelId = modelId;
+          }
         } else {
-          // ИЗМЕНЕНО: для невалидных значений используем ID записи "не указано"
-          modelId = modelMap.get(UNSPECIFIED);
-        }
-        if (modelId) {
-          processedData.modelId = modelId;
+          // Для невалидных значений пробуем найти "Не указано"
+          const unspecifiedId = modelMap.get(UNSPECIFIED);
+          if (unspecifiedId) {
+            processedData.modelId = unspecifiedId;
+          }
         }
         delete processedData.model;
 
         // --- Обработка department ---
         const deptTrimmed = equipment.department?.trim();
-        let deptId;
         if (isCellDataValid(deptTrimmed)) {
-          deptId = departmentMap.get(deptTrimmed);
+          const deptId = departmentMap.get(deptTrimmed);
+          if (deptId) {
+            processedData.departmentId = deptId;
+          }
         } else {
-          // ИЗМЕНЕНО: для невалидных значений используем ID записи "не указано"
-          deptId = departmentMap.get(UNSPECIFIED);
-        }
-        if (deptId) {
-          processedData.departmentId = deptId;
+          // Для невалидных значений пробуем найти "Не указано"
+          const unspecifiedId = departmentMap.get(UNSPECIFIED);
+          if (unspecifiedId) {
+            processedData.departmentId = unspecifiedId;
+          }
         }
         delete processedData.department;
 
         // --- Обработка остальных фильтров ---
         filterFieldsConfig.forEach(config => {
-          const value = equipment[config.field];
-          const trimmed = value?.trim();
-          let id;
-          if (isCellDataValid(trimmed)) {
-            id = filterMaps[config.field].get(trimmed);
-          } else {
-            // ИЗМЕНЕНО: для невалидных значений используем ID записи "не указано"
-            id = filterMaps[config.field].get(UNSPECIFIED);
+          if (config.field === 'department' || config.field === 'model') {
+            return;
           }
           
-          if (id) {
-            // Поле для measurements уже корректно обрабатывалось (без изменений)
-            const fieldId = config.field === 'measurements' ? 'measurementId' : `${config.field}Id`;
-            processedData[fieldId] = id;
+          const value = equipment[config.field];
+          const trimmed = value?.trim();
+          
+          if (isCellDataValid(trimmed)) {
+            const id = filterMaps[config.field].get(trimmed);
+            if (id) {
+              const fieldId = config.field === 'measurements' ? 'measurementId' : `${config.field}Id`;
+              processedData[fieldId] = id;
+            }
+          } else {
+            // Для невалидных значений пробуем найти "Не указано"
+            const unspecifiedId = filterMaps[config.field].get(UNSPECIFIED);
+            if (unspecifiedId) {
+              const fieldId = config.field === 'measurements' ? 'measurementId' : `${config.field}Id`;
+              processedData[fieldId] = unspecifiedId;
+            }
           }
           delete processedData[config.field];
         });
@@ -759,7 +775,6 @@ async function createEquipmentWithRelations(equipmentList) {
     try {
       await notifyAdmins(`Создано ${successfulRecordsCount} записей оборудования со связями`)
     } catch (error) {
-      // Игнорируем ошибки отправки уведомлений, чтобы не прерывать выполнение seed скрипта
       console.warn('Не удалось отправить уведомление админам:', error.message)
     }
     
@@ -769,11 +784,12 @@ async function createEquipmentWithRelations(equipmentList) {
   }
 }
 
-function buildFilterValues(values) {
-  const sorted = Array.from(values)
-    .filter(v => v !== UNSPECIFIED)
-    .sort((a, b) => a.localeCompare(b));
-  return [...sorted, UNSPECIFIED];
+function buildFilterValues(values, hasInvalid) {
+  const sorted = Array.from(values).sort((a, b) => a.localeCompare(b));
+    if(hasInvalid) {
+      sorted.push(UNSPECIFIED)
+    }
+  return sorted;
 }
 
 export async function getEquipmentCount() {
