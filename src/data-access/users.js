@@ -22,8 +22,6 @@ export async function getUserData(login) {
     const status = error.status || 500
     const errorMsg = error.message || 'Внутренняя ошибка сервера: ' + error
     throw { message: errorMsg, status }
-  } finally {
-    await prisma.$disconnect()
   }
 }
 
@@ -44,8 +42,6 @@ export async function deleteUser(login) {
     const status = error.status || 500
     const errorMsg = error.message || 'Внутренняя ошибка сервера: ' + error
     throw { message: errorMsg, status }
-  } finally {
-    await prisma.$disconnect()
   }
 }
 
@@ -58,9 +54,10 @@ export async function createNewPerson(login, userData) {
 
     const hashedPassword = await bcrypt.hash(userData.password, 10)
     delete userData.password
-    if (!userData.role) {
-      userData.role = personRoles.user
-    }
+    // Роль всегда выдаём сами. /auth/sign-up доступен без токена, поэтому роль
+    // из тела позволила бы любому анониму создать себе администратора.
+    // Повышение — только PATCH /users/:login под requireAdmin
+    userData.role = personRoles.user
 
     // @ts-ignore
     await prisma.User.create({
@@ -70,13 +67,11 @@ export async function createNewPerson(login, userData) {
         password: hashedPassword,
       },
     })
-    const token = generateAccessToken(login)
+    const token = generateAccessToken(login, userData.role)
     return { message: `Пользователь ${login} успешно создан`, token }
   } catch (error) {
     const errorMsg = `Ошибка при создании нового пользователя. Подробности: ${error.message || error}`
     throw { message: errorMsg, status: error.status || 500 }
-  } finally {
-    await prisma.$disconnect()
   }
 }
 
@@ -97,8 +92,6 @@ export async function updateUserData(login, userData) {
   } catch (error) {
     const errorMsg = `Ошибка при обновлении пользователя. Логин ${login}. Подробности: ${error.message}`
     throw { message: errorMsg, status: 500 }
-  } finally {
-    await prisma.$disconnect()
   }
 }
 
@@ -124,7 +117,7 @@ export async function authenticateUser(login, password) {
       throw { message: msg, status: 404 }
     }
 
-    const token = generateAccessToken(login)
+    const token = generateAccessToken(login, user.role)
 
     console.info(`Успешная аутентификация пользователя с логином: ${login}`)
 
@@ -133,7 +126,5 @@ export async function authenticateUser(login, password) {
     const status = error.status || 500
     const errorMsg = error.message || 'Внутренняя ошибка сервера: ' + error
     throw { message: errorMsg, status }
-  } finally {
-    await prisma.$disconnect()
   }
 }
