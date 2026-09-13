@@ -16,6 +16,12 @@ import { clearTable } from '../common.js'
 import { transformEquipmentInfo, transformEquipmentList } from '../helpers.js'
 import { notifyAdmins } from '../../services/telegram-notifier.js'
 import { isCellDataValid } from '../../controllers/equipment-controller/helpers.js'
+import {
+  setSyncStage,
+  startSync,
+  completeSync,
+  failSync,
+} from '../../services/sync-manager.js'
 
 function isPrismaConnectionError(error) {
   return error?.code?.startsWith('P100') || error?.errorCode?.startsWith('P100') || 
@@ -170,8 +176,6 @@ export async function getEquipmentList(login, isAuthenticated) {
     const errorMsg =
       error.message || 'Внутренняя ошибка сервера (при поиске оборудования): ' + error
     throw { message: errorMsg, status }
-  } finally {
-    await prisma.$disconnect()
   }
 }
 
@@ -220,8 +224,6 @@ export async function getEquipmentByID(equipmentId, login, isAuthenticated) {
     const status = error.status || 500
     const errorMsg = error.message || 'Внутренняя ошибка сервера (при клике на карточку): ' + error
     throw { message: errorMsg, status }
-  } finally {
-    await prisma.$disconnect()
   }
 }
 
@@ -286,8 +288,6 @@ export async function getEquipmentByIDs(equipmentIds, login, isAuthenticated) {
     const status = error.status || 500
     const errorMsg = error.message || 'Внутренняя ошибка сервера: ' + error
     throw { message: errorMsg, status }
-  } finally {
-    await prisma.$disconnect()
   }
 }
 
@@ -327,8 +327,6 @@ export async function getEquipmentListByCategory(category, login, isAuthenticate
     const errorMsg =
       error.message || 'Внутренняя ошибка сервера (при поиске оборудования): ' + error
     throw { message: errorMsg, status }
-  } finally {
-    await prisma.$disconnect()
   }
 }
 
@@ -502,11 +500,76 @@ export async function createEquipmentDbFromGSheet(botLogs = true) {
   } catch (error) {
     console.error('Ошибка при создании базы данных из GSheet:', error)
     throw error // Пробрасываем ошибку выше для обработки
-  } finally {
-    await prisma.$disconnect()
   }
 
   return localizations.equipment.dbIsReloadedMsg
+}
+
+/**
+ * Асинхронная синхронизация БД из Google Sheets с отслеживанием прогресса
+ * @returns {Promise<number>} Количество созданных записей оборудования
+ */
+export async function syncEquipmentDbFromGSheet() {
+  let successfulRecordsCount = 0
+
+  try {
+    // Шаг 1: Инициализация
+    startSync()
+    setSyncStage('init', 'Инициализация синхронизации...', 5)
+
+    // Шаг 2: Очистка таблиц
+    setSyncStage('clear_tables', 'Очистка таблиц...', 10)
+    // @ts-ignore
+    await clearTable(prisma.Equipment)
+    // @ts-ignore
+    await clearTable(prisma.Department)
+    // @ts-ignore
+    await clearTable(prisma.Model)
+    // @ts-ignore
+    await clearTable(prisma.Classification)
+    // @ts-ignore
+    await clearTable(prisma.Measurement)
+    // @ts-ignore
+    await clearTable(prisma.EquipmentType)
+    // @ts-ignore
+    await clearTable(prisma.EquipmentKind)
+    setSyncStage('clear_tables', 'Таблицы очищены', 20)
+
+    // Шаг 3: Загрузка данных из GSheet
+    setSyncStage('fetch_data', 'Загрузка данных из Google Sheets...', 25)
+    const list = await fetchEquipmentListFromGSheet()
+    setSyncStage('fetch_data', `Загружено ${list.length} записей`, 35)
+
+    // Шаг 4: Создание таблиц и фильтров
+    setSyncStage('create_filters', 'Создание таблиц и фильтров...', 40)
+    await createAllTablesAndFilters(list)
+    setSyncStage('create_filters', 'Таблицы и фильтры созданы', 55)
+
+    // Шаг 5: Создание оборудования со связями
+    setSyncStage('create_equipment', 'Создание оборудования со связями...', 60)
+    successfulRecordsCount = await createEquipmentWithRelations(list)
+    setSyncStage('create_equipment', `Создано ${successfulRecordsCount} записей`, 85)
+
+    // Шаг 6: Создание индексов (опционально, не блокируем)
+    try {
+      setSyncStage('create_indexes', 'Создание триграммных индексов...', 90)
+      await createTrgmIndexes()
+      setSyncStage('create_indexes', 'Индексы созданы', 95)
+    } catch (indexError) {
+      console.warn('⚠️ Не удалось создать индексы (это не критично):', indexError.message)
+      setSyncStage('create_indexes', 'Индексы не созданы (не критично)', 95)
+    }
+
+    // Успешное завершение
+    completeSync(successfulRecordsCount)
+    console.info(`✅ Синхронизация завершена успешно. Создано ${successfulRecordsCount} записей.`)
+
+    return successfulRecordsCount
+  } catch (error) {
+    console.error('❌ Ошибка синхронизации:', error)
+    failSync(error)
+    throw error
+  }
 }
 
 async function createAllTablesAndFilters(list) {
@@ -658,8 +721,6 @@ export async function getEquipmentFilters() {
   } catch (error) {
     console.error('Ошибка получения фильтров оборудования:', error)
     throw error
-  } finally {
-    await prisma.$disconnect()
   }
 }
 
@@ -778,6 +839,7 @@ async function createEquipmentWithRelations(equipmentList) {
       console.warn('Не удалось отправить уведомление админам:', error.message)
     }
     
+    return successfulRecordsCount
   } catch (error) {
     console.error('Ошибка создания оборудования со связями:', error);
     throw error;
@@ -808,8 +870,6 @@ export async function getEquipmentCount() {
     }
     
     throw error
-  } finally {
-    await prisma.$disconnect()
   }
 }
 

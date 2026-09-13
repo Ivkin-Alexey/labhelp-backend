@@ -11,6 +11,8 @@ import { getFavoriteEquipmentsFromDB } from '../../data-access/data-access-equip
 import { getWorkingEquipmentListFromDB } from '../../data-access/data-access-equipments/operate-equipments.js'
 import { processEndpointError } from '../../utils/errorProcessing.js'
 import { getFiltersFromQuery } from '../../utils/query.js'
+import { requireAdmin } from '../../middlewaries/requireAdmin.js'
+import { getPublicSyncStatus } from '../../services/sync-manager.js'
 
 export default function getEquipment(app) {
   app.get('/equipments/search', async (req, res) => {
@@ -44,6 +46,14 @@ export default function getEquipment(app) {
     try {
       const count = await getEquipmentCount()
       return res.status(200).json({ count })
+    } catch (e) {
+      processEndpointError(res, e)
+    }
+  })
+
+  app.get('/equipments/sync-status', requireAdmin, async (req, res) => {
+    try {
+      return res.status(200).json(getPublicSyncStatus())
     } catch (e) {
       processEndpointError(res, e)
     }
