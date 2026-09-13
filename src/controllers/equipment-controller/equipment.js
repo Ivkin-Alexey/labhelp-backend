@@ -37,8 +37,6 @@ export async function createEquipment(req, res) {
 
   } catch (error) {
     processEndpointError(res, error)
-  } finally {
-    await prisma.$disconnect()
   }
 }
   

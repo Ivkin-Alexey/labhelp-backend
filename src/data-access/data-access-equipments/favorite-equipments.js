@@ -33,7 +33,6 @@ export async function getFavoriteEquipmentsFromDB(login) {
       error.message ||
       `Ошибка при отправке избранного оборудования. Логин ${login}. Подробности: ` + error
     const errorStatus = error.status || 500
-    await prisma.$disconnect()
     throw { message: errorMsg, status: errorStatus }
   }
 }
@@ -61,7 +60,6 @@ export async function removeFavoriteEquipmentFromDB(login, equipmentId) {
       error
     console.error(errorMsg)
     sendNotification(`❌ ${errorMsg}`)
-    await prisma.$disconnect()
     throw { message: errorMsg, status: 500 }
   }
 }
@@ -96,7 +94,6 @@ export async function addFavoriteEquipmentToDB(login, equipmentId) {
     }
     console.error(errorMsg)
     sendNotification(`❌ ${errorMsg}`)
-    await prisma.$disconnect()
     throw { message: errorMsg, status: 500 }
   }
 }

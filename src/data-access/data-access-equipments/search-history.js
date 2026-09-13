@@ -16,8 +16,6 @@ export async function getSearchHistory(login) {
     const errorMsg =
       error.message || 'Внутренняя ошибка сервера (при поиске оборудования): ' + error
     throw { message: errorMsg, status }
-  } finally {
-    await prisma.$disconnect()
   }
 }
 
@@ -55,8 +53,6 @@ export async function addTermToSearchHistory(login, term) {
   } catch (error) {
     const errorMsg = `Ошибка при добавлении термина в историю поиска. Подробности: ${error.message}`
     throw { message: errorMsg, status: 500 }
-  } finally {
-    await prisma.$disconnect()
   }
 }
 
@@ -77,7 +73,5 @@ export async function deleteTermFromSearchHistory(login, term) {
   } catch (error) {
     const errorMsg = `Ошибка при удалении термина из истории поиска. Подробности: ` + error
     throw { message: errorMsg, status: 500 }
-  } finally {
-    await prisma.$disconnect()
   }
 }

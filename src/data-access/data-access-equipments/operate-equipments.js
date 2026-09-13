@@ -26,8 +26,6 @@ export async function getWorkingEquipmentListFromDB(login) {
       `Ошибка при отправке избранного оборудования. Логин ${login}. Подробности: ` + error
     const errorStatus = error.status || 500
     throw { message: errorMsg, status: errorStatus }
-  } finally {
-    await prisma.$disconnect()
   }
 }
 
@@ -48,8 +46,6 @@ export async function startWorkWithEquipment(login, equipmentId, isLongUse = fal
         error
     const errorStatus = error.status || 500
     throw { message: errorMsg, status: errorStatus }
-  } finally {
-    await prisma.$disconnect()
   }
 }
 
@@ -71,7 +67,5 @@ export async function endWorkWithEquipment(login, equipmentId) {
         error
     const errorStatus = error.status || 500
     throw { message: errorMsg, status: errorStatus }
-  } finally {
-    await prisma.$disconnect()
   }
 }
