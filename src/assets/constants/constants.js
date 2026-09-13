@@ -1,7 +1,7 @@
 import { researches } from './researches.js'
 import localizations from './localizations.js'
 
-const PORT = process.env.BACKEND_PORT
+const PORT = process.env.BACKEND_PORT || '8000'
 const HTTPS_PORT = 443
 export const programmerChatID = 392584400
 export const admins = [392584400, 918143462]

@@ -28,7 +28,7 @@ process.traceDeprecation = true;
 process.env.NTBA_FIX_350 = true;
 const token = process.env.TELEGRAM_TOKEN;
 export const jwtTokenSecret = process.env.JWT_TOKEN_SECRET;
-export const bot = new TelegramBot(token, { polling: true });
+export const bot = new TelegramBot(token, { polling: false });
 export const prisma = new PrismaClient();
 
 bot.on('message', async msg => await processCommand(bot, msg));
@@ -57,6 +57,27 @@ deleteMethod(app);
 patch(app);
 
 const httpServer = http.createServer(app);
+
+// Пул соединений больше не закрывается в каждой функции доступа к данным,
+// поэтому освобождаем его при остановке процесса: nodemon шлёт SIGTERM перед
+// каждым рестартом, а Ctrl+C в консоли — SIGINT
+async function shutdown(signal) {
+  console.log(`Получен ${signal}, закрываем подключение к базе данных`);
+  httpServer.close();
+  try {
+    await prisma.$disconnect();
+  } catch (error) {
+    // Если БД уже недоступна, останавливаться из-за этого нельзя — иначе
+    // nodemon будет ждать жёсткого завершения процесса
+    console.error('Не удалось корректно закрыть подключение к базе данных:', error.message);
+  }
+  process.exit(0);
+}
+
+for (const signal of ['SIGINT', 'SIGTERM']) {
+  process.on(signal, () => shutdown(signal));
+}
+
 
 // Проверяем подключение к БД при запуске (принудительно)
 forceCheckDatabaseConnection().then(({ isConnected, error }) => {
