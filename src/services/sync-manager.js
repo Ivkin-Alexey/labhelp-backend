@@ -41,6 +41,7 @@ let currentState = {
   startedAt: null,
   completedAt: null,
   equipmentCount: null, // количество созданных записей
+  collisions: null,     // id с дублями пары (инвентарный, заводской) в таблице
 }
 
 /**
@@ -81,13 +82,14 @@ export function startSync() {
     startedAt: new Date().toISOString(),
     completedAt: null,
     equipmentCount: null,
+    collisions: null,
   }
 }
 
 /**
  * Завершить синхронизацию успешно
  */
-export function completeSync(equipmentCount = 0) {
+export function completeSync(equipmentCount = 0, collisions = []) {
   currentState = {
     ...currentState,
     status: SyncStatus.COMPLETED,
@@ -96,6 +98,7 @@ export function completeSync(equipmentCount = 0) {
     progress: 100,
     completedAt: new Date().toISOString(),
     equipmentCount,
+    collisions,
   }
 }
 
@@ -126,6 +129,7 @@ export function resetSync() {
     startedAt: null,
     completedAt: null,
     equipmentCount: null,
+    collisions: null,
   }
 }
 

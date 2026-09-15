@@ -10,7 +10,7 @@ import {
 } from '../../assets/constants/equipments.js'
 import { EXPECTED_TRGM_INDEXES_COUNT } from '../../assets/constants/database.js'
 import localizations from '../../assets/constants/localizations.js'
-import { fetchEquipmentListFromGSheet } from '../../controllers/equipment-controller/g-sheet.js'
+import { fetchEquipmentListFromGSheet, getEquipmentIdCollisions } from '../../controllers/equipment-controller/g-sheet.js'
 import { sendNotification } from '../../controllers/tg-bot-controllers/botAnswers.js'
 import { clearTable } from '../common.js'
 import { transformEquipmentInfo, transformEquipmentList } from '../helpers.js'
@@ -539,6 +539,9 @@ export async function syncEquipmentDbFromGSheet() {
     setSyncStage('fetch_data', 'Загрузка данных из Google Sheets...', 25)
     const list = await fetchEquipmentListFromGSheet()
     setSyncStage('fetch_data', `Загружено ${list.length} записей`, 35)
+    // Коллизии id (дубли пары «инвентарный_заводской» в таблице) — в итоговый
+    // статус, чтобы панель админа показала их после синка
+    const collisions = getEquipmentIdCollisions()
 
     // Шаг 4: Создание таблиц и фильтров
     setSyncStage('create_filters', 'Создание таблиц и фильтров...', 40)
@@ -561,7 +564,7 @@ export async function syncEquipmentDbFromGSheet() {
     }
 
     // Успешное завершение
-    completeSync(successfulRecordsCount)
+    completeSync(successfulRecordsCount, collisions)
     console.info(`✅ Синхронизация завершена успешно. Создано ${successfulRecordsCount} записей.`)
 
     return successfulRecordsCount

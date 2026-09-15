@@ -9,6 +9,9 @@ export async function fetchEquipmentListFromGSheet() {
     await equipmentList.loadInfo()
     let sheet = equipmentList.sheetsById[equipmentListSheetID]
     const rows = await sheet.getRows()
+    // Счётчик дублей живёт в рамках одного прохода по таблице: между
+    // синхронизациями не сохраняется, иначе id дрейфовал бы при каждом синке
+    resetEquipmentIdDuplicates()
     return await createEquipmentList(rows)
   } catch (e) {
     console.log(e)
@@ -18,7 +21,7 @@ export async function fetchEquipmentListFromGSheet() {
 async function createEquipmentList(rows) {
   const equipmentArr = []
   let invalidIdsCount = 0
-  
+
   for (let i = 0; i < amountOfEquipment; i++) {
     if (!rows[i]) continue
     const newEquipmentItem = createEquipmentItem(rows[i], () => invalidIdsCount++)
@@ -26,14 +29,24 @@ async function createEquipmentList(rows) {
       equipmentArr.push(newEquipmentItem)
     }
   }
-  
+
   // Выводим общее сообщение о невалидных ID
   if (invalidIdsCount > 0) {
     const message = `⚠️ Невалидные номера оборудования: ${invalidIdsCount}`
     console.log(message)
     await notifyProgrammer(message)
   }
-  
+
+  // Коллизии — это дубль пары «инвентарный_заводской» в таблице: второй и
+  // дальнейшие получили суффикс. Данные стоит поправить в таблице
+  const collisions = getEquipmentIdCollisions()
+  if (collisions.length > 0) {
+    const collisionList = collisions.map(inv => `• ${inv}`).join('\n')
+    const message = `⚠️ Коллизии id оборудования: ${collisions.length} шт.\n${collisionList}`
+    console.log(message)
+    await notifyProgrammer(message)
+  }
+
   return equipmentArr
 }
 
@@ -51,7 +64,19 @@ function createEquipmentItem(obj, incrementInvalidCount) {
   return newEquipmentItem
 }
 
-const idsMap = {};
+// Дубли пары (инвентарный, заводской) в данных таблицы: им добавляем суффикс
+// по порядку появления. Счётчик обнуляется перед каждым проходом
+let equipmentIdDuplicates = {}
+
+export function resetEquipmentIdDuplicates() {
+  equipmentIdDuplicates = {}
+}
+
+// Инвентарные номера, у которых пара (инвентарный, заводской) встретилась
+// больше одного раза: для отчёта после синхронизации
+export function getEquipmentIdCollisions() {
+  return Object.keys(equipmentIdDuplicates).filter(id => equipmentIdDuplicates[id] > 1)
+}
 
 export function createEquipmentId(inventoryNumber, serialNumber, incrementInvalidCount = () => {}) {
   if (typeof inventoryNumber !== "string" || typeof serialNumber !== "string") {
@@ -59,7 +84,7 @@ export function createEquipmentId(inventoryNumber, serialNumber, incrementInvali
     throw new TypeError("Инвентарный и серийный номер должны быть строками")
   }
 
-  let invTrimmed = inventoryNumber.trim()
+  const invTrimmed = inventoryNumber.trim()
   const serTrimmed = serialNumber.trim()
 
   if (!isCellDataValid(invTrimmed)) {
@@ -67,20 +92,19 @@ export function createEquipmentId(inventoryNumber, serialNumber, incrementInvali
     return
   }
 
-  if (!idsMap[invTrimmed]) {
-    idsMap[invTrimmed] = 1;
+  // Инвентарные номера в таблице уже содержат индекс _N для повторяющихся,
+  // поэтому id — просто склейка инвентарного и заводского номеров
+  let id = isCellDataValid(serTrimmed) ? invTrimmed + "_" + serTrimmed : invTrimmed
+
+  // Страховка от дублей в данных: одинаковые пары различаем суффиксом
+  if (equipmentIdDuplicates[id] === undefined) {
+    equipmentIdDuplicates[id] = 1
   } else {
-    const prev = invTrimmed;
-    invTrimmed = `${prev}_${idsMap[prev]}`
-    idsMap[prev] = idsMap[prev] + 1;
+    equipmentIdDuplicates[id] += 1
+    id = `${id}_${equipmentIdDuplicates[id]}`
   }
 
-
-  if(!isCellDataValid(serTrimmed)) {
-    return invTrimmed
-  }
-
-  return invTrimmed + "_" + serTrimmed
+  return id
 }
 
 
