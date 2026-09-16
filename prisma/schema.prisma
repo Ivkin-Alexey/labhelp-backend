@@ -42,6 +42,7 @@ model Equipment {
   category           String?
   filesUrl           String?
   imgUrl             String?
+  auditorium         String?
   classification     Classification?      @relation(fields: [classificationId], references: [id])
   classificationId   Int?
   measurements       Measurement?         @relation(fields: [measurementId], references: [id])
@@ -63,6 +64,7 @@ model Equipment {
   @@index([description])
   @@index([brand])
   @@index([category])
+  @@index([auditorium])
   
   // Индексы для внешних ключей
   @@index([modelId])

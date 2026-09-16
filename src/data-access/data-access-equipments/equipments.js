@@ -719,7 +719,25 @@ export async function getEquipmentFilters() {
         options: names,
       }
     })
-    
+
+    // Аудитория — не справочник, а поле Equipment: собираем уникальные
+    // значения. Последним в списке: навигационные фильтры-справочники выше
+    const auditoriumRows = await prisma.Equipment.findMany({
+      where: { auditorium: { not: null } },
+      distinct: ['auditorium'],
+      select: { auditorium: true },
+      orderBy: { auditorium: 'asc' },
+    })
+    const auditoriums = auditoriumRows
+      .map(row => row.auditorium?.trim())
+      .filter(auditorium => auditorium && !invalidEquipmentCellData.includes(auditorium))
+
+    filters.push({
+      name: 'auditorium',
+      label: 'Аудитория',
+      options: auditoriums,
+    })
+
     return filters
   } catch (error) {
     console.error('Ошибка получения фильтров оборудования:', error)

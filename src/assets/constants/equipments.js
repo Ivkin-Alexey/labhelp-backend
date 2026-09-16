@@ -49,7 +49,9 @@ export const filterFieldsConfig = [
   { field: 'department', label: 'Подразделение', tableName: 'Department' }
 ]
 
-export const equipmentFilterNames = filterFieldsConfig.map(el => el.field)
+// auditorium — не справочник, а поле Equipment (склейка «УЦN аудитория»),
+// но в query-строке поиска участвует наравне с остальными фильтрами
+export const equipmentFilterNames = [...filterFieldsConfig.map(el => el.field), 'auditorium']
 
 const equipmentItem = {
   inventoryNumber: 'Инвентарный №',

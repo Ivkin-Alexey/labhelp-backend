@@ -61,7 +61,36 @@ function createEquipmentItem(obj, incrementInvalidCount) {
   if (!newEquipmentItem.id) {
     return
   }
+  // Местоположение — склейка учебного центра и аудитории («УЦ1 3225»):
+  // аудитории в разных центрах совпадают, поэтому хранить их нужно вместе
+  newEquipmentItem.auditorium = createAuditorium(
+    obj.get('Учебный центр'),
+    obj.get('Аудитория'),
+  )
   return newEquipmentItem
+}
+
+// Название учебного центра в таблице пишут по-разному: «Учебный центр №1»,
+// «Учебный центр 1», «УЦ1». Приводим к короткому «УЦN», прочее оставляем
+// как есть (например, «Учебно-научный полигон «Саблино»»)
+export function normalizeEducationCenter(center) {
+  const trimmed = center.trim()
+  const full = trimmed.match(/^Учебный центр\s*№?\s*(\d+)$/i)
+  if (full) return `УЦ${full[1]}`
+  const short = trimmed.match(/^УЦ\s*№?\s*(\d+)$/i)
+  if (short) return `УЦ${short[1]}`
+  return trimmed
+}
+
+// Местоположение единицы оборудования: «УЦ1 3225». Аудитории без центра
+// бесполезны (номера совпадают между центрами), поэтому без центра — пусто
+export function createAuditorium(educationCenter, room) {
+  const center = typeof educationCenter === 'string' ? normalizeEducationCenter(educationCenter) : ''
+  const roomTrimmed = typeof room === 'string' ? room.trim() : ''
+  if (!isCellDataValid(center)) {
+    return ''
+  }
+  return roomTrimmed && isCellDataValid(roomTrimmed) ? `${center} ${roomTrimmed}` : center
 }
 
 // Дубли пары (инвентарный, заводской) в данных таблицы: им добавляем суффикс
